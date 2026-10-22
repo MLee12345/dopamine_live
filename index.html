@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ DOPAMINE RUSH — Luxury Retail & Haul Simulator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              bg: '#080c14',
+              surface: '#0f172a',
+              card: '#131d33',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10b981',
+              indigo: '#6366f1',
+              violet: '#8b5cf6',
+              cyan: '#06b6d4',
+              gold: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #080c14;
+      color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(19, 29, 51, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px -12px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #080c14; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+    /* Animated Tape Slash Line */
+    .tape-cut-line {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, #10b981, #6366f1, transparent);
+      height: 4px;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%) scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease-out;
+      box-shadow: 0 0 16px #10b981;
+    }
+    .tape-cut-line.sliced { transform: translateY(-50%) scaleX(1); }
+
+    /* Button Pulse on Add */
+    .btn-added-pulse {
+      animation: btnPulse 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes btnPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-100 selection:bg-indigo-500 selection:text-white">
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-[1000] w-full h-full"></canvas>
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3 sm:gap-6">
+      
+      <!-- Brand Logo -->
+      <button onclick="switchTab('shop')" class="flex items-center gap-2.5 group text-left shrink-0">
+        <div class="bg-gradient-to-tr from-indigo-500 via-violet-500 to-emerald-400 text-slate-950 font-display font-black text-xl w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition">
+          ⚡
+        </div>
+        <div>
+          <div class="font-display font-black text-xl tracking-tight leading-none text-white flex items-center gap-1.5">
+            DOPAMINE<span class="text-indigo-400">RUSH</span>
+          </div>
+          <div class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Luxury Haul Simulator</div>
+        </div>
+      </button>
+
+      <!-- Center Search Bar -->
+      <div class="flex-1 max-w-lg relative hidden md:block">
+        <div class="relative flex items-center">
+          <input type="text" id="searchInput" placeholder="Search 37+ luxury tech, setup, apparel..." 
+                 oninput="handleSearch()"
+                 class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition">
+          <span class="absolute right-3.5 text-slate-500 text-xs font-mono">⌘K</span>
+        </div>
+      </div>
+
+      <!-- Header Tools & Navigation -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        
+        <!-- Active Spree Switcher Button -->
+        <button onclick="openSpreeModal()" class="flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-200 transition">
+          <span class="text-amber-400">🎯</span>
+          <span id="spreeNavLabel">Spree: Unlimited</span>
+        </button>
+
+        <!-- Sound Toggle -->
+        <button id="soundToggleBtn" onclick="toggleSound()" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold text-slate-300 transition flex items-center gap-1.5">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline" id="soundLabel">Audio</span>
+        </button>
+
+        <!-- Orders / Tracking Tab Button -->
+        <button onclick="switchTab('orders')" id="navOrdersBtn" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 transition flex items-center gap-1.5 relative">
+          <span>📦</span>
+          <span class="hidden sm:inline">My Orders</span>
+          <span id="ordersBadge" class="hidden bg-indigo-500 text-white font-black text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+
+        <!-- Cart Drawer Button -->
+        <button onclick="openCartDrawer()" id="cartBtn" class="bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-600 hover:opacity-95 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-indigo-500/25">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span class="hidden sm:inline">Haul Cart</span>
+          <span id="cartBadge" class="bg-slate-950 text-indigo-400 font-mono font-black text-xs px-2 py-0.5 rounded-lg border border-indigo-500/30">0</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Mobile Search Bar -->
+    <div class="px-4 pb-2.5 md:hidden">
+      <input type="text" id="searchInputMobile" placeholder="Search 37+ luxury items..." 
+             oninput="handleSearchMobile()"
+             class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 outline-none">
+    </div>
+
+    <!-- CATEGORY BAR -->
+    <div class="bg-slate-950/70 border-t border-brand-border px-4 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
+        <div class="flex items-center gap-1.5">
+          <button onclick="filterCategory('all', this)" class="cat-pill active bg-indigo-500 text-white font-black text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition">🔥 All Drops (37)</button>
+          <button onclick="filterCategory('tech', this)" class="cat-pill bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition">🎧 Tech & Audio</button>
+          <button onclick="filterCategory('home', this)" class="cat-pill bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition">☕ Home & Coffee</button>
+          <button onclick="filterCategory('style', this)" class="cat-pill bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition">💎 Apparel & Style</button>
+          <button onclick="filterCategory('gaming', this)" class="cat-pill bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition">🖥️ Setup & Gaming</button>
+          <button onclick="filterCategory('grooming', this)" class="cat-pill bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition">✨ Grooming & Wellness</button>
+        </div>
+
+        <!-- Sort dropdown -->
+        <div class="flex items-center gap-2 text-xs text-slate-400 shrink-0">
+          <span class="hidden md:inline">Sort:</span>
+          <select id="sortSelect" onchange="handleSort()" class="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 text-xs outline-none cursor-pointer">
+            <option value="popular">Most Popular</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="rating">Highest Rated</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LIVE SPREE DASHBOARD -->
+  <section class="bg-slate-950/90 border-b border-brand-border py-3.5 px-4">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+      
+      <!-- Current Cart Subtotal -->
+      <div class="glass-panel rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cart Haul Total</div>
+          <div class="text-lg font-display font-black text-indigo-400 flex items-baseline gap-1">
+            $<span id="dashCartTotal">0.00</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Savings</div>
+          <div class="text-xs font-mono font-bold text-emerald-400" id="dashTotalSavings">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Spree Progress Gauge -->
+      <div class="glass-panel rounded-xl p-3 md:col-span-2 space-y-1.5">
+        <div class="flex items-center justify-between text-xs font-bold">
+          <span class="text-amber-400 font-display flex items-center gap-1.5">
+            🎯 ACTIVE SPREE TARGET: <span id="dashSpreeModeName">Unlimited Spree</span>
+          </span>
+          <span id="dashSpreeStats" class="font-mono text-[11px] text-slate-300">
+            $0.00 spent
+          </span>
+        </div>
+        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800 relative">
+          <div id="spreeProgressBar" class="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-400 w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <!-- Lifetime Unboxed Stat & Quick Spree Button -->
+      <div class="glass-panel rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lifetime Delivered</div>
+          <div class="text-base font-mono font-bold text-violet-400" id="dashLifetimeTotal">$0.00</div>
+        </div>
+        <button onclick="fillInstantHaul()" class="bg-gradient-to-r from-emerald-500 to-cyan-400 text-slate-950 font-extrabold text-xs px-3 py-2 rounded-lg shadow transition hover:scale-105 shrink-0">
+          🎰 Instant $3k Haul
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+    
+    <!-- TAB 1: SHOP CATALOG -->
+    <div id="tabShopView" class="space-y-6">
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <!-- Products injected via JS -->
+      </div>
+    </div>
+
+    <!-- TAB 2: MY ORDERS & REAL-TIME TRACKER -->
+    <div id="tabOrdersView" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl">
+        <div>
+          <h2 class="font-display font-black text-2xl text-white flex items-center gap-2">
+            📦 My Orders & Express Tracker
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Track live package status with real-time speed controls or fast-forward to unbox immediately!
+          </p>
+        </div>
+        <button onclick="switchTab('shop')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition">
+          + Add More Items to Haul
+        </button>
+      </div>
+
+      <div id="ordersListContainer" class="space-y-6">
+        <!-- Orders injected via JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CART DRAWER SLIDE-OUT -->
+  <div id="cartOverlay" onclick="closeCartDrawer()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-panel bg-slate-950/95 z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col border-l border-brand-border">
+    
+    <!-- Cart Header -->
+    <div class="p-4 border-b border-brand-border flex items-center justify-between">
+      <div class="flex items-center gap-2 font-display font-black text-lg text-white">
+        <span class="text-indigo-400">⚡</span> Your Haul Cart
+      </div>
+      <button onclick="closeCartDrawer()" class="text-slate-400 hover:text-white p-1 text-2xl leading-none">&times;</button>
+    </div>
+
+    <!-- Cart Body -->
+    <div id="cartBody" class="flex-1 overflow-y-auto p-4 divide-y divide-slate-800/60">
+      <!-- Dynamic cart items -->
+    </div>
+
+    <!-- Cart Footer with Real Checkout Breakdown -->
+    <div class="p-4 bg-slate-900/90 border-t border-brand-border space-y-3">
+      
+      <!-- Shipping Select -->
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Shipping Speed</label>
+        <select id="cartShippingSelect" onchange="updateCartTotals()" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg p-2 outline-none">
+          <option value="0">Standard VIP Express (2-Day) - FREE</option>
+          <option value="25">Priority Air Overnight Jet - $25.00</option>
+        </select>
+      </div>
+
+      <!-- Promo Code Input -->
+      <div class="flex gap-2">
+        <input type="text" id="promoInput" placeholder="Promo code (e.g. DOPAMINE20)" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 uppercase outline-none placeholder:normal-case">
+        <button onclick="applyPromoCode()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+          Apply
+        </button>
+      </div>
+      <div id="promoNotice" class="hidden text-[11px] text-emerald-400 font-mono">✓ Code DOPAMINE20 Applied (-20%)</div>
+
+      <!-- Real Price Breakdown -->
+      <div class="space-y-1.5 text-xs text-slate-400 pt-2 border-t border-slate-800">
+        <div class="flex justify-between">
+          <span>Items Subtotal:</span>
+          <span class="font-mono text-slate-200" id="cartSubtotal">$0.00</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Discount:</span>
+          <span class="font-mono text-emerald-400" id="cartDiscount">-$0.00</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Shipping:</span>
+          <span class="font-mono text-slate-200" id="cartShipping">$0.00</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Estimated Tax (8.25%):</span>
+          <span class="font-mono text-slate-200" id="cartTax">$0.00</span>
+        </div>
+        <div class="flex justify-between text-base font-display font-black text-white pt-2 border-t border-slate-800">
+          <span>ORDER TOTAL:</span>
+          <span class="text-indigo-400 font-mono" id="cartGrandTotal">$0.00</span>
+        </div>
+      </div>
+
+      <button onclick="checkoutCart()" class="w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-600 hover:opacity-95 text-white font-display font-black py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition text-sm flex items-center justify-center gap-2">
+        ⚡ PLACE SIMULATED ORDER (<span id="cartCheckoutBtnTotal">$0.00</span>)
+      </button>
+    </div>
+  </aside>
+
+  <!-- SPREE MODE MODAL WITH CUSTOM INPUT -->
+  <div id="spreeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 shadow-2xl relative border border-slate-700/80 space-y-4">
+      <button onclick="closeSpreeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+
+      <div>
+        <h2 class="font-display font-black text-xl text-white flex items-center gap-2">
+          🎯 Configure Spree Limit
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Set a strict budget target or unlock unlimited wealth.</p>
+      </div>
+
+      <!-- Presets Grid -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="setSpreePreset('unlimited')" class="p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-indigo-500 text-left transition group">
+          <div class="font-bold text-xs text-slate-200 group-hover:text-indigo-400">♾️ Unlimited</div>
+          <div class="text-[10px] text-slate-500">No Budget Ceiling</div>
+        </button>
+        <button onclick="setSpreePreset(1000)" class="p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-indigo-500 text-left transition group">
+          <div class="font-bold text-xs text-slate-200 group-hover:text-indigo-400">💵 $1,000 Spree</div>
+          <div class="text-[10px] text-slate-500">Starter Haul</div>
+        </button>
+        <button onclick="setSpreePreset(5000)" class="p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-indigo-500 text-left transition group">
+          <div class="font-bold text-xs text-slate-200 group-hover:text-indigo-400">💎 $5,000 Spree</div>
+          <div class="text-[10px] text-slate-500">Tech & Gear Haul</div>
+        </button>
+        <button onclick="setSpreePreset(25000)" class="p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-indigo-500 text-left transition group">
+          <div class="font-bold text-xs text-slate-200 group-hover:text-indigo-400">🚀 $25,000 Flex</div>
+          <div class="text-[10px] text-slate-500">Luxury High Roller</div>
+        </button>
+      </div>
+
+      <!-- Custom Spree Limit Input -->
+      <div class="pt-2 border-t border-slate-800 space-y-2">
+        <label class="text-xs font-bold text-slate-300">Or Set Custom Dollar Limit ($):</label>
+        <div class="flex gap-2">
+          <input type="number" id="customSpreeInput" placeholder="e.g. 3250" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-indigo-500">
+          <button onclick="applyCustomSpree()" class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs px-4 py-2 rounded-xl transition">
+            Set Limit
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div id="productDetailModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="glass-panel rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-700/80 overflow-y-auto max-h-[90vh]">
+      <button onclick="closeProductModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold z-10">&times;</button>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- SVG Image Area -->
+        <div class="bg-slate-950/80 rounded-2xl p-6 border border-slate-800 flex items-center justify-center min-h-[220px]">
+          <div id="modalSvgContainer" class="w-full h-full flex items-center justify-center"></div>
+        </div>
+
+        <!-- Details Area -->
+        <div class="space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span id="modalTag" class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase">TAG</span>
+              <span class="text-xs text-emerald-400 font-bold">In Stock • VIP Express</span>
+            </div>
+            
+            <h2 id="modalTitle" class="font-display font-black text-xl text-white leading-tight">Product Title</h2>
+            
+            <!-- Price -->
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="modalPrice" class="text-2xl font-display font-black text-indigo-400">$0.00</span>
+              <span id="modalListPrice" class="text-sm text-slate-500 line-through"></span>
+            </div>
+
+            <p id="modalDesc" class="text-xs text-slate-400 mt-2.5 leading-relaxed">Product description goes here...</p>
+          </div>
+
+          <!-- Specs List -->
+          <div>
+            <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Key Specs:</div>
+            <ul id="modalSpecs" class="text-xs text-slate-400 space-y-1 list-disc list-inside"></ul>
+          </div>
+
+          <!-- Quantity + Add Button -->
+          <div class="pt-3 border-t border-slate-800 flex items-center gap-3">
+            <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl">
+              <button onclick="adjustModalQty(-1)" class="px-3 py-2 text-slate-400 hover:text-white font-bold text-sm">-</button>
+              <span id="modalQtyDisplay" class="px-2 font-mono font-bold text-sm text-slate-200">1</span>
+              <button onclick="adjustModalQty(1)" class="px-3 py-2 text-slate-400 hover:text-white font-bold text-sm">+</button>
+            </div>
+            
+            <button id="modalAddBtn" onclick="addFromModal()" class="flex-1 bg-gradient-to-r from-indigo-500 to-violet-500 hover:opacity-95 text-white font-display font-extrabold py-2.5 px-4 rounded-xl text-xs shadow-lg shadow-indigo-500/20 transition flex items-center justify-center gap-2">
+              ⚡ ADD TO HAUL
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verified Reviews Section -->
+      <div class="mt-6 pt-5 border-t border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display font-bold text-sm text-white">Verified Customer Reviews</h3>
+          <span id="modalRatingText" class="text-xs text-amber-400 font-bold">★ 4.9 / 5.0 (2,400+ reviews)</span>
+        </div>
+
+        <div id="modalReviewsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <!-- Reviews injected via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE UNBOXING MODAL -->
+  <div id="unboxingModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <button onclick="closeUnboxingModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white text-3xl font-bold z-10">&times;</button>
+
+    <div class="max-w-2xl w-full text-center space-y-6">
+      <div id="unboxingStepHeader">
+        <div class="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-mono text-xs px-3.5 py-1 rounded-full uppercase tracking-wider mb-2">
+          📦 INTERACTIVE RUSH UNBOXING
+        </div>
+        <h2 id="unboxingTitle" class="font-display font-black text-3xl text-white">
+          Slice Security Tape ✂️
+        </h2>
+        <p id="unboxingSubtitle" class="text-xs text-slate-400 mt-1">
+          Click or swipe across the tape line below!
+        </p>
+      </div>
+
+      <!-- Box Container -->
+      <div id="boxInteractiveArea" class="relative w-full h-80 glass-panel rounded-3xl border-2 border-slate-700/80 flex items-center justify-center overflow-hidden shadow-2xl cursor-pointer select-none">
+        
+        <!-- Tape Cut Line -->
+        <div id="tapeLine" onclick="sliceTape()" class="tape-cut-line"></div>
+        <div id="tapeInstruction" onclick="sliceTape()" class="absolute bg-slate-900/90 text-indigo-400 border border-indigo-500/40 text-xs font-bold px-4 py-2 rounded-full shadow-lg hover:scale-105 transition">
+          ✂️ CLICK TO SLICE TAPE
+        </div>
+
+        <!-- Flaps -->
+        <div id="flapLeft" onclick="openFlap('left')" class="hidden absolute top-0 left-0 w-1/2 h-full bg-slate-900 border-r border-slate-700 flex items-center justify-center transition-transform duration-500 origin-left">
+          <span class="text-slate-600 font-bold text-xs uppercase tracking-widest -rotate-90">OPEN FLAP</span>
+        </div>
+        <div id="flapRight" onclick="openFlap('right')" class="hidden absolute top-0 right-0 w-1/2 h-full bg-slate-900 border-l border-slate-700 flex items-center justify-center transition-transform duration-500 origin-right">
+          <span class="text-slate-600 font-bold text-xs uppercase tracking-widest rotate-90">OPEN FLAP</span>
+        </div>
+
+        <!-- Packing Material Layer -->
+        <div id="bubbleWrapLayer" onclick="popBubbleWrap()" class="hidden absolute inset-0 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center gap-2">
+          <div class="text-4xl animate-bounce">📦</div>
+          <div class="text-sm font-bold text-indigo-400">REMOVE PACKING PEANUTS</div>
+          <div class="text-xs text-slate-400">Tap anywhere to uncover items</div>
+        </div>
+
+        <!-- Item Spotlight Reveal -->
+        <div id="itemRevealSpotlight" class="hidden absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 p-6 flex flex-col items-center justify-center text-center">
+          <div class="relative w-40 h-40 mb-2 flex items-center justify-center">
+            <div class="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
+            <div id="revealSvgContainer" class="relative w-full h-full flex items-center justify-center p-2"></div>
+          </div>
+          
+          <div id="revealItemTag" class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest mb-1">
+            UNBOXED ITEM 1
+          </div>
+          <h3 id="revealItemTitle" class="font-display font-black text-xl text-white max-w-md line-clamp-1">
+            Item Name
+          </h3>
+          <div class="flex items-center gap-3 mt-2">
+            <span id="revealItemPrice" class="text-lg font-black text-indigo-400">$0.00</span>
+            <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30">
+              ✨ Verified Trophy Item
+            </span>
+          </div>
+
+          <button onclick="nextUnboxItem()" id="nextItemBtn" class="mt-5 bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-display font-black text-xs px-6 py-2.5 rounded-xl shadow-lg transition hover:scale-105">
+            NEXT UNBOXED ITEM ➔
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Summary Card -->
+      <div id="unboxingSummaryCard" class="hidden glass-panel p-6 rounded-3xl border border-indigo-500/40 text-center space-y-4">
+        <div class="w-16 h-16 bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 rounded-full flex items-center justify-center text-3xl mx-auto">
+          🏆
+        </div>
+        <h2 class="font-display font-black text-2xl text-white">
+          HAUL UNBOXED SUCCESSFULLY!
+        </h2>
+        <p class="text-xs text-slate-400">All items are now in your permanent unboxed collection.</p>
+
+        <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left font-mono text-xs">
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="text-slate-500 text-[10px]">TOTAL UNBOXED:</div>
+            <div class="text-indigo-400 font-bold text-base" id="summaryTotal">$0.00</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="text-slate-500 text-[10px]">HAUL FLEX SCORE:</div>
+            <div class="text-amber-400 font-bold text-base">⚡ 99.9% LEGEND</div>
+          </div>
+        </div>
+
+        <button onclick="finishUnboxing()" class="w-full max-w-sm bg-indigo-500 hover:bg-indigo-400 text-white font-display font-black py-3 px-4 rounded-xl shadow-lg transition text-xs">
+          🚀 CLAIM TROPHIES & RETURN TO ORDERS
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 border-t border-brand-border py-8 text-slate-500 text-xs mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+      <div class="font-display font-black text-slate-300 text-sm">⚡ DOPAMINE RUSH LUXURY SIMULATOR</div>
+      <p>A zero-risk retail spree simulation designed for shopping therapy and haul unboxing.</p>
+      <p class="text-[11px] text-slate-600">All product trademarks are property of their respective owners. No actual payment or real products are involved.</p>
+    </div>
+  </footer>
+
+  <!-- APPLICATION JAVASCRIPT -->
+  <script>
+    /* ==========================================================================
+       1. EXPANDED PRODUCT CATALOG (37 Realistic Products with Specs)
+       ========================================================================== */
+    const productsData = [
+      // TECH & AUDIO
+      {
+        id: "tech-1",
+        name: "Sony WH-1000XM5 Noise-Canceling Headphones",
+        category: "tech",
+        price: 398.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 28400,
+        tag: "Audio King",
+        svgType: "headphones",
+        desc: "Industry-leading noise canceling with Auto NC Optimizer, 30-hour battery life, and ultra-comfortable lightweight design.",
+        specs: ["30-Hour Battery", "Custom 30mm Drivers", "Speak-to-Chat Tech", "Multipoint Connection"]
+      },
+      {
+        id: "tech-2",
+        name: "Apple AirPods Max Wireless Headphones",
+        category: "tech",
+        price: 549.00,
+        listPrice: 599.00,
+        rating: 4.8,
+        reviewsCount: 19200,
+        tag: "Iconic Design",
+        svgType: "headphones-airpods",
+        desc: "Apple-designed dynamic driver provides high-fidelity audio with active noise cancellation and spatial audio with dynamic head tracking.",
+        specs: ["Knit-Mesh Canopy", "Apple H1 Chips", "Digital Crown Control", "20-Hour Battery"]
+      },
+      {
+        id: "tech-3",
+        name: "Keychron Q1 Pro Custom Wireless Mechanical Keyboard",
+        category: "tech",
+        price: 199.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 4100,
+        tag: "Desk Grail",
+        svgType: "keyboard",
+        desc: "Full aluminum CNC body, hot-swappable mechanical switches, QMK/VIA programmable keymaps, and double-gasket design.",
+        specs: ["CNC Aluminum Frame", "Hot-Swappable Switches", "Bluetooth 5.1 & Wired", "South-facing RGB"]
+      },
+      {
+        id: "tech-4",
+        name: "Teenage Engineering OP-1 Field Synthesizer",
+        category: "tech",
+        price: 1999.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 920,
+        tag: "Studio Grail",
+        svgType: "synth",
+        desc: "Ultra-portable synthesizer, sampler, and tape recorder with high-resolution screen, aluminum chassis, and 24-hour battery.",
+        specs: ["100+ Engine Tweaks", "Stereo Sample Engine", "FM Transmitter & Receiver", "24-Hour USB-C Power"]
+      },
+      {
+        id: "tech-5",
+        name: "LG 65\" C3 Series 4K OLED evo Smart TV",
+        category: "tech",
+        price: 1596.00,
+        listPrice: 1899.00,
+        rating: 4.9,
+        reviewsCount: 8400,
+        tag: "OLED King",
+        svgType: "tv",
+        desc: "Bright OLED evo display powered by α9 AI Processor Gen6, 120Hz refresh rate, G-SYNC, and Dolby Vision HDR.",
+        specs: ["Self-Lit OLED Pixels", "120Hz Native Gaming", "4x HDMI 2.1 Ports", "Dolby Atmos Audio"]
+      },
+      {
+        id: "tech-6",
+        name: "DJI Mini 4 Pro Fly More Combo Drone",
+        category: "tech",
+        price: 759.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 5200,
+        tag: "Aerial Tech",
+        svgType: "drone",
+        desc: "Under 249g ultralight foldable drone with 4K/60fps HDR video, omnidirectional obstacle sensing, and 34-min flight time.",
+        specs: ["Under 249g Weight", "4K/60fps HDR Video", "20km HD Video Trans", "Omnidirectional Sensing"]
+      },
+      {
+        id: "tech-7",
+        name: "Fujifilm X100VI Digital Compact Camera",
+        category: "tech",
+        price: 1599.00,
+        listPrice: null,
+        rating: 5.0,
+        reviewsCount: 3100,
+        tag: "Viral Grail",
+        svgType: "camera",
+        desc: "40.2MP X-Trans CMOS 5 HR sensor with fixed 23mm F2 lens, 6-stop in-body image stabilization, and 20 Film Simulation modes.",
+        specs: ["40.2MP APS-C Sensor", "Fixed 23mm f/2 Lens", "6.0-Stop IBIS", "Hybrid Optical/EVF"]
+      },
+      {
+        id: "tech-8",
+        name: "Apple Watch Ultra 2 GPS + Cellular 49mm",
+        category: "tech",
+        price: 799.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 11500,
+        tag: "Titanium Tech",
+        svgType: "watch",
+        desc: "Rugged titanium case with dual-frequency GPS, S9 SiP with Double Tap gesture, 3000 nits display, and 36-hour battery.",
+        specs: ["49mm Titanium Case", "3000 Nits Brightness", "100m Water Resistance", "Up to 72h Low Power"]
+      },
+      {
+        id: "tech-9",
+        name: "Meta Quest 3 512GB VR/MR Headset",
+        category: "tech",
+        price: 649.00,
+        listPrice: 699.00,
+        rating: 4.7,
+        reviewsCount: 9300,
+        tag: "Mixed Reality",
+        svgType: "vr",
+        desc: "Breakthrough mixed reality headset with dual 4K+ Infinite Display, Snapdragon XR2 Gen 2, and Touch Plus controllers.",
+        specs: ["4K+ Infinite Display", "Snapdragon XR2 Gen 2", "Full-Color Passthrough", "512GB Storage"]
+      },
+      {
+        id: "tech-10",
+        name: "Mac Studio M2 Ultra (24-Core CPU, 60-Core GPU)",
+        category: "tech",
+        price: 3999.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 1400,
+        tag: "Workstation",
+        svgType: "mac-studio",
+        desc: "Monster performance workstation capable of running complex 3D renders, multiple 8K video streams, and AI model training.",
+        specs: ["M2 Ultra Chip", "64GB Unified Memory", "1TB Superfast SSD", "Support for 8 Displays"]
+      },
+      {
+        id: "tech-11",
+        name: "Sennheiser HD 800 S Reference Headphones",
+        category: "tech",
+        price: 1799.00,
+        listPrice: null,
+        rating: 5.0,
+        reviewsCount: 1850,
+        tag: "Audiophile",
+        svgType: "headphones-open",
+        desc: "Open-back audiophile headphones featuring handcrafted 56mm Ring Radiator transducers and natural spatial soundstage.",
+        specs: ["56mm Ring Radiators", "Open-Back Design", "Microfiber Ear Pads", "Made in Germany"]
+      },
+
+      // HOME & COFFEE
+      {
+        id: "home-1",
+        name: "Breville Barista Touch Impress Espresso Machine",
+        category: "home",
+        price: 1499.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 4800,
+        tag: "Barista Pro",
+        svgType: "espresso",
+        desc: "Barista-quality espresso at home with touchscreen guidance, automatic milk microfoam, and assisted tamping.",
+        specs: ["Assisted Tamping System", "Auto MilQ Milk Foam", "ThermoJet Heating", "54mm Stainless Portafilter"]
+      },
+      {
+        id: "home-2",
+        name: "Dyson V15 Detect Cordless Vacuum",
+        category: "home",
+        price: 749.00,
+        listPrice: 849.00,
+        rating: 4.8,
+        reviewsCount: 16500,
+        tag: "Laser Tech",
+        svgType: "vacuum",
+        desc: "Laser reveals microscopic dust, piezoelectric sensor counts particles, and Digital Motorbar adjusts suction automatically.",
+        specs: ["Laser Dust Detection", "60-Min Run Time", "Piezo Particle Sensor", "HEPA Whole-Machine Filter"]
+      },
+      {
+        id: "home-3",
+        name: "Ember Smart Temperature Control Mug 2 (14 oz)",
+        category: "home",
+        price: 149.00,
+        listPrice: null,
+        rating: 4.6,
+        reviewsCount: 9200,
+        tag: "Desk Must-Have",
+        svgType: "mug",
+        desc: "Set your exact drinking temperature and keep hot beverages warm for up to 80 minutes on a single charge.",
+        specs: ["135°F Default Temp", "80-Min Battery", "App Controlled", "Auto-Sleep Motion Sensor"]
+      },
+      {
+        id: "home-4",
+        name: "Herman Miller Aeron Ergonomic Chair",
+        category: "home",
+        price: 1295.00,
+        listPrice: null,
+        rating: 5.0,
+        reviewsCount: 14200,
+        tag: "Ergonomic Icon",
+        svgType: "chair",
+        desc: "Pellicle breathable mesh suspension and PostureFit SL lumbar support designed for all-day workspace health.",
+        specs: ["8Z Pellicle Mesh", "PostureFit SL Support", "Fully Adjustable Arms", "12-Year Warranty"]
+      },
+      {
+        id: "home-5",
+        name: "Fellow Stagg EKG Electric Pour-Over Kettle",
+        category: "home",
+        price: 165.00,
+        listPrice: 195.00,
+        rating: 4.8,
+        reviewsCount: 11000,
+        tag: "Pour-Over King",
+        svgType: "kettle",
+        desc: "Precision gooseneck spout, variable temperature control (135°F-212°F), and LCD screen for coffee enthusiasts.",
+        specs: ["Precision Gooseneck", "PID Temp Control", "60-Min Heat Hold", "0.9L Capacity"]
+      },
+      {
+        id: "home-6",
+        name: "Loftie Smart Sunrise Alarm Clock",
+        category: "home",
+        price: 149.00,
+        listPrice: null,
+        rating: 4.6,
+        reviewsCount: 3400,
+        tag: "Sleep Biohack",
+        svgType: "clock",
+        desc: "Two-phase alarm clock with built-in white noise machine, sunrise alarm glow, and smartphone disconnect mode.",
+        specs: ["Two-Phase Alarm", "White Noise Generator", "Warm Sunrise Lamp", "No Smartphone Needed"]
+      },
+      {
+        id: "home-7",
+        name: "Balmuda The Toaster Steam Oven",
+        category: "home",
+        price: 299.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 2200,
+        tag: "Japanese Craft",
+        svgType: "toaster",
+        desc: "Uses precision steam technology and temperature regulation to revive bread to bakery-fresh perfection.",
+        specs: ["5cc Steam Injection", "4 Toasting Modes", "Precision Heating", "Compact Countertop"]
+      },
+
+      // APPAREL & STYLE
+      {
+        id: "style-1",
+        name: "Arc'teryx Beta AR Waterproof Jacket",
+        category: "style",
+        price: 600.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 5600,
+        tag: "GORE-TEX Pro",
+        svgType: "jacket",
+        desc: "All-round GORE-TEX Pro shell designed for stormproof mountain performance and urban streetwear aesthetic.",
+        specs: ["GORE-TEX Pro Most Rugged", "DropHood Design", "RECCO Reflector", "Pit Zips Ventilation"]
+      },
+      {
+        id: "style-2",
+        name: "Rimowa Classic Cabin Aluminum Suitcase",
+        category: "style",
+        price: 1425.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 3800,
+        tag: "Jetset Flex",
+        svgType: "suitcase",
+        desc: "High-end anodized aluminum alloy suitcase with riveted aluminum corners and Multiwheel ball-bearing system.",
+        specs: ["Anodized Aluminum", "TSA-Approved Locks", "Flex Divider System", "Lifetime Guarantee"]
+      },
+      {
+        id: "style-3",
+        name: "Nike Dunk Low Retro Sneakers (Panda)",
+        category: "style",
+        price: 115.00,
+        listPrice: 130.00,
+        rating: 4.8,
+        reviewsCount: 34000,
+        tag: "Street Classic",
+        svgType: "sneaker",
+        desc: "Crisp leather overlays, classic color blocking, and padded low-cut collar for timeless streetwear style.",
+        specs: ["Premium Leather Upper", "Foam Midsole", "Rubber Traction Outsole", "Padded Low-Cut Collar"]
+      },
+      {
+        id: "style-4",
+        name: "Ray-Ban Meta Smart Glasses (Wayfarer)",
+        category: "style",
+        price: 299.00,
+        listPrice: null,
+        rating: 4.7,
+        reviewsCount: 8900,
+        tag: "Smart Wearable",
+        svgType: "glasses",
+        desc: "Capture 12MP photos and 1080p video, listen to open-ear audio, and interact with Meta AI built right into classic Wayfarers.",
+        specs: ["12MP Ultra-Wide Camera", "Open-Ear Audio Speakers", "Meta AI Voice Assistant", "Charging Case Included"]
+      },
+      {
+        id: "style-5",
+        name: "Maison Margiela Tabi Leather Boots",
+        category: "style",
+        price: 1150.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 1200,
+        tag: "High Fashion",
+        svgType: "boots",
+        desc: "Iconic split-toe leather ankle boots inspired by traditional Japanese 15th-century socks.",
+        specs: ["100% Calfskin Leather", "Split Tabi Toe", "30mm Cylindrical Heel", "Made in Italy"]
+      },
+      {
+        id: "style-6",
+        name: "Supreme Box Logo Heavyweight Hoodie",
+        category: "style",
+        price: 288.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 15400,
+        tag: "Grail Drop",
+        svgType: "hoodie",
+        desc: "Heavyweight crossgrain cotton fleece hoodie featuring embroidered Supreme box logo across the chest.",
+        specs: ["Heavyweight Cotton Fleece", "Embroidered Box Logo", "Ribbed Side Panels", "Made in Canada"]
+      },
+      {
+        id: "style-7",
+        name: "Tumi Alpha 3 Briefcase",
+        category: "style",
+        price: 675.00,
+        listPrice: 750.00,
+        rating: 4.9,
+        reviewsCount: 2900,
+        tag: "Executive",
+        svgType: "briefcase",
+        desc: "Ultra-durable FXT ballistic nylon organizer briefcase with padded laptop sleeve and TUMI Tracer registration.",
+        specs: ["FXT Ballistic Nylon", "Padded 15\" Laptop Compartment", "Add-a-Bag Sleeve", "TUMI Tracer System"]
+      },
+
+      // SETUP & GAMING
+      {
+        id: "gaming-1",
+        name: "PlayStation 5 Slim Console (1TB SSD)",
+        category: "gaming",
+        price: 499.00,
+        listPrice: null,
+        rating: 4.9,
+        reviewsCount: 42000,
+        tag: "Next-Gen Gaming",
+        svgType: "ps5",
+        desc: "Slimmer design with 1TB SSD storage, haptic feedback DualSense controller, 4K/120fps gaming, and Ray Tracing.",
+        specs: ["Custom Ultra-Fast 1TB SSD", "DualSense Haptic Controller", "4K HDR @ 120Hz", "Tempest 3D AudioTech"]
+      },
+      {
+        id: "gaming-2",
+        name: "Nintendo Switch OLED Model",
+        category: "gaming",
+        price: 349.00,
+        listPrice: 399.00,
+        rating: 4.9,
+        reviewsCount: 38000,
+        tag: "Vibrant Gaming",
+        svgType: "switch",
+        desc: "7-inch OLED screen with deep blacks, wide adjustable stand, wired LAN dock, and 64GB internal storage.",
+        specs: ["7-Inch OLED Screen", "64GB Internal Storage", "Enhanced Audio Speakers", "Wired LAN Dock"]
+      },
+      {
+        id: "gaming-3",
+        name: "ASUS ROG Ally X Handheld Gaming PC",
+        category: "gaming",
+        price: 799.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 6100,
+        tag: "Handheld Beast",
+        svgType: "rog-ally",
+        desc: "AMD Z1 Extreme processor, 80Wh double capacity battery, 24GB LPDDR5X RAM, and 120Hz VRR touchscreen.",
+        specs: ["AMD Ryzen Z1 Extreme", "24GB LPDDR5X RAM", "80Wh Battery Capacity", "1080p 120Hz VRR Display"]
+      },
+      {
+        id: "gaming-4",
+        name: "LG DualUp 28\" Ergonomic Monitor",
+        category: "gaming",
+        price: 699.00,
+        listPrice: null,
+        rating: 4.7,
+        reviewsCount: 2400,
+        tag: "Setup Upgrade",
+        svgType: "dualup",
+        desc: "Unique 16:18 aspect ratio SDQHD display equal to two 21.5-inch monitors stacked on top of each other.",
+        specs: ["16:18 SDQHD Resolution", "Nano IPS Display", "LG Ergo Arm Stand Included", "90W USB-C Power Delivery"]
+      },
+      {
+        id: "gaming-5",
+        name: "BenQ ScreenBar Halo LED Monitor Light",
+        category: "gaming",
+        price: 179.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 7800,
+        tag: "Desk Glow",
+        svgType: "screenbar",
+        desc: "Asymmetric optical lamp eliminates screen glare with wireless smart controller and back-light bias glow.",
+        specs: ["Zero Screen Glare Optical", "Wireless Touch Controller", "Back-Light Ambient Glow", "Auto-Dimming Sensor"]
+      },
+      {
+        id: "gaming-6",
+        name: "Grovemade American Walnut Desk Pad",
+        category: "gaming",
+        price: 120.00,
+        listPrice: 140.00,
+        rating: 4.9,
+        reviewsCount: 4300,
+        tag: "Desk Aesthetic",
+        svgType: "deskpad",
+        desc: "Handcrafted natural wool felt and solid American walnut detail line for elevated setup aesthetics.",
+        specs: ["Merino Wool Felt Base", "American Walnut Accent", "Vegetable-Tanned Leather", "Made in USA"]
+      },
+      {
+        id: "gaming-7",
+        name: "Elgato Stream Deck + Controller",
+        category: "gaming",
+        price: 199.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 6500,
+        tag: "Creator Tool",
+        svgType: "streamdeck",
+        desc: "8 customizable LCD keys, 4 touch-sensitive push dials, and dynamic touch strip for ultimate workflow control.",
+        specs: ["8 Customizable LCD Keys", "4 Rotary Touch Dials", "LCD Touch Strip", "Wave Link Audio Software"]
+      },
+      {
+        id: "gaming-8",
+        name: "Apple Studio Display 27\" 5K Retina",
+        category: "gaming",
+        price: 1599.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 5100,
+        tag: "5K Retina",
+        svgType: "studio-display",
+        desc: "27-inch 5K Retina display with 600 nits brightness, 12MP Ultra Wide camera with Center Stage, and 6-speaker system.",
+        specs: ["5K Retina (5120x2880)", "600 Nits Brightness", "A13 Bionic Chip Built-In", "Six-Speaker Sound System"]
+      },
+
+      // GROOMING & WELLNESS
+      {
+        id: "grooming-1",
+        name: "Dyson Airwrap Multi-Styler Complete Long",
+        category: "grooming",
+        price: 599.00,
+        listPrice: null,
+        rating: 4.8,
+        reviewsCount: 22100,
+        tag: "Viral Hair Tech",
+        svgType: "airwrap",
+        desc: "Harnesses Coanda airflow technology to curl, shape, and hide flyaways without extreme heat damage.",
+        specs: ["Coanda Airflow Engine", "No Extreme Heat Damage", "6 Included Attachments", "Prussian Blue Case"]
+      },
+      {
+        id: "grooming-2",
+        name: "Theragun PRO Gen 5 Percussive Massager",
+        category: "grooming",
+        price: 599.00,
+        listPrice: 649.00,
+        rating: 4.9,
+        reviewsCount: 8700,
+        tag: "Recovery Pro",
+        svgType: "theragun",
+        desc: "Deep muscle treatment with EQ-150 motor, OLED screen with guided routines, and 60 lbs stall force.",
+        specs: ["QuietForce Technology", "16mm Amplitude Reach", "OLED Routine Display", "6 Attachment Heads"]
+      },
+      {
+        id: "grooming-3",
+        name: "Oura Ring Gen 3 Horizon Smart Ring",
+        category: "grooming",
+        price: 299.00,
+        listPrice: null,
+        rating: 4.7,
+        reviewsCount: 14500,
+        tag: "Biohack Health",
+        svgType: "ring",
+        desc: "Sleek titanium smart ring tracking sleep stages, HRV, readiness score, and daytime stress levels.",
+        specs: ["Lightweight Titanium", "7-Day Battery Life", "Water Resistant to 100m", "Research-Grade Sensors"]
+      }
+    ];
+
+    /* ==========================================================================
+       2. CUSTOM SVG VECTOR ARTWORK GENERATOR
+       ========================================================================== */
+    function getProductSVG(type) {
+      const svgs = {
+        'headphones': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M20 55 C20 25, 80 25, 80 55" stroke-width="6" stroke-linecap="round"/>
+            <rect x="12" y="48" width="16" height="28" rx="8" fill="#1e293b" stroke-width="3"/>
+            <rect x="72" y="48" width="16" height="28" rx="8" fill="#1e293b" stroke-width="3"/>
+            <circle cx="20" cy="62" r="4" fill="#6366f1"/>
+            <circle cx="80" cy="62" r="4" fill="#6366f1"/>
+          </svg>`,
+        'headphones-airpods': `
+          <svg class="w-full h-full text-slate-200 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M22 50 C22 20, 78 20, 78 50" stroke-width="7" stroke-linecap="round" stroke="#64748b"/>
+            <rect x="14" y="45" width="18" height="30" rx="9" fill="#0f172a" stroke="#94a3b8" stroke-width="3"/>
+            <rect x="68" y="45" width="18" height="30" rx="9" fill="#0f172a" stroke="#94a3b8" stroke-width="3"/>
+            <line x1="20" y1="28" x2="80" y2="28" stroke="#818cf8" stroke-width="2"/>
+          </svg>`,
+        'keyboard': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="10" y="32" width="80" height="36" rx="6" fill="#0f172a" stroke-width="3"/>
+            <rect x="16" y="38" width="8" height="6" rx="1" fill="#6366f1"/>
+            <rect x="28" y="38" width="8" height="6" rx="1" fill="#1e293b"/>
+            <rect x="40" y="38" width="8" height="6" rx="1" fill="#1e293b"/>
+            <rect x="52" y="38" width="8" height="6" rx="1" fill="#1e293b"/>
+            <rect x="64" y="38" width="8" height="6" rx="1" fill="#1e293b"/>
+            <rect x="76" y="38" width="8" height="6" rx="1" fill="#f59e0b"/>
+            <rect x="16" y="48" width="12" height="6" rx="1" fill="#1e293b"/>
+            <rect x="32" y="48" width="36" height="6" rx="1" fill="#6366f1"/>
+            <rect x="72" y="48" width="12" height="6" rx="1" fill="#1e293b"/>
+            <circle cx="80" cy="28" r="3" fill="#10b981"/>
+          </svg>`,
+        'synth': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="8" y="35" width="84" height="30" rx="4" fill="#0f172a" stroke-width="3"/>
+            <circle cx="20" cy="45" r="4" fill="#ef4444"/>
+            <circle cx="32" cy="45" r="4" fill="#f59e0b"/>
+            <circle cx="44" cy="45" r="4" fill="#10b981"/>
+            <circle cx="56" cy="45" r="4" fill="#6366f1"/>
+            <rect x="18" y="54" width="4" height="8" fill="#fff"/>
+            <rect x="24" y="54" width="4" height="8" fill="#fff"/>
+            <rect x="30" y="54" width="4" height="8" fill="#fff"/>
+            <rect x="36" y="54" width="4" height="8" fill="#fff"/>
+            <rect x="70" y="42" width="16" height="16" rx="2" fill="#1e293b" stroke="#6366f1"/>
+          </svg>`,
+        'tv': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="10" y="22" width="80" height="48" rx="3" fill="#020617" stroke-width="3"/>
+            <path d="M40 70 L60 70 M50 70 L50 78 M35 78 L65 78" stroke-width="3" stroke-linecap="round"/>
+            <path d="M20 35 L40 55 L80 30" stroke="#6366f1" stroke-width="2" stroke-linecap="round"/>
+          </svg>`,
+        'drone': `
+          <svg class="w-full h-full text-cyan-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <circle cx="50" cy="50" r="12" fill="#0f172a" stroke-width="3"/>
+            <line x1="25" y1="25" x2="40" y2="40" stroke-width="3"/>
+            <line x1="75" y1="25" x2="60" y2="40" stroke-width="3"/>
+            <line x1="25" y1="75" x2="40" y2="60" stroke-width="3"/>
+            <line x1="75" y1="75" x2="60" y2="60" stroke-width="3"/>
+            <circle cx="22" cy="22" r="10" stroke="#06b6d4" stroke-width="2"/>
+            <circle cx="78" cy="22" r="10" stroke="#06b6d4" stroke-width="2"/>
+            <circle cx="22" cy="78" r="10" stroke="#06b6d4" stroke-width="2"/>
+            <circle cx="78" cy="78" r="10" stroke="#06b6d4" stroke-width="2"/>
+          </svg>`,
+        'camera': `
+          <svg class="w-full h-full text-amber-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="12" y="32" width="76" height="42" rx="6" fill="#0f172a" stroke-width="3"/>
+            <rect x="24" y="24" width="20" height="8" rx="2" fill="#1e293b" stroke-width="2"/>
+            <circle cx="54" cy="53" r="16" fill="#020617" stroke="#f59e0b" stroke-width="3"/>
+            <circle cx="54" cy="53" r="8" fill="#f59e0b" fill-opacity="0.3"/>
+            <circle cx="76" cy="40" r="3" fill="#ef4444"/>
+          </svg>`,
+        'watch': `
+          <svg class="w-full h-full text-slate-200 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="38" y="10" width="24" height="20" rx="3" fill="#1e293b"/>
+            <rect x="38" y="70" width="24" height="20" rx="3" fill="#1e293b"/>
+            <rect x="30" y="28" width="40" height="44" rx="10" fill="#020617" stroke="#cbd5e1" stroke-width="3"/>
+            <circle cx="72" cy="42" r="4" fill="#f97316"/>
+            <text x="50" y="54" font-size="10" text-anchor="middle" fill="#10b981" font-weight="bold">10:09</text>
+          </svg>`,
+        'vr': `
+          <svg class="w-full h-full text-purple-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M15 40 C15 32, 85 32, 85 40 L80 65 C80 70, 20 70, 20 65 Z" fill="#0f172a" stroke-width="3"/>
+            <circle cx="35" cy="50" r="8" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+            <circle cx="65" cy="50" r="8" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+            <path d="M10 45 C5 25, 95 25, 90 45" stroke="#64748b" stroke-width="3"/>
+          </svg>`,
+        'mac-studio': `
+          <svg class="w-full h-full text-slate-300 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="20" y="35" width="60" height="35" rx="6" fill="#0f172a" stroke="#94a3b8" stroke-width="3"/>
+            <line x1="20" y1="45" x2="80" y2="45" stroke="#475569" stroke-width="1"/>
+            <circle cx="50" cy="58" r="4" fill="#94a3b8"/>
+          </svg>`,
+        'headphones-open': `
+          <svg class="w-full h-full text-amber-500 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M18 55 C18 20, 82 20, 82 55" stroke-width="6" stroke="#f59e0b"/>
+            <circle cx="20" cy="60" r="14" fill="#0f172a" stroke="#f59e0b" stroke-width="3"/>
+            <circle cx="80" cy="60" r="14" fill="#0f172a" stroke="#f59e0b" stroke-width="3"/>
+            <circle cx="20" cy="60" r="6" stroke="#f59e0b" stroke-dasharray="2,2"/>
+            <circle cx="80" cy="60" r="6" stroke="#f59e0b" stroke-dasharray="2,2"/>
+          </svg>`,
+        'espresso': `
+          <svg class="w-full h-full text-amber-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="22" y="18" width="56" height="64" rx="6" fill="#0f172a" stroke-width="3"/>
+            <rect x="30" y="26" width="40" height="14" rx="2" fill="#1e293b" stroke="#f59e0b"/>
+            <path d="M35 50 L65 50 L58 60 L42 60 Z" fill="#334155"/>
+            <rect x="42" y="66" width="16" height="12" rx="2" fill="#f59e0b" fill-opacity="0.3"/>
+          </svg>`,
+        'vacuum': `
+          <svg class="w-full h-full text-purple-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <line x1="30" y1="75" x2="70" y2="25" stroke="#a855f7" stroke-width="5" stroke-linecap="round"/>
+            <rect x="65" y="15" width="18" height="18" rx="4" fill="#0f172a" stroke="#a855f7" stroke-width="2"/>
+            <polygon points="20,80 38,70 28,85" fill="#a855f7"/>
+          </svg>`,
+        'mug': `
+          <svg class="w-full h-full text-rose-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="28" y="30" width="38" height="46" rx="6" fill="#0f172a" stroke-width="3"/>
+            <path d="M66 40 C78 40, 78 60, 66 60" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="47" cy="65" r="3" fill="#fb7185"/>
+          </svg>`,
+        'chair': `
+          <svg class="w-full h-full text-slate-300 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M35 20 C35 20, 65 20, 65 48 L35 48 Z" fill="#0f172a" stroke-width="3"/>
+            <rect x="28" y="52" width="44" height="8" rx="3" fill="#334155"/>
+            <line x1="50" y1="60" x2="50" y2="78" stroke-width="4"/>
+            <path d="M30 82 L50 78 L70 82" stroke-width="3"/>
+          </svg>`,
+        'kettle': `
+          <svg class="w-full h-full text-slate-200 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M32 35 C32 35, 68 35, 64 70 L36 70 Z" fill="#0f172a" stroke-width="3"/>
+            <path d="M30 55 C18 50, 15 30, 22 25" stroke-width="3" fill="none"/>
+            <path d="M64 42 C78 42, 78 62, 64 62" stroke-width="3"/>
+          </svg>`,
+        'clock': `
+          <svg class="w-full h-full text-emerald-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="20" y="32" width="60" height="40" rx="10" fill="#0f172a" stroke-width="3"/>
+            <text x="50" y="58" font-size="16" text-anchor="middle" fill="#10b981" font-weight="extrabold">07:00</text>
+          </svg>`,
+        'toaster': `
+          <svg class="w-full h-full text-amber-500 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="18" y="35" width="64" height="40" rx="8" fill="#0f172a" stroke-width="3"/>
+            <rect x="28" y="28" width="44" height="7" rx="2" fill="#f59e0b"/>
+            <circle cx="72" cy="55" r="4" fill="#f59e0b"/>
+          </svg>`,
+        'jacket': `
+          <svg class="w-full h-full text-emerald-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M30 25 L15 40 L25 45 L30 38 L30 80 L70 80 L70 38 L75 45 L85 40 L70 25 Z" fill="#0f172a" stroke-width="3"/>
+            <line x1="50" y1="25" x2="50" y2="80" stroke="#10b981" stroke-width="2"/>
+          </svg>`,
+        'suitcase': `
+          <svg class="w-full h-full text-slate-300 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="22" y="30" width="56" height="52" rx="6" fill="#0f172a" stroke-width="3"/>
+            <path d="M40 30 L40 18 L60 18 L60 30" stroke-width="3"/>
+            <line x1="36" y1="30" x2="36" y2="82" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="50" y1="30" x2="50" y2="82" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="64" y1="30" x2="64" y2="82" stroke="#64748b" stroke-width="1.5"/>
+          </svg>`,
+        'sneaker': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M15 65 C20 40, 45 35, 60 45 L85 55 L85 70 L15 70 Z" fill="#0f172a" stroke-width="3"/>
+            <path d="M15 70 L85 70 L85 78 L15 78 Z" fill="#6366f1"/>
+            <path d="M40 42 C55 50, 70 50, 80 58" stroke="#a855f7" stroke-width="3"/>
+          </svg>`,
+        'glasses': `
+          <svg class="w-full h-full text-slate-100 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="12" y="40" width="32" height="22" rx="6" fill="#020617" stroke-width="3"/>
+            <rect x="56" y="40" width="32" height="22" rx="6" fill="#020617" stroke-width="3"/>
+            <line x1="44" y1="46" x2="56" y2="46" stroke-width="3"/>
+            <circle cx="18" cy="45" r="2" fill="#38bdf8"/>
+          </svg>`,
+        'boots': `
+          <svg class="w-full h-full text-slate-300 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M35 20 L58 20 L58 55 L78 62 L78 78 L35 78 Z" fill="#0f172a" stroke-width="3"/>
+            <line x1="58" y1="62" x2="58" y2="78" stroke="#64748b" stroke-width="2"/>
+          </svg>`,
+        'hoodie': `
+          <svg class="w-full h-full text-rose-500 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M32 25 C32 20, 68 20, 68 25 L88 38 L76 48 L70 42 L70 80 L30 80 L30 42 L24 48 L12 38 Z" fill="#0f172a" stroke-width="3"/>
+            <rect x="38" y="46" width="24" height="10" fill="#ef4444"/>
+            <text x="50" y="53" font-size="6" text-anchor="middle" fill="#fff" font-weight="black">SUPREME</text>
+          </svg>`,
+        'briefcase': `
+          <svg class="w-full h-full text-slate-300 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="18" y="32" width="64" height="46" rx="5" fill="#0f172a" stroke-width="3"/>
+            <path d="M40 32 L40 22 L60 22 L60 32" stroke-width="3"/>
+            <rect x="42" y="48" width="16" height="10" rx="2" fill="#334155"/>
+          </svg>`,
+        'ps5': `
+          <svg class="w-full h-full text-slate-100 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M30 15 C40 10, 60 10, 70 15 L62 82 L38 82 Z" fill="#0f172a" stroke-width="3"/>
+            <path d="M30 15 L38 82 M70 15 L62 82" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="45" y="82" width="10" height="4" fill="#64748b"/>
+          </svg>`,
+        'switch': `
+          <svg class="w-full h-full text-rose-500 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="10" y="30" width="80" height="40" rx="8" fill="#0f172a" stroke-width="3"/>
+            <rect x="10" y="30" width="18" height="40" rx="6" fill="#ef4444"/>
+            <rect x="72" y="30" width="18" height="40" rx="6" fill="#06b6d4"/>
+            <circle cx="19" cy="42" r="3" fill="#000"/>
+            <circle cx="81" cy="52" r="3" fill="#000"/>
+          </svg>`,
+        'rog-ally': `
+          <svg class="w-full h-full text-slate-200 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="8" y="32" width="84" height="36" rx="8" fill="#0f172a" stroke-width="3"/>
+            <rect x="28" y="36" width="44" height="28" rx="2" fill="#020617" stroke="#6366f1"/>
+            <circle cx="18" cy="46" r="4" fill="#334155"/>
+            <circle cx="82" cy="54" r="4" fill="#334155"/>
+          </svg>`,
+        'dualup': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="28" y="12" width="44" height="60" rx="3" fill="#020617" stroke-width="3"/>
+            <line x1="28" y1="42" x2="72" y2="42" stroke="#6366f1" stroke-width="1.5"/>
+            <path d="M50 72 L50 85 M38 85 L62 85" stroke-width="3"/>
+          </svg>`,
+        'screenbar': `
+          <svg class="w-full h-full text-amber-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <line x1="15" y1="30" x2="85" y2="30" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+            <rect x="44" y="30" width="12" height="18" rx="2" fill="#0f172a"/>
+            <path d="M20 30 L10 65 M80 30 L90 65" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.5"/>
+          </svg>`,
+        'deskpad': `
+          <svg class="w-full h-full text-amber-700 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="10" y="35" width="80" height="30" rx="4" fill="#1e293b" stroke="#b45309" stroke-width="3"/>
+            <line x1="82" y1="35" x2="82" y2="65" stroke="#b45309" stroke-width="4"/>
+          </svg>`,
+        'streamdeck': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="18" y="25" width="64" height="50" rx="6" fill="#0f172a" stroke-width="3"/>
+            <rect x="24" y="32" width="10" height="10" rx="2" fill="#6366f1"/>
+            <rect x="38" y="32" width="10" height="10" rx="2" fill="#6366f1"/>
+            <rect x="52" y="32" width="10" height="10" rx="2" fill="#6366f1"/>
+            <rect x="66" y="32" width="10" height="10" rx="2" fill="#6366f1"/>
+            <circle cx="28" cy="58" r="4" fill="#334155"/>
+            <circle cx="42" cy="58" r="4" fill="#334155"/>
+            <circle cx="56" cy="58" r="4" fill="#334155"/>
+            <circle cx="70" cy="58" r="4" fill="#334155"/>
+          </svg>`,
+        'studio-display': `
+          <svg class="w-full h-full text-slate-200 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="12" y="18" width="76" height="46" rx="4" fill="#020617" stroke-width="3"/>
+            <path d="M50 64 L50 82 M36 82 L64 82" stroke-width="3"/>
+            <circle cx="50" cy="23" r="1.5" fill="#38bdf8"/>
+          </svg>`,
+        'airwrap': `
+          <svg class="w-full h-full text-rose-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <rect x="42" y="20" width="16" height="60" rx="8" fill="#0f172a" stroke="#fb7185" stroke-width="3"/>
+            <path d="M42 35 C35 30, 35 25, 42 20" stroke="#fb7185" stroke-width="2"/>
+            <circle cx="50" cy="68" r="3" fill="#fb7185"/>
+          </svg>`,
+        'theragun': `
+          <svg class="w-full h-full text-indigo-400 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <path d="M25 30 L65 30 L75 55 L55 55 Z" fill="#0f172a" stroke-width="3"/>
+            <rect x="60" y="45" width="18" height="35" rx="4" fill="#1e293b" stroke-width="3"/>
+            <circle cx="20" cy="30" r="7" fill="#6366f1"/>
+          </svg>`,
+        'ring': `
+          <svg class="w-full h-full text-slate-200 max-h-36" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <circle cx="50" cy="50" r="26" fill="#0f172a" stroke="#e2e8f0" stroke-width="8"/>
+            <circle cx="50" cy="28" r="2" fill="#38bdf8"/>
+          </svg>`
+      };
+
+      return svgs[type] || svgs['headphones'];
+    }
+
+    /* ==========================================================================
+       3. AUDIO SYNTHESIZER
+       ========================================================================== */
+    const AudioEngine = {
+      ctx: null,
+      muted: false,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      click() {
+        if (this.muted) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.04);
+        } catch(e) {}
+      },
+      addChime() {
+        if (this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.12); // C6
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } catch(e) {}
+      },
+      cashRegister() {
+        if (this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          [1318.51, 1760.00].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            gain.gain.setValueAtTime(0.12, now + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.3);
+          });
+        } catch(e) {}
+      },
+      tapeSlice() {
+        if (this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(1800, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.12);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } catch(e) {}
+      },
+      fanfare() {
+        if (this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            gain.gain.setValueAtTime(0.1, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.35);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.35);
+          });
+        } catch(e) {}
+      }
+    };
+
+    function toggleSound() {
+      AudioEngine.muted = !AudioEngine.muted;
+      document.getElementById('soundIcon').innerText = AudioEngine.muted ? '🔇' : '🔊';
+      document.getElementById('soundLabel').innerText = AudioEngine.muted ? 'Muted' : 'Audio';
+    }
+
+    /* ==========================================================================
+       4. STATE & PERSISTENCE
+       ========================================================================== */
+    const STORAGE_KEY = 'dopamine_rush_v4_state';
+
+    let state = {
+      cart: [], // [{ id, qty }]
+      orders: [], // [{ id, timestamp, items: [{id, qty}], subtotal, shipping, tax, discount, total, status, progress, speedMultiplier, unboxed }]
+      lifetimeUnboxed: 0,
+      spreeLimit: 'unlimited', // 'unlimited' or number e.g. 5000
+      activeCategory: 'all',
+      searchQuery: '',
+      sortOption: 'popular',
+      promoApplied: false
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          state.cart = parsed.cart || [];
+          state.orders = parsed.orders || [];
+          state.lifetimeUnboxed = parsed.lifetimeUnboxed || 0;
+          state.spreeLimit = parsed.spreeLimit || 'unlimited';
+        } catch(e) {}
+      }
+      updateUI();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        cart: state.cart,
+        orders: state.orders,
+        lifetimeUnboxed: state.lifetimeUnboxed,
+        spreeLimit: state.spreeLimit
+      }));
+      updateUI();
+    }
+
+    /* ==========================================================================
+       5. CATALOG RENDERING & MODALS
+       ========================================================================== */
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+
+      let filtered = productsData.filter(p => {
+        const matchesCat = (state.activeCategory === 'all') || (state.activeCategory === p.category);
+        const matchesSearch = p.name.toLowerCase().includes(state.searchQuery.toLowerCase());
+        return matchesCat && matchesSearch;
+      });
+
+      if (state.sortOption === 'price-high') filtered.sort((a, b) => b.price - a.price);
+      if (state.sortOption === 'price-low') filtered.sort((a, b) => a.price - b.price);
+      if (state.sortOption === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+      if (state.sortOption === 'popular') filtered.sort((a, b) => b.reviewsCount - a.reviewsCount);
+
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "glass-card rounded-2xl p-4 flex flex-col justify-between group cursor-pointer";
+        card.onclick = (e) => {
+          // If clicked directly on card (and not add button)
+          if (!e.target.closest('button')) {
+            openProductModal(p.id);
+          }
+        };
+
+        const isSale = p.listPrice && p.listPrice > p.price;
+        const discountPct = isSale ? Math.round(((p.listPrice - p.price) / p.listPrice) * 100) : 0;
+
+        card.innerHTML = `
+          <div>
+            <!-- Image Frame -->
+            <div class="relative bg-slate-950/80 w-full h-44 rounded-xl overflow-hidden flex items-center justify-center p-4 mb-3 border border-slate-800/80 group-hover:border-indigo-500/40 transition">
+              <span class="absolute top-2 left-2 bg-slate-900/90 text-indigo-400 border border-indigo-500/30 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md uppercase">
+                ${p.tag}
+              </span>
+              ${isSale ? `<span class="absolute top-2 right-2 bg-rose-500/90 text-white font-mono font-bold text-[10px] px-1.5 py-0.5 rounded">-${discountPct}%</span>` : ''}
+              
+              <div class="w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                ${getProductSVG(p.svgType)}
+              </div>
+            </div>
+
+            <h3 class="font-semibold text-slate-100 text-sm leading-snug line-clamp-2 mb-1 group-hover:text-indigo-400 transition">
+              ${p.name}
+            </h3>
+
+            <!-- Rating -->
+            <div class="flex items-center gap-1.5 text-xs text-slate-400 mb-2">
+              <span class="text-amber-400 font-bold">★ ${p.rating}</span>
+              <span class="text-slate-500 text-[11px]">(${p.reviewsCount.toLocaleString()})</span>
+            </div>
+
+            <!-- Price -->
+            <div class="flex items-baseline gap-2 mb-4">
+              <span class="text-xl font-display font-black text-white">$${p.price.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+              ${isSale ? `<span class="text-xs text-slate-500 line-through">$${p.listPrice.toLocaleString('en-US', {minimumFractionDigits:2})}</span>` : ''}
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="pt-2 border-t border-slate-800/80 flex gap-2">
+            <button onclick="addToCart('${p.id}', event)" id="btn-add-${p.id}" class="flex-1 bg-gradient-to-r from-indigo-500 to-violet-500 hover:opacity-95 text-white font-display font-extrabold py-2 px-3 rounded-xl text-xs shadow-md shadow-indigo-500/15 transition flex items-center justify-center gap-1">
+              ⚡ Add to Haul
+            </button>
+            <button onclick="openProductModal('${p.id}')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 font-bold px-2.5 py-2 rounded-xl text-xs transition" title="View Specs">
+              🔍
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    /* Product Specs Modal */
+    let activeModalProductId = null;
+    let modalQty = 1;
+
+    function openProductModal(id) {
+      AudioEngine.click();
+      const p = productsData.find(item => item.id === id);
+      if (!p) return;
+
+      activeModalProductId = id;
+      modalQty = 1;
+
+      document.getElementById('modalSvgContainer').innerHTML = getProductSVG(p.svgType);
+      document.getElementById('modalTag').innerText = p.tag;
+      document.getElementById('modalTitle').innerText = p.name;
+      document.getElementById('modalPrice').innerText = `$${p.price.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      
+      const listPriceEl = document.getElementById('modalListPrice');
+      if (p.listPrice && p.listPrice > p.price) {
+        listPriceEl.innerText = `$${p.listPrice.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      } else {
+        listPriceEl.innerText = '';
+      }
+
+      document.getElementById('modalDesc').innerText = p.desc;
+      
+      const specsList = document.getElementById('modalSpecs');
+      specsList.innerHTML = p.specs.map(s => `<li>${s}</li>`).join('');
+
+      document.getElementById('modalQtyDisplay').innerText = modalQty;
+      document.getElementById('modalRatingText').innerText = `★ ${p.rating} / 5.0 (${p.reviewsCount.toLocaleString()} verified reviews)`;
+
+      // Reviews
+      document.getElementById('modalReviewsList').innerHTML = `
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between font-bold text-slate-200 mb-1">
+            <span>Alex M.</span>
+            <span class="text-amber-400">★★★★★</span>
+          </div>
+          <p class="text-slate-400 text-[11px]">"Absolutely incredible quality. Was delivered super fast and unboxing it was super satisfying!"</p>
+        </div>
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between font-bold text-slate-200 mb-1">
+            <span>Jordan T.</span>
+            <span class="text-amber-400">★★★★★</span>
+          </div>
+          <p class="text-slate-400 text-[11px]">"10/10 purchase. Fits into my dream desktop setup seamlessly. Highly recommended!"</p>
+        </div>
+      `;
+
+      document.getElementById('productDetailModal').classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productDetailModal').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function adjustModalQty(delta) {
+      modalQty = Math.max(1, modalQty + delta);
+      document.getElementById('modalQtyDisplay').innerText = modalQty;
+    }
+
+    function addFromModal() {
+      if (!activeModalProductId) return;
+      for (let i = 0; i < modalQty; i++) {
+        addToCart(activeModalProductId);
+      }
+      closeProductModal();
+      openCartDrawer();
+    }
+
+    /* Filter & Search */
+    function filterCategory(cat, btn) {
+      AudioEngine.click();
+      state.activeCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(b => {
+        b.className = "cat-pill bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition";
+      });
+      btn.className = "cat-pill active bg-indigo-500 text-white font-black text-xs px-3.5 py-1 rounded-full whitespace-nowrap transition";
+      renderProducts();
+    }
+
+    function handleSearch() {
+      state.searchQuery = document.getElementById('searchInput').value;
+      renderProducts();
+    }
+
+    function handleSearchMobile() {
+      state.searchQuery = document.getElementById('searchInputMobile').value;
+      renderProducts();
+    }
+
+    function handleSort() {
+      AudioEngine.click();
+      state.sortOption = document.getElementById('sortSelect').value;
+      renderProducts();
+    }
+
+    /* ==========================================================================
+       6. CART & REAL CHECKOUT
+       ========================================================================== */
+    function addToCart(productId, event) {
+      AudioEngine.addChime();
+
+      const existing = state.cart.find(item => item.id === productId);
+      if (existing) {
+        existing.qty++;
+      } else {
+        state.cart.push({ id: productId, qty: 1 });
+      }
+
+      // Visual feedback on button (Checkmark pulse, NO green +$$ popup)
+      const btn = document.getElementById(`btn-add-${productId}`);
+      if (btn) {
+        const origText = btn.innerHTML;
+        btn.innerHTML = `✓ Added!`;
+        btn.classList.add('btn-added-pulse', 'bg-emerald-500');
+        setTimeout(() => {
+          btn.innerHTML = origText;
+          btn.classList.remove('btn-added-pulse', 'bg-emerald-500');
+        }, 1000);
+      }
+
+      saveState();
+    }
+
+    function updateCartQty(productId, delta) {
+      AudioEngine.click();
+      const item = state.cart.find(i => i.id === productId);
+      if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) {
+          state.cart = state.cart.filter(i => i.id !== productId);
+        }
+      }
+      saveState();
+    }
+
+    function fillInstantHaul() {
+      AudioEngine.cashRegister();
+      state.cart = [
+        { id: "tech-1", qty: 1 },
+        { id: "home-1", qty: 1 },
+        { id: "gaming-1", qty: 1 }
+      ];
+      saveState();
+      triggerConfetti();
+      openCartDrawer();
+    }
+
+    function calculateCartSubtotal() {
+      return state.cart.reduce((sum, item) => {
+        const p = productsData.find(prod => prod.id === item.id);
+        return sum + (p ? p.price * item.qty : 0);
+      }, 0);
+    }
+
+    function calculateTotalSavings() {
+      return state.cart.reduce((sum, item) => {
+        const p = productsData.find(prod => prod.id === item.id);
+        if (p && p.listPrice && p.listPrice > p.price) {
+          return sum + ((p.listPrice - p.price) * item.qty);
+        }
+        return sum;
+      }, 0);
+    }
+
+    function applyPromoCode() {
+      const code = document.getElementById('promoInput').value.trim().toUpperCase();
+      if (code === 'DOPAMINE20') {
+        AudioEngine.cashRegister();
+        state.promoApplied = true;
+        document.getElementById('promoNotice').classList.remove('hidden');
+        updateCartTotals();
+      }
+    }
+
+    function updateCartTotals() {
+      const subtotal = calculateCartSubtotal();
+      const shipping = parseFloat(document.getElementById('cartShippingSelect').value || 0);
+      const discount = state.promoApplied ? subtotal * 0.20 : 0;
+      const taxableSubtotal = Math.max(0, subtotal - discount);
+      const tax = taxableSubtotal * 0.0825; // 8.25% Tax
+      const grandTotal = taxableSubtotal + shipping + tax;
+
+      document.getElementById('cartSubtotal').innerText = `$${subtotal.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      document.getElementById('cartDiscount').innerText = `-$${discount.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      document.getElementById('cartShipping').innerText = `$${shipping.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      document.getElementById('cartTax').innerText = `$${tax.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      document.getElementById('cartGrandTotal').innerText = `$${grandTotal.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      document.getElementById('cartCheckoutBtnTotal').innerText = `$${grandTotal.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+    }
+
+    function checkoutCart() {
+      if (state.cart.length === 0) return;
+      closeCartDrawer();
+      AudioEngine.cashRegister();
+      triggerConfetti();
+
+      const subtotal = calculateCartSubtotal();
+      const shipping = parseFloat(document.getElementById('cartShippingSelect').value || 0);
+      const discount = state.promoApplied ? subtotal * 0.20 : 0;
+      const tax = Math.max(0, subtotal - discount) * 0.0825;
+      const grandTotal = subtotal - discount + shipping + tax;
+
+      const orderRef = "RUSH-" + Math.floor(100000 + Math.random() * 900000);
+
+      const newOrder = {
+        id: orderRef,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        items: [...state.cart],
+        subtotal: subtotal,
+        shipping: shipping,
+        tax: tax,
+        discount: discount,
+        total: grandTotal,
+        status: 0, // 0: Placed, 1: Processing, 2: Handed to Carrier, 3: Out for Delivery, 4: Delivered
+        progress: 0, // 0 to 100%
+        speedMultiplier: 1, // 1, 10, 100
+        unboxed: false
+      };
+
+      state.orders.unshift(newOrder);
+      state.cart = [];
+      state.promoApplied = false;
+      document.getElementById('promoNotice').classList.add('hidden');
+      document.getElementById('promoInput').value = '';
+      saveState();
+
+      switchTab('orders');
+    }
+
+    /* ==========================================================================
+       7. SPREE LIMIT MODAL
+       ========================================================================== */
+    function openSpreeModal() {
+      AudioEngine.click();
+      document.getElementById('spreeModal').classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeSpreeModal() {
+      document.getElementById('spreeModal').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function setSpreePreset(val) {
+      AudioEngine.click();
+      state.spreeLimit = val;
+      saveState();
+      closeSpreeModal();
+    }
+
+    function applyCustomSpree() {
+      const val = parseFloat(document.getElementById('customSpreeInput').value);
+      if (val && val > 0) {
+        AudioEngine.click();
+        state.spreeLimit = val;
+        saveState();
+        closeSpreeModal();
+      }
+    }
+
+    /* ==========================================================================
+       8. REAL-TIME FAST-FORWARD SHIPPING TICKER
+       ========================================================================== */
+    const STAGE_LABELS = [
+      "Order Placed",
+      "Processing at Rush Hub",
+      "Handed to Express Jet",
+      "Out for VIP Delivery",
+      "Delivered - Ready to Unbox"
+    ];
+
+    setInterval(() => {
+      let updated = false;
+      state.orders.forEach(ord => {
+        if (ord.status < 4) {
+          ord.progress += 2.5 * ord.speedMultiplier;
+          if (ord.progress >= 100) {
+            ord.status++;
+            ord.progress = 0;
+            if (ord.status >= 4) {
+              ord.status = 4;
+              ord.progress = 100;
+              AudioEngine.cashRegister();
+            }
+          }
+          updated = true;
+        }
+      });
+      if (updated) {
+        saveState();
+      }
+    }, 1000);
+
+    function setSpeed(orderId, mult) {
+      AudioEngine.click();
+      const ord = state.orders.find(o => o.id === orderId);
+      if (ord) {
+        ord.speedMultiplier = mult;
+        saveState();
+      }
+    }
+
+    function instantDeliver(orderId) {
+      AudioEngine.cashRegister();
+      const ord = state.orders.find(o => o.id === orderId);
+      if (ord) {
+        ord.status = 4;
+        ord.progress = 100;
+        saveState();
+        triggerConfetti();
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('ordersListContainer');
+      const badge = document.getElementById('ordersBadge');
+      container.innerHTML = '';
+
+      if (state.orders.length > 0) {
+        badge.innerText = state.orders.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      if (state.orders.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-16 glass-panel rounded-2xl p-8 border border-slate-800">
+            <div class="text-4xl mb-3">📦</div>
+            <div class="font-display font-bold text-lg text-slate-200">No Haul Orders Placed Yet</div>
+            <div class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+              Checkout items in your cart to view live real-time express shipping simulations!
+            </div>
+            <button onclick="switchTab('shop')" class="mt-4 bg-indigo-500 text-white font-bold text-xs px-4 py-2 rounded-xl">
+              Browse Catalog
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      state.orders.forEach(ord => {
+        const isDelivered = ord.status >= 4;
+
+        // Calculate overall progress across 4 stages
+        const overallPct = isDelivered ? 100 : Math.min(100, Math.round(((ord.status * 100) + ord.progress) / 4));
+
+        let itemsPreview = '';
+        ord.items.forEach(it => {
+          const p = productsData.find(prod => prod.id === it.id);
+          if (p) {
+            itemsPreview += `
+              <div class="flex items-center gap-2 bg-slate-950/80 p-2 rounded-xl border border-slate-800 shrink-0">
+                <div class="w-8 h-8 flex items-center justify-center p-1 bg-slate-900 rounded-lg">
+                  ${getProductSVG(p.svgType)}
+                </div>
+                <div class="text-xs">
+                  <div class="font-bold text-slate-200 truncate max-w-[120px]">${p.name}</div>
+                  <div class="text-slate-400 font-mono text-[10px]">${it.qty}x $${p.price.toFixed(2)}</div>
+                </div>
+              </div>
+            `;
+          }
+        });
+
+        const card = document.createElement('div');
+        card.className = "glass-panel p-5 rounded-2xl border border-slate-800 space-y-4";
+        card.innerHTML = `
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-black text-indigo-400 text-sm">#${ord.id}</span>
+                <span class="text-slate-500 text-xs">• Today at ${ord.timestamp}</span>
+              </div>
+              <div class="text-xs text-slate-400 mt-0.5">
+                Total Paid: <span class="text-slate-100 font-bold font-mono">$${ord.total.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+              </div>
+            </div>
+
+            <div>
+              ${ord.unboxed ? `
+                <span class="bg-violet-500/10 text-violet-400 border border-violet-500/30 text-xs font-mono font-bold px-3 py-1 rounded-full">
+                  ✨ UNBOXED IN COLLECTION
+                </span>
+              ` : isDelivered ? `
+                <button onclick="startUnboxing('${ord.id}')" class="bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-display font-black text-xs px-4 py-2 rounded-xl shadow-lg hover:scale-105 transition flex items-center gap-1.5 animate-pulse">
+                  🎁 UNBOX THIS HAUL NOW!
+                </button>
+              ` : `
+                <!-- Speed Controls -->
+                <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  <span class="text-[10px] text-slate-500 font-mono px-1">SPEED:</span>
+                  <button onclick="setSpeed('${ord.id}', 1)" class="px-2 py-0.5 rounded text-[10px] font-bold ${ord.speedMultiplier===1 ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}">1x</button>
+                  <button onclick="setSpeed('${ord.id}', 10)" class="px-2 py-0.5 rounded text-[10px] font-bold ${ord.speedMultiplier===10 ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}">10x</button>
+                  <button onclick="setSpeed('${ord.id}', 100)" class="px-2 py-0.5 rounded text-[10px] font-bold ${ord.speedMultiplier===100 ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}">⏩ 100x</button>
+                  <button onclick="instantDeliver('${ord.id}')" class="bg-emerald-500 text-slate-950 px-2 py-0.5 rounded text-[10px] font-black hover:bg-emerald-400 transition">⏭️ Instant</button>
+                </div>
+              `}
+            </div>
+          </div>
+
+          <!-- Items Row -->
+          <div class="flex gap-2 overflow-x-auto py-1 no-scrollbar">
+            ${itemsPreview}
+          </div>
+
+          <!-- Shipping Bar -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono mb-1">
+              <span class="text-slate-400">STATUS: <strong class="${isDelivered ? 'text-emerald-400' : 'text-amber-400'}">${STAGE_LABELS[ord.status]}</strong></span>
+              <span class="text-slate-500">${overallPct}% COMPLETE</span>
+            </div>
+
+            <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+              <div class="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-400 transition-all duration-300" style="width: ${overallPct}%"></div>
+            </div>
+
+            <div class="grid grid-cols-5 text-center text-[10px] text-slate-500 font-mono pt-1">
+              <span class="${ord.status >= 0 ? 'text-indigo-400 font-bold' : ''}">Placed</span>
+              <span class="${ord.status >= 1 ? 'text-indigo-400 font-bold' : ''}">Processing</span>
+              <span class="${ord.status >= 2 ? 'text-indigo-400 font-bold' : ''}">Express Jet</span>
+              <span class="${ord.status >= 3 ? 'text-indigo-400 font-bold' : ''}">Out for Del.</span>
+              <span class="${ord.status >= 4 ? 'text-emerald-400 font-bold' : ''}">Delivered</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* ==========================================================================
+       9. INTERACTIVE UNBOXING EXPERIENCE
+       ========================================================================== */
+    let activeUnboxOrder = null;
+    let unboxStep = 0; // 0: Tape, 1: Flaps, 2: Peanuts, 3: Items
+    let unboxItemIndex = 0;
+    let leftFlapOpen = false;
+    let rightFlapOpen = false;
+
+    function startUnboxing(orderId) {
+      AudioEngine.cashRegister();
+      activeUnboxOrder = state.orders.find(o => o.id === orderId);
+      if (!activeUnboxOrder) return;
+
+      unboxStep = 0;
+      unboxItemIndex = 0;
+      leftFlapOpen = false;
+      rightFlapOpen = false;
+
+      document.getElementById('tapeLine').classList.remove('sliced');
+      document.getElementById('tapeInstruction').classList.remove('hidden');
+      document.getElementById('flapLeft').classList.add('hidden');
+      document.getElementById('flapLeft').style.transform = 'none';
+      document.getElementById('flapRight').classList.add('hidden');
+      document.getElementById('flapRight').style.transform = 'none';
+      document.getElementById('bubbleWrapLayer').classList.add('hidden');
+      document.getElementById('itemRevealSpotlight').classList.add('hidden');
+      document.getElementById('unboxingSummaryCard').classList.add('hidden');
+      document.getElementById('boxInteractiveArea').classList.remove('hidden');
+      document.getElementById('unboxingStepHeader').classList.remove('hidden');
+
+      document.getElementById('unboxingTitle').innerText = "Slice Security Tape ✂️";
+      document.getElementById('unboxingSubtitle').innerText = "Click or tap across the holographic tape seal!";
+
+      document.getElementById('unboxingModal').classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function sliceTape() {
+      if (unboxStep !== 0) return;
+      AudioEngine.tapeSlice();
+      document.getElementById('tapeLine').classList.add('sliced');
+      document.getElementById('tapeInstruction').classList.add('hidden');
+
+      setTimeout(() => {
+        unboxStep = 1;
+        document.getElementById('unboxingTitle').innerText = "Open Box Flaps 📦";
+        document.getElementById('unboxingSubtitle').innerText = "Click both left and right cardboard flaps!";
+        
+        document.getElementById('flapLeft').classList.remove('hidden');
+        document.getElementById('flapRight').classList.remove('hidden');
+      }, 400);
+    }
+
+    function openFlap(side) {
+      if (unboxStep !== 1) return;
+      AudioEngine.click();
+
+      if (side === 'left') {
+        document.getElementById('flapLeft').style.transform = 'rotateY(-110deg)';
+        leftFlapOpen = true;
+      } else {
+        document.getElementById('flapRight').style.transform = 'rotateY(110deg)';
+        rightFlapOpen = true;
+      }
+
+      if (leftFlapOpen && rightFlapOpen) {
+        setTimeout(() => {
+          unboxStep = 2;
+          document.getElementById('unboxingTitle').innerText = "Remove Packing Peanuts 📦";
+          document.getElementById('unboxingSubtitle').innerText = "Tap anywhere to reveal your unboxed items!";
+          document.getElementById('bubbleWrapLayer').classList.remove('hidden');
+        }, 500);
+      }
+    }
+
+    function popBubbleWrap() {
+      if (unboxStep !== 2) return;
+      AudioEngine.fanfare();
+      document.getElementById('bubbleWrapLayer').classList.add('hidden');
+
+      unboxStep = 3;
+      document.getElementById('unboxingTitle').innerText = "Unboxing Your Buys! ✨";
+      document.getElementById('unboxingSubtitle').innerText = "Revealing items in your haul...";
+      document.getElementById('itemRevealSpotlight').classList.remove('hidden');
+
+      showUnboxItem();
+    }
+
+    function showUnboxItem() {
+      AudioEngine.fanfare();
+      triggerConfetti();
+
+      const itemData = activeUnboxOrder.items[unboxItemIndex];
+      const p = productsData.find(prod => prod.id === itemData.id);
+
+      if (p) {
+        document.getElementById('revealSvgContainer').innerHTML = getProductSVG(p.svgType);
+        document.getElementById('revealItemTag').innerText = `UNBOXED ITEM ${unboxItemIndex + 1} OF ${activeUnboxOrder.items.length}`;
+        document.getElementById('revealItemTitle').innerText = p.name;
+        document.getElementById('revealItemPrice').innerText = `$${p.price.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      }
+
+      if (unboxItemIndex >= activeUnboxOrder.items.length - 1) {
+        document.getElementById('nextItemBtn').innerText = "COMPLETE UNBOXING HAUL 🏆";
+      } else {
+        document.getElementById('nextItemBtn').innerText = "NEXT UNBOXED ITEM ➔";
+      }
+    }
+
+    function nextUnboxItem() {
+      if (unboxItemIndex < activeUnboxOrder.items.length - 1) {
+        unboxItemIndex++;
+        showUnboxItem();
+      } else {
+        AudioEngine.cashRegister();
+        document.getElementById('boxInteractiveArea').classList.add('hidden');
+        document.getElementById('unboxingStepHeader').classList.add('hidden');
+        document.getElementById('unboxingSummaryCard').classList.remove('hidden');
+        document.getElementById('summaryTotal').innerText = `$${activeUnboxOrder.total.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      }
+    }
+
+    function finishUnboxing() {
+      if (activeUnboxOrder) {
+        activeUnboxOrder.unboxed = true;
+        state.lifetimeUnboxed += activeUnboxOrder.total;
+        saveState();
+      }
+      closeUnboxingModal();
+    }
+
+    function closeUnboxingModal() {
+      document.getElementById('unboxingModal').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    /* ==========================================================================
+       10. UI UPDATES & CONFETTI
+       ========================================================================== */
+    function switchTab(tab) {
+      AudioEngine.click();
+      if (tab === 'shop') {
+        document.getElementById('tabShopView').classList.remove('hidden');
+        document.getElementById('tabOrdersView').classList.add('hidden');
+      } else {
+        document.getElementById('tabShopView').classList.add('hidden');
+        document.getElementById('tabOrdersView').classList.remove('hidden');
+        renderOrders();
+      }
+    }
+
+    function openCartDrawer() {
+      AudioEngine.click();
+      document.getElementById('cartOverlay').classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('cartDrawer').classList.remove('translate-x-full');
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cartOverlay').classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('cartDrawer').classList.add('translate-x-full');
+    }
+
+    function updateUI() {
+      const subtotal = calculateCartSubtotal();
+      const count = state.cart.reduce((sum, i) => sum + i.qty, 0);
+
+      document.getElementById('cartBadge').innerText = count;
+      document.getElementById('dashCartTotal').innerText = subtotal.toLocaleString('en-US', {minimumFractionDigits:2});
+      document.getElementById('dashTotalSavings').innerText = `$${calculateTotalSavings().toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      document.getElementById('dashLifetimeTotal').innerText = `$${state.lifetimeUnboxed.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+
+      // Spree Limit Logic
+      const navLabel = document.getElementById('spreeNavLabel');
+      const modeName = document.getElementById('dashSpreeModeName');
+      const stats = document.getElementById('dashSpreeStats');
+      const bar = document.getElementById('spreeProgressBar');
+
+      if (state.spreeLimit === 'unlimited') {
+        navLabel.innerText = "Spree: Unlimited";
+        modeName.innerText = "Unlimited Spree";
+        stats.innerText = `$${subtotal.toLocaleString('en-US', {minimumFractionDigits:2})} spent`;
+        bar.style.width = '100%';
+      } else {
+        const limit = parseFloat(state.spreeLimit);
+        navLabel.innerText = `Spree: $${limit.toLocaleString()}`;
+        modeName.innerText = `$${limit.toLocaleString()} Limit`;
+        
+        const pct = Math.min(100, Math.round((subtotal / limit) * 100));
+        const rem = Math.max(0, limit - subtotal);
+        stats.innerText = `$${subtotal.toLocaleString()} / $${limit.toLocaleString()} ($${rem.toLocaleString()} left)`;
+        bar.style.width = `${pct}%`;
+      }
+
+      renderCartItems();
+      updateCartTotals();
+    }
+
+    function renderCartItems() {
+      const container = document.getElementById('cartBody');
+      container.innerHTML = '';
+
+      if (state.cart.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-500 font-mono text-xs">
+            <div class="text-3xl mb-2">🛒</div>
+            YOUR HAUL CART IS EMPTY
+          </div>
+        `;
+        return;
+      }
+
+      state.cart.forEach(item => {
+        const p = productsData.find(prod => prod.id === item.id);
+        if (!p) return;
+
+        const row = document.createElement('div');
+        row.className = "py-3 flex gap-3 items-center";
+        row.innerHTML = `
+          <div class="w-12 h-12 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0 flex items-center justify-center">
+            ${getProductSVG(p.svgType)}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-xs text-slate-200 truncate">${p.name}</h4>
+            <div class="text-xs font-bold text-indigo-400 mt-0.5">$${p.price.toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+            
+            <div class="flex items-center gap-2 mt-2">
+              <button onclick="updateCartQty('${p.id}', -1)" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 rounded font-bold text-xs flex items-center justify-center">-</button>
+              <span class="text-xs font-mono font-bold w-4 text-center">${item.qty}</span>
+              <button onclick="updateCartQty('${p.id}', 1)" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 rounded font-bold text-xs flex items-center justify-center">+</button>
+            </div>
+          </div>
+          <button onclick="updateCartQty('${p.id}', -${item.qty})" class="text-slate-500 hover:text-rose-400 text-lg px-1">&times;</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#6366f1', '#a855f7', '#10b981', '#f59e0b', '#06b6d4'];
+
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 18,
+          vy: (Math.random() - 0.5) * 18 - 4,
+          size: Math.random() * 7 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 8
+        });
+      }
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.22;
+          p.rotation += p.rotSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        frame++;
+        if (frame < 90) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    /* On Window Load */
+    window.onload = function() {
+      loadState();
+      renderProducts();
+    };
+  </script>
+</body>
+</html>
