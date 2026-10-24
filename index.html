@@ -1,2367 +1,1665 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark h-full bg-[#0b0d10] text-slate-100">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Music Dopamine Simulator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAGE PASS - Live Music Dopamine Simulator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: {
+              cyan: '#00f2fe',
+              magenta: '#ff007f',
+              purple: '#7928ca',
+              gold: '#ffd700',
+              dark: '#0b0d10',
+              card: '#131720',
+              border: '#232936'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 2s infinite',
+            'float': 'float 3s ease-in-out infinite',
+            'shimmer': 'shimmer 2.5s infinite linear',
+            'bounce-gentle': 'bounceGentle 1.5s infinite'
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 15px rgba(0, 242, 254, 0.4)' },
+              '50%': { boxShadow: '0 0 30px rgba(255, 0, 127, 0.7)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' }
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            },
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-4px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    /* ==========================================================================
-       1. GLOBAL RESET & DESIGN TOKENS
-       ========================================================================== */
-    :root {
-      --bg-dark: #0f1015;
-      --bg-card: #181a24;
-      --bg-card-hover: #222534;
-      --bg-panel: #13151f;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --border-highlight: rgba(0, 242, 254, 0.3);
-      
-      --text-main: #f0f2f8;
-      --text-muted: #9398ab;
-      --text-dim: #62677a;
-
-      --accent-cyan: #00f2fe;
-      --accent-blue: #4facfe;
-      --accent-purple: #9d4edd;
-      --accent-pink: #ff0844;
-      --accent-green: #00e676;
-      --accent-gold: #ffb703;
-
-      --glow-cyan: 0 0 20px rgba(0, 242, 254, 0.4);
-      --glow-pink: 0 0 20px rgba(255, 8, 68, 0.4);
-      --glow-green: 0 0 18px rgba(0, 230, 118, 0.4);
-      --glow-purple: 0 0 20px rgba(157, 78, 221, 0.4);
-
-      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --transition-fast: 0.18s ease;
-      --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: var(--font-family);
-      min-height: 100vh;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg-dark);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #2a2d3d;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3e4359;
-    }
-
-    /* ==========================================================================
-       2. HEADER & NAVIGATION
-       ========================================================================== */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(15, 16, 21, 0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      cursor: pointer;
-    }
-
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--glow-cyan);
-    }
-
-    .brand-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(90deg, #ffffff, var(--accent-cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-subtitle {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .search-bar {
-      flex: 1;
-      max-width: 380px;
-      position: relative;
-    }
-
-    .search-bar input {
-      width: 100%;
-      background: #181a24;
-      border: 1px solid var(--border-color);
-      padding: 0.55rem 1rem 0.55rem 2.4rem;
-      border-radius: 20px;
-      color: var(--text-main);
-      font-size: 0.88rem;
-      outline: none;
-      transition: var(--transition-fast);
-    }
-
-    .search-bar input:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 0.8rem;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      fill: var(--text-muted);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .nav-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0.5rem 0.9rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      position: relative;
-    }
-
-    .nav-btn:hover {
-      background: var(--bg-card-hover);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
-    }
-
-    .nav-btn.active {
-      border-color: var(--accent-cyan);
-      background: rgba(0, 242, 254, 0.1);
-      color: var(--accent-cyan);
-    }
-
-    .badge-count {
-      background: var(--accent-pink);
-      color: white;
-      font-size: 0.7rem;
-      padding: 0.15rem 0.45rem;
-      border-radius: 10px;
-      font-weight: 700;
-    }
-
-    .fast-forward-btn {
-      background: linear-gradient(135deg, rgba(255, 183, 3, 0.2), rgba(255, 8, 68, 0.2));
-      border: 1px solid var(--accent-gold);
-      color: var(--accent-gold);
-    }
-
-    .fast-forward-btn:hover {
-      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
-      color: #000;
-      box-shadow: 0 0 15px rgba(255, 183, 3, 0.4);
-    }
-
-    .fast-forward-btn.active-ff {
-      animation: ffPulse 1s infinite alternate;
-    }
-
-    @keyframes ffPulse {
-      from { box-shadow: 0 0 5px var(--accent-gold); }
-      to { box-shadow: 0 0 20px var(--accent-pink); }
-    }
-
-    /* Wallet Widget Header */
-    .wallet-widget {
-      background: rgba(0, 230, 118, 0.08);
-      border: 1px solid rgba(0, 230, 118, 0.25);
-      border-radius: 12px;
-      padding: 0.4rem 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      cursor: pointer;
-    }
-
-    .wallet-widget:hover {
-      border-color: var(--accent-green);
-      background: rgba(0, 230, 118, 0.15);
-    }
-
-    .wallet-amount {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: var(--accent-green);
-    }
-
-    /* ==========================================================================
-       3. TOP BANNER / DOPAMINE METRICS BAR
-       ========================================================================== */
-    .hero-banner {
-      background: linear-gradient(180deg, rgba(24, 26, 36, 0.8) 0%, rgba(15, 16, 21, 1) 100%);
-      border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 1.5rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
-    .stat-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 0.9rem 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; width: 4px; height: 100%;
-      background: var(--accent-cyan);
-    }
-
-    .stat-card.green::before { background: var(--accent-green); }
-    .stat-card.pink::before { background: var(--accent-pink); }
-    .stat-card.purple::before { background: var(--accent-purple); }
-
-    .stat-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-    }
-
-    .stat-val {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .stat-lbl {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* ==========================================================================
-       4. MAIN CONTAINER & TABS NAVIGATION
-       ========================================================================== */
-    main {
-      flex: 1;
-      padding: 1.5rem;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    .tab-navigation {
-      display: flex;
-      gap: 0.5rem;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 0.6rem 1.2rem;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .tab-btn.active {
-      color: var(--accent-cyan);
-      background: rgba(0, 242, 254, 0.1);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ==========================================================================
-       5. ARTIST & DROPS GRID
-       ========================================================================== */
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .artist-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      overflow: hidden;
-      transition: var(--transition-smooth);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .artist-card:hover {
-      border-color: var(--border-highlight);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .card-banner {
-      height: 160px;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-      background: #1e202e;
-    }
-
-    .card-banner svg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .price-drop-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--accent-pink);
-      color: white;
-      font-size: 0.72rem;
-      font-weight: 800;
-      padding: 0.3rem 0.6rem;
-      border-radius: 8px;
-      box-shadow: var(--glow-pink);
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      animation: pulseGlow 1.5s infinite alternate;
-    }
-
-    @keyframes pulseGlow {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
-    }
-
-    .genre-tag {
-      position: absolute;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(15, 16, 21, 0.8);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--accent-cyan);
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.25rem 0.55rem;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-
-    .card-body {
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-
-    .artist-name {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 0.2rem;
-    }
-
-    .tour-title {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-bottom: 0.8rem;
-    }
-
-    .event-info {
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 10px;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      font-size: 0.8rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .event-detail-row {
-      display: flex;
-      justify-content: space-between;
-      color: var(--text-muted);
-    }
-
-    .event-detail-row span:last-child {
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .ai-rating-chip {
-      background: rgba(0, 242, 254, 0.1);
-      border: 1px solid rgba(0, 242, 254, 0.3);
-      color: var(--accent-cyan);
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.72rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      margin-bottom: 0.8rem;
-    }
-
-    .card-actions {
-      margin-top: auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-      border: none;
-      color: #000;
-      font-weight: 800;
-      padding: 0.65rem 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: var(--transition-fast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-    }
-
-    .btn-primary:hover {
-      box-shadow: var(--glow-cyan);
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      font-weight: 700;
-      padding: 0.65rem 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: var(--transition-fast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    /* ==========================================================================
-       6. SEAT MAP & TICKET PROCUREMENT MODAL
-       ========================================================================== */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(8, 9, 12, 0.85);
+    /* Custom CSS Scrollbars & Glow Utils */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0d10; }
+    ::-webkit-scrollbar-thumb { background: #232936; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
+    
+    .glow-cyan { text-shadow: 0 0 10px rgba(0, 242, 254, 0.6); }
+    .glow-magenta { text-shadow: 0 0 10px rgba(255, 0, 127, 0.6); }
+    .glow-gold { text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+    
+    .bg-glass {
+      background: rgba(19, 23, 32, 0.85);
       backdrop-filter: blur(12px);
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-container {
-      background: var(--bg-card);
-      border: 1px solid var(--border-highlight);
-      border-radius: 20px;
-      width: 90%;
-      max-width: 850px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 1.75rem;
-      position: relative;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-      transform: scale(0.95);
-      transition: transform 0.25s ease;
-    }
-
-    .modal-overlay.open .modal-container {
-      transform: scale(1);
-    }
-
-    .modal-close-btn {
-      position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-      background: rgba(255,255,255,0.08);
-      border: none;
-      color: var(--text-muted);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      transition: var(--transition-fast);
-    }
-
-    .modal-close-btn:hover {
-      background: var(--accent-pink);
-      color: white;
-    }
-
-    .modal-title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      margin-bottom: 0.3rem;
-    }
-
-    .venue-map-layout {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 1.5rem;
-      margin-top: 1.25rem;
-    }
-
-    @media (max-width: 768px) {
-      .venue-map-layout { grid-template-columns: 1fr; }
-    }
-
-    .seat-map-canvas-wrap {
-      background: #0f1016;
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .stage-indicator {
-      width: 80%;
-      height: 24px;
-      background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
-      border-radius: 4px;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: #000;
-      box-shadow: var(--glow-cyan);
-    }
-
-    .seat-sections-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      width: 100%;
-    }
-
-    .seat-section-row {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-
-    .seat-section-row:hover {
-      border-color: var(--accent-cyan);
-      background: rgba(0, 242, 254, 0.08);
-    }
-
-    .seat-section-row.selected {
-      border-color: var(--accent-green);
-      background: rgba(0, 230, 118, 0.12);
-      box-shadow: 0 0 10px rgba(0, 230, 118, 0.2);
-    }
-
-    .section-name {
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    .section-tag {
-      font-size: 0.7rem;
-      color: var(--accent-gold);
-    }
-
-    .section-price {
-      text-align: right;
-    }
-
-    .price-original {
-      font-size: 0.75rem;
-      text-decoration: line-through;
-      color: var(--text-dim);
-    }
-
-    .price-free {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--accent-green);
-    }
-
-    .seat-details-panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .viewpoint-preview {
-      width: 100%;
-      height: 120px;
-      background: #000;
-      border-radius: 10px;
-      margin: 0.8rem 0;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .claim-instant-btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--accent-green), #00b0ff);
-      border: none;
-      color: #000;
-      font-size: 1rem;
-      font-weight: 900;
-      padding: 0.85rem;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      box-shadow: var(--glow-green);
-    }
-
-    .claim-instant-btn:hover {
-      transform: scale(1.02);
-    }
-
-    /* ==========================================================================
-       7. DIGITAL TICKET STUB VIEW
-       ========================================================================== */
-    .ticket-stub {
-      background: linear-gradient(135deg, #1f2233 0%, #12141d 100%);
-      border: 1px dashed rgba(255,255,255,0.2);
-      border-radius: 16px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .ticket-stub::before, .ticket-stub::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 20px;
-      height: 20px;
-      background: var(--bg-dark);
-      border-radius: 50%;
-      transform: translateY(-50%);
-    }
-    .ticket-stub::before { left: -10px; }
-    .ticket-stub::after { right: -10px; }
-
-    .ticket-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-
-    .ticket-artist {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--accent-cyan);
-    }
-
-    .ticket-venue {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .ticket-seat {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--accent-gold);
-    }
-
-    .ticket-barcode {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.3rem;
-    }
-
-    .enter-show-btn {
-      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-      border: none;
-      color: white;
-      font-weight: 800;
-      padding: 0.6rem 1.2rem;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      box-shadow: var(--glow-pink);
-      animation: pulseGlow 1.5s infinite alternate;
-    }
-
-    /* ==========================================================================
-       8. CONCERT STAGE ARENA & AUDIO VISUALIZER
-       ========================================================================== */
-    .concert-arena-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: #050608;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-
-    .concert-arena-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .arena-header {
-      padding: 1rem 1.5rem;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-color);
-      z-index: 10;
-    }
-
-    .arena-title {
-      font-size: 1.2rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .visualizer-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      background: #000;
-    }
-
-    #stageCanvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .arena-controls {
-      padding: 1rem 1.5rem;
-      background: rgba(15, 16, 21, 0.9);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      z-index: 10;
-    }
-
-    .audio-play-btn {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: var(--accent-cyan);
-      border: none;
-      color: #000;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: var(--glow-cyan);
-      transition: var(--transition-fast);
-    }
-
-    .audio-play-btn:hover {
-      transform: scale(1.08);
-    }
-
-    .crowd-cheer-btn {
-      background: linear-gradient(135deg, var(--accent-pink), #ff5252);
-      border: none;
-      color: white;
-      font-weight: 800;
-      padding: 0.75rem 1.25rem;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: var(--glow-pink);
-    }
-
-    .crowd-cheer-btn:active {
-      transform: scale(0.95);
-    }
-
-    .merch-queue-trigger-btn {
-      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-      border: none;
-      color: white;
-      font-weight: 800;
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      box-shadow: var(--glow-purple);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* ==========================================================================
-       9. MERCH QUEUE TAP/ARROW MINI-GAME OVERLAY
-       ========================================================================== */
-    .game-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(5, 6, 8, 0.95);
-      z-index: 1200;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .game-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .game-box {
-      width: 90%;
-      max-width: 650px;
-      background: var(--bg-card);
-      border: 1px solid var(--accent-cyan);
-      border-radius: 20px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      box-shadow: 0 0 40px rgba(0, 242, 254, 0.2);
-    }
-
-    .game-canvas-wrap {
-      width: 100%;
-      height: 380px;
-      background: #0d0f17;
-      border-radius: 14px;
-      margin: 1rem 0;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-    }
-
-    #queueCanvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .game-controls-hint {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 0.5rem;
-      text-align: center;
-    }
-
-    .touch-pad {
-      display: grid;
-      grid-template-columns: repeat(3, 50px);
-      gap: 6px;
-      margin-top: 0.5rem;
-    }
-
-    .touch-btn {
-      width: 50px;
-      height: 50px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .touch-btn:active {
-      background: var(--accent-cyan);
-      color: #000;
-    }
-
-    /* ==========================================================================
-       10. MERCH BOOTH MODAL & STASH
-       ========================================================================== */
-    .merch-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.2rem;
-      margin-top: 1rem;
-    }
-
-    .merch-item-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      position: relative;
-    }
-
-    .merch-item-card:hover {
-      border-color: var(--accent-purple);
-    }
-
-    .merch-preview {
-      width: 100%;
-      height: 140px;
-      background: #141622;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .merch-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    .merch-variant {
-      font-size: 0.72rem;
-      color: var(--accent-gold);
-    }
-
-    .size-selector {
-      display: flex;
-      gap: 0.3rem;
-      margin: 0.4rem 0;
-    }
-
-    .size-btn {
-      flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 0.25rem 0;
-      font-size: 0.75rem;
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .size-btn.selected {
-      background: var(--accent-cyan);
-      color: #000;
-      font-weight: bold;
-      border-color: var(--accent-cyan);
-    }
-
-    .claim-merch-btn {
-      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-      border: none;
-      color: white;
-      font-weight: 800;
-      padding: 0.55rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      box-shadow: var(--glow-purple);
-    }
-
-    /* ==========================================================================
-       11. TOAST NOTIFICATION SYSTEM
-       ========================================================================== */
-    #toast-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      pointer-events: none;
-    }
-
-    .toast {
-      background: rgba(24, 26, 36, 0.95);
-      border: 1px solid var(--accent-cyan);
-      border-radius: 12px;
-      padding: 0.8rem 1.2rem;
-      color: white;
-      font-size: 0.85rem;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1), fadeOutToast 0.4s 3.6s forwards;
-      pointer-events: auto;
-    }
-
-    @keyframes slideInToast {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    @keyframes fadeOutToast {
-      from { opacity: 1; transform: translateY(0); }
-      to { opacity: 0; transform: translateY(10px); }
-    }
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .bg-glass-card {
+      background: rgba(25, 30, 42, 0.75);
+      backdrop-filter: blur(8px);
+    }
+    
+    .border-gradient {
+      border-image: linear-gradient(to right, #00f2fe, #ff007f) 1;
+    }
+    
+    .seat-pit { background: rgba(255, 215, 0, 0.2); border-color: #ffd700; color: #ffd700; }
+    .seat-pit:hover { background: #ffd700; color: #000; }
+    
+    .seat-vip { background: rgba(255, 0, 127, 0.2); border-color: #ff007f; color: #ff007f; }
+    .seat-vip:hover { background: #ff007f; color: #fff; }
+    
+    .seat-lower { background: rgba(0, 242, 254, 0.2); border-color: #00f2fe; color: #00f2fe; }
+    .seat-lower:hover { background: #00f2fe; color: #000; }
+    
+    .seat-upper { background: rgba(148, 163, 184, 0.15); border-color: #64748b; color: #cbd5e1; }
+    .seat-upper:hover { background: #94a3b8; color: #000; }
+    
+    .seat-selected { background: #10b981 !important; border-color: #34d399 !important; color: #ffffff !important; box-shadow: 0 0 15px #10b981; }
   </style>
 </head>
-<body>
+<body class="bg-[#0b0d10] text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-cyan selection:text-black">
 
-  <!-- GLOBAL HEADER -->
-  <header>
-    <div class="brand" onclick="switchTab('tab-events')">
-      <div class="brand-logo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-          <path d="M9 18V5l12-2v13M9 9l12-2M6 21a3 3 0 100-6 3 3 0 000 6zM18 19a3 3 0 100-6 3 3 0 000 6z"/>
-        </svg>
-      </div>
-      <div>
-        <div class="brand-title">DOPAMINE LIVE</div>
-        <div class="brand-subtitle">Concert Simulator</div>
-      </div>
-    </div>
-
-    <div class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24">
-        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-      </svg>
-      <input type="text" id="searchInput" placeholder="Search artists, venues, or cities..." oninput="handleSearch()" />
-    </div>
-
-    <div class="nav-actions">
-      <!-- Wallet Widget -->
-      <div class="wallet-widget" onclick="openWalletModal()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2">
-          <rect x="2" y="4" width="20" height="16" rx="4"/>
-          <circle cx="16" cy="12" r="2"/>
-        </svg>
-        <div>
-          <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Wallet</div>
-          <div class="wallet-amount" id="headerWalletText">UNLIMITED</div>
+  <!-- ==================== HEADER NAVBAR ==================== -->
+  <header class="sticky top-0 z-40 w-full bg-glass border-b border-brand-border/60 px-4 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <!-- Brand Logo -->
+    <div class="flex items-center gap-3 cursor-pointer" onclick="resetView()">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-cyan via-brand-purple to-brand-magenta p-0.5 flex items-center justify-center shadow-lg shadow-brand-cyan/20 animate-pulse-glow">
+        <div class="w-full h-full bg-[#0b0d10] rounded-[10px] flex items-center justify-center">
+          <i class="fa-solid fa-bolt text-brand-cyan text-lg"></i>
         </div>
       </div>
+      <div>
+        <span class="text-xl font-black tracking-wider bg-gradient-to-r from-brand-cyan via-white to-brand-magenta bg-clip-text text-transparent">
+          STAGE<span class="text-brand-gold">PASS</span>
+        </span>
+        <span class="block text-[10px] tracking-widest text-slate-400 font-mono uppercase">Dopamine Tour Engine</span>
+      </div>
+    </div>
 
-      <!-- Tickets Counter -->
-      <button class="nav-btn" onclick="switchTab('tab-tickets')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/>
-        </svg>
-        Tickets
-        <span class="badge-count" id="ticketCountBadge">0</span>
+    <!-- Live Search & Fast Forward Time -->
+    <div class="flex items-center gap-3 flex-1 max-w-md mx-auto">
+      <div class="relative w-full">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input type="text" id="searchInput" oninput="renderConcerts()" placeholder="Search Taylor Swift, Weeknd, Drake, Venue..." 
+          class="w-full bg-[#131720] border border-brand-border rounded-full pl-10 pr-4 py-2 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-cyan transition-all">
+      </div>
+      <button onclick="toggleFastForward()" id="fastForwardBtn" title="Fast-Forward time to open all doors instantly" 
+        class="px-3.5 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-brand-purple to-brand-magenta hover:brightness-125 text-white transition-all flex items-center gap-1.5 whitespace-nowrap shadow-md shadow-brand-magenta/20">
+        <i class="fa-solid fa-forward-fast"></i>
+        <span id="fastForwardText">Unlock All Doors</span>
+      </button>
+    </div>
+
+    <!-- Right Controls: Wallet, Ticket Wallet, Merch Stash, Cart -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <!-- Virtual Wallet Balance -->
+      <div class="bg-[#131720] border border-brand-border rounded-full pl-3.5 pr-1.5 py-1 flex items-center gap-2">
+        <div class="flex flex-col text-right">
+          <span class="text-[9px] uppercase font-mono tracking-wider text-slate-400">Dopamine Cash</span>
+          <span id="walletBalance" class="text-sm font-black text-brand-gold font-mono">$1,000</span>
+        </div>
+        <button onclick="addWalletFunds(500)" class="w-7 h-7 rounded-full bg-brand-gold/20 hover:bg-brand-gold text-brand-gold hover:text-black font-bold text-xs flex items-center justify-center transition-all shadow-sm" title="Instant +$500 Cash Injection">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Ticket Wallet Button -->
+      <button onclick="openModal('ticketWalletModal')" class="relative p-2.5 rounded-full bg-[#131720] border border-brand-border hover:border-brand-cyan hover:text-brand-cyan transition-all group" title="My Ticket Wallet">
+        <i class="fa-solid fa-ticket text-slate-300 group-hover:text-brand-cyan text-sm"></i>
+        <span id="ticketBadge" class="absolute -top-1 -right-1 bg-brand-cyan text-black font-extrabold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
       </button>
 
-      <!-- Merch Collection -->
-      <button class="nav-btn" onclick="switchTab('tab-merch')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/>
-        </svg>
-        Merch
-        <span class="badge-count" id="merchCountBadge">0</span>
+      <!-- Merch Stash Button -->
+      <button onclick="openModal('merchStashModal')" class="relative p-2.5 rounded-full bg-[#131720] border border-brand-border hover:border-brand-magenta hover:text-brand-magenta transition-all group" title="My Merch Stash">
+        <i class="fa-solid fa-shirt text-slate-300 group-hover:text-brand-magenta text-sm"></i>
+        <span id="merchBadge" class="absolute -top-1 -right-1 bg-brand-magenta text-white font-extrabold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
       </button>
 
-      <!-- Fast-Forward Speed Up Button -->
-      <button class="nav-btn fast-forward-btn" id="ffGlobalBtn" onclick="toggleFastForward()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="13,19 22,12 13,5"/>
-          <polygon points="2,19 11,12 2,5"/>
-        </svg>
-        Speed Up Time
+      <!-- Cart Drawer Button -->
+      <button onclick="toggleCartDrawer()" class="relative px-3.5 py-2 rounded-full bg-gradient-to-r from-brand-cyan/20 to-brand-purple/20 border border-brand-cyan/40 hover:border-brand-cyan text-slate-100 transition-all flex items-center gap-2 shadow-lg shadow-brand-cyan/10">
+        <i class="fa-solid fa-cart-shopping text-brand-cyan text-sm"></i>
+        <span id="cartTotalHeader" class="font-bold text-xs font-mono">$0</span>
+        <span id="cartCountBadge" class="bg-brand-cyan text-black text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span>
       </button>
     </div>
   </header>
 
-  <!-- HERO DOPAMINE STATS BANNER -->
-  <section class="hero-banner">
-    <div class="stat-card green">
-      <div class="stat-icon">💸</div>
-      <div>
-        <div class="stat-val" id="statSaved">$0</div>
-        <div class="stat-lbl">Fees & Scalper Money Saved</div>
-      </div>
-    </div>
-    <div class="stat-card pink">
-      <div class="stat-icon">🔥</div>
-      <div>
-        <div class="stat-val" id="statDrops">6 Active</div>
-        <div class="stat-lbl">Price Drops & Presale Drops</div>
-      </div>
-    </div>
-    <div class="stat-card purple">
-      <div class="stat-icon">⚡</div>
-      <div>
-        <div class="stat-val" id="statDopamine">OVERDRIVE</div>
-        <div class="stat-lbl">Dopamine Rush Level</div>
-      </div>
-    </div>
-  </section>
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6 space-y-8">
 
-  <!-- MAIN CONTENT CONTAINER -->
-  <main>
-    <!-- TAB NAVIGATION BAR -->
-    <div class="tab-navigation">
-      <button class="tab-btn active" id="btn-tab-events" onclick="switchTab('tab-events')">
-        🎪 Live Tour Drops
-      </button>
-      <button class="tab-btn" id="btn-tab-tickets" onclick="switchTab('tab-tickets')">
-        🎟️ My Ticket Wallet
-      </button>
-      <button class="tab-btn" id="btn-tab-merch" onclick="switchTab('tab-merch')">
-        👕 My Merch Stash
-      </button>
-      <button class="tab-btn" id="btn-tab-audio" onclick="switchTab('tab-audio')">
-        🎧 Audio Visualizer Stage
-      </button>
-    </div>
+    <!-- HERO DASHBOARD BANNER -->
+    <section class="relative rounded-3xl overflow-hidden border border-brand-border bg-gradient-to-r from-[#131720] via-[#1a102f] to-[#131720] p-6 md:p-10 shadow-2xl">
+      <!-- Ambient Background Glow -->
+      <div class="absolute -top-24 -left-24 w-72 h-72 bg-brand-cyan/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-brand-magenta/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- TAB 1: ARTISTS & LIVE TOUR DROPS -->
-    <div class="tab-content active" id="tab-events">
-      <div class="grid-container" id="eventsGrid">
-        <!-- Event Cards Injected via JS -->
-      </div>
-    </div>
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-3 max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-magenta/10 border border-brand-magenta/30 text-brand-magenta text-xs font-bold tracking-wide uppercase">
+            <span class="w-2 h-2 rounded-full bg-brand-magenta animate-ping"></span>
+            Live World Tour Drops & Exclusive VIP Seats
+          </div>
+          <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-none">
+            FEEL THE <span class="bg-gradient-to-r from-brand-cyan via-brand-magenta to-brand-gold bg-clip-text text-transparent">LIVE ENERGY</span>
+          </h1>
+          <p class="text-slate-400 text-sm md:text-base">
+            Secure prime seats, unlock stage doors, dodge the merch line crowds, and experience live concert visualizers with authentic synthesized soundscapes.
+          </p>
+        </div>
 
-    <!-- TAB 2: MY TICKET WALLET -->
-    <div class="tab-content" id="tab-tickets">
-      <div id="ticketWalletList">
-        <!-- Claimed Tickets Injected via JS -->
+        <!-- Live Quick Stats Cards -->
+        <div class="grid grid-cols-2 gap-3 w-full md:w-auto">
+          <div class="bg-black/40 border border-slate-800 rounded-2xl p-3.5 text-center min-w-[120px]">
+            <span class="text-[10px] font-mono text-slate-400 uppercase block">Active Drops</span>
+            <span class="text-xl font-black text-brand-cyan font-mono" id="statActiveCount">8 Tours</span>
+          </div>
+          <div class="bg-black/40 border border-slate-800 rounded-2xl p-3.5 text-center min-w-[120px]">
+            <span class="text-[10px] font-mono text-slate-400 uppercase block">Doors Open</span>
+            <span class="text-xl font-black text-brand-gold font-mono" id="statDoorsOpen">3 Ready</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- TAB 3: MY MERCH STASH -->
-    <div class="tab-content" id="tab-merch">
-      <div class="merch-grid" id="merchStashGrid">
-        <!-- Acquired Merch Injected via JS -->
-      </div>
-    </div>
+    <!-- TOUR DROPS GRID SECTION -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-brand-border/60">
+        <div class="flex items-center gap-3">
+          <h2 class="text-xl font-black tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-fire text-brand-magenta"></i>
+            LIVE TOUR DROPS
+          </h2>
+          <span class="text-xs bg-slate-800 text-slate-300 font-mono px-2.5 py-0.5 rounded-full" id="tourCountBadge">8 Events</span>
+        </div>
 
-    <!-- TAB 4: AUDIO VISUALIZER LOUNGE -->
-    <div class="tab-content" id="tab-audio">
-      <div style="background: var(--bg-card); border-radius: 18px; padding: 1.5rem; text-align: center; border: 1px solid var(--border-color);">
-        <h2>Interactive Audio Visualizer</h2>
-        <p style="color: var(--text-muted); margin-top: 0.4rem; font-size: 0.9rem;">
-          Select an artist to stream procedurally synthesized music tracks with real-time frequency visuals.
-        </p>
-        <button class="btn-primary" style="margin: 1.5rem auto; width: 220px;" onclick="openConcertArena(AppState.selectedArtistId || 'lumina')">
-          🚀 Enter Concert Stage View
-        </button>
+        <!-- Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 text-xs font-medium">
+          <button onclick="setFilter('all')" id="filter-all" class="px-3.5 py-1.5 rounded-full bg-brand-cyan text-black font-bold transition-all">All Drops</button>
+          <button onclick="setFilter('live')" id="filter-live" class="px-3.5 py-1.5 rounded-full bg-[#131720] border border-brand-border hover:border-slate-500 text-slate-300 transition-all">🔴 Live Doors Open</button>
+          <button onclick="setFilter('drop')" id="filter-drop" class="px-3.5 py-1.5 rounded-full bg-[#131720] border border-brand-border hover:border-slate-500 text-slate-300 transition-all">⚡ Price Drop Flash</button>
+        </div>
       </div>
-    </div>
+
+      <!-- Grid Container -->
+      <div id="concertsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
   </main>
 
-  <!-- MODAL 1: SEAT SELECTION & TICKET CLAIM -->
-  <div class="modal-overlay" id="seatModal">
-    <div class="modal-container">
-      <button class="modal-close-btn" onclick="closeModal('seatModal')">&times;</button>
-      <div class="modal-title" id="seatModalArtist">Artist Tour</div>
-      <div style="font-size: 0.85rem; color: var(--text-muted);" id="seatModalVenue">Venue Name</div>
-
-      <div class="venue-map-layout">
-        <!-- Seat Map Selector -->
-        <div class="seat-map-canvas-wrap">
-          <div class="stage-indicator">STAGE / PERFORMANCE AREA</div>
-          <div class="seat-sections-grid" id="seatSectionsList">
-            <!-- Seat rows generated via JS -->
+  <!-- ==================== MODAL: FULL-SCREEN SEAT SELECTION ==================== -->
+  <div id="seatModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl hidden flex flex-col p-4 md:p-8 overflow-y-auto">
+    <div class="max-w-6xl w-full mx-auto flex-1 flex flex-col space-y-6">
+      
+      <!-- Modal Top Bar -->
+      <div class="flex items-center justify-between border-b border-brand-border pb-4">
+        <div class="flex items-center gap-4">
+          <button onclick="closeModal('seatModal')" class="p-2.5 rounded-full bg-[#131720] border border-brand-border hover:border-brand-cyan text-slate-300 hover:text-white transition-all">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div>
+            <h2 id="seatModalTitle" class="text-xl md:text-2xl font-black text-white">Taylor Swift - The Eras Tour</h2>
+            <p id="seatModalVenue" class="text-xs text-slate-400 font-mono">SoFi Stadium, Los Angeles • Interactive 3D Venue Map</p>
           </div>
         </div>
 
-        <!-- Seat Details Panel -->
-        <div class="seat-details-panel">
-          <div>
-            <div class="ai-rating-chip" id="seatAiRating">
-              ✨ AI Rating: 9.9/10
-            </div>
-            <h3 id="selectedSecTitle" style="font-size: 1.1rem; margin-bottom: 0.4rem;">Pit Section 1</h3>
-            <p style="font-size: 0.8rem; color: var(--text-muted);" id="selectedSecDesc">
-              Unmatched proximity to stage lasers & subwoofers.
-            </p>
+        <button onclick="closeModal('seatModal')" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
 
-            <div class="viewpoint-preview" id="viewpointPreview">
-              <!-- SVG preview -->
+      <!-- Flash Sale Toast inside Modal -->
+      <div id="modalFlashAlert" class="hidden bg-gradient-to-r from-brand-magenta/20 to-brand-purple/20 border border-brand-magenta/50 rounded-2xl p-3 flex items-center justify-between animate-bounce-gentle">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-bolt text-brand-gold text-lg animate-pulse"></i>
+          <span id="modalFlashText" class="text-xs md:text-sm font-bold text-white">FLASH PRICE DROP ALERT! Pit GA dropped to $290 (-35% OFF!)</span>
+        </div>
+        <span class="text-[10px] font-mono text-brand-gold uppercase tracking-wider">Limited Seats</span>
+      </div>
+
+      <!-- Main Interactive Seat Layout Container -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+        
+        <!-- Interactive Canvas / Grid Map (2 Cols) -->
+        <div class="lg:col-span-2 bg-[#131720] border border-brand-border rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden min-h-[420px]">
+          
+          <!-- Concert Stage Graphic -->
+          <div class="w-3/4 py-3 bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-magenta rounded-2xl text-center text-xs font-black tracking-widest text-white shadow-lg shadow-brand-cyan/20 mb-8 uppercase relative">
+            <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-2 bg-brand-cyan rounded-full"></div>
+            ⚡ MAIN STAGE & CATWALK ⚡
+          </div>
+
+          <!-- Venue Map Sections Grid -->
+          <div class="w-full max-w-lg space-y-4">
+            <!-- PIT GA Section -->
+            <div class="space-y-1">
+              <span class="text-[10px] font-mono uppercase text-brand-gold tracking-wider font-bold">Pit / GA ($350 - $650)</span>
+              <div id="gridPit" class="grid grid-cols-6 gap-2"></div>
+            </div>
+
+            <!-- VIP Lounge Section -->
+            <div class="space-y-1">
+              <span class="text-[10px] font-mono uppercase text-brand-magenta tracking-wider font-bold">VIP Floor ($280 - $400)</span>
+              <div id="gridVip" class="grid grid-cols-8 gap-2"></div>
+            </div>
+
+            <!-- Lower Bowl Section -->
+            <div class="space-y-1">
+              <span class="text-[10px] font-mono uppercase text-brand-cyan tracking-wider font-bold">Lower Bowl ($150 - $220)</span>
+              <div id="gridLower" class="grid grid-cols-10 gap-2"></div>
+            </div>
+
+            <!-- Upper Level Section -->
+            <div class="space-y-1">
+              <span class="text-[10px] font-mono uppercase text-slate-400 tracking-wider font-bold">Upper Level ($75 - $120)</span>
+              <div id="gridUpper" class="grid grid-cols-12 gap-1.5"></div>
             </div>
           </div>
 
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.8rem;">
-              <span style="font-size: 0.85rem; color: var(--text-muted);">Simulated Price:</span>
-              <div>
-                <span class="price-original" id="modalOrigPrice">$250</span>
-                <span class="price-free" style="margin-left: 0.5rem;">$0 INSTANT</span>
-              </div>
+          <!-- Legend -->
+          <div class="flex items-center gap-4 mt-6 text-[10px] font-mono text-slate-400">
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-brand-gold/30 border border-brand-gold"></span> PIT</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-brand-magenta/30 border border-brand-magenta"></span> VIP</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-brand-cyan/30 border border-brand-cyan"></span> LOWER</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-700 border border-slate-500"></span> UPPER</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span> SELECTED</div>
+          </div>
+        </div>
+
+        <!-- Selected Seat Inspector Drawer (1 Col) -->
+        <div class="bg-[#131720] border border-brand-border rounded-3xl p-6 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <h3 class="text-base font-bold text-slate-300 uppercase tracking-wider font-mono">Seat Details Inspector</h3>
+            
+            <div id="seatInspector" class="p-5 rounded-2xl bg-[#0b0d10] border border-brand-border space-y-3">
+              <p class="text-xs text-slate-500">Click any seat on the map to preview view rating and actual pricing.</p>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-4 border-t border-brand-border">
+            <div class="flex justify-between items-center text-sm font-mono">
+              <span class="text-slate-400">Selected Seats:</span>
+              <span id="selectedSeatCount" class="font-bold text-white">0 Seats</span>
+            </div>
+            <div class="flex justify-between items-center text-lg font-mono">
+              <span class="text-slate-400">Total Price:</span>
+              <span id="selectedSeatTotal" class="font-black text-brand-gold">$0</span>
             </div>
 
-            <button class="claim-instant-btn" onclick="confirmTicketClaim()">
-              🎉 Claim Ticket ($0)
+            <button id="addSeatToCartBtn" disabled onclick="addSelectedSeatsToCart()" 
+              class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-purple text-black font-black hover:brightness-125 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-cyan/20">
+              ADD SEATS TO CART 🛒
             </button>
           </div>
         </div>
+
       </div>
+
     </div>
   </div>
 
-  <!-- MODAL 2: WALLET BUDGET CONFIG -->
-  <div class="modal-overlay" id="walletModal">
-    <div class="modal-container" style="max-width: 480px;">
-      <button class="modal-close-btn" onclick="closeModal('walletModal')">&times;</button>
-      <div class="modal-title">Wallet & Budget Settings</div>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">
-        Configure your zero-risk virtual spending mode.
-      </p>
+  <!-- ==================== MODAL: FULL-SCREEN LIVE CONCERT STAGE ==================== -->
+  <div id="stageModal" class="fixed inset-0 z-50 bg-black hidden flex flex-col overflow-hidden">
+    <!-- Stage Canvas Visualizer -->
+    <canvas id="stageCanvas" class="absolute inset-0 w-full h-full object-cover z-0"></canvas>
 
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
-          <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-            <input type="radio" name="walletMode" value="unlimited" id="modeUnlimited" onchange="setWalletMode('unlimited')" checked />
-            <div>
-              <div style="font-weight: 700;">Unlimited Dopamine Wallet (Default)</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Infinite virtual funds for unlimited ticket drops & merch.</div>
-            </div>
-          </label>
+    <!-- Overlay UI Controls -->
+    <div class="relative z-10 flex flex-col h-full justify-between p-4 md:p-8 pointer-events-none">
+      
+      <!-- Top Stage Bar -->
+      <div class="flex items-center justify-between bg-black/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 pointer-events-auto">
+        <div class="flex items-center gap-3">
+          <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+          <div>
+            <h2 id="stageArtistName" class="text-lg md:text-xl font-black text-white">Taylor Swift - LIVE STAGE</h2>
+            <p id="stageTrackTitle" class="text-xs font-mono text-brand-cyan">Now Playing: Cruel Summer (Synthesized Stage Remix)</p>
+          </div>
         </div>
 
-        <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
-          <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 0.8rem;">
-            <input type="radio" name="walletMode" value="custom" id="modeCustom" onchange="setWalletMode('custom')" />
-            <div>
-              <div style="font-weight: 700;">Custom Spending Limit</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Set a virtual budget limit for budget-conscious fun.</div>
-            </div>
-          </label>
-          <input type="number" id="customLimitInput" placeholder="e.g. 500" style="width: 100%; background: #12141d; border: 1px solid var(--border-color); padding: 0.5rem 0.8rem; border-radius: 8px; color: white; outline: none;" onchange="updateCustomLimit(this.value)" />
-        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="triggerStageCheer()" class="px-3.5 py-2 rounded-xl bg-brand-magenta/30 hover:bg-brand-magenta border border-brand-magenta text-white font-bold text-xs transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-hands-clapping"></i> Cheer Crowd
+          </button>
 
-        <button class="btn-secondary" style="margin-top: 0.5rem;" onclick="resetSpentWallet()">
-          🔄 Reset Spent Balance & Stats
-        </button>
+          <button onclick="openMerchFromStage()" class="px-3.5 py-2 rounded-xl bg-brand-gold/30 hover:bg-brand-gold border border-brand-gold text-white hover:text-black font-bold text-xs transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-shirt"></i> Merch Queue
+          </button>
+
+          <button onclick="closeStageModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </div>
+
+      <!-- Bottom Audio Player & Fan Chat Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        
+        <!-- Fan Live Chat Ticker (1 Col) -->
+        <div class="bg-black/70 backdrop-blur-md rounded-2xl border border-white/10 p-3 h-48 flex flex-col justify-between pointer-events-auto overflow-hidden">
+          <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-white/10 pb-1">🔥 Live Crowd Chat</span>
+          <div id="fanChatContainer" class="flex-1 overflow-y-auto space-y-2 py-2 text-xs font-mono">
+            <!-- Dynamic chats -->
+          </div>
+        </div>
+
+        <!-- Center Audio Synthesizer Control (1 Col) -->
+        <div class="bg-black/80 backdrop-blur-md rounded-2xl border border-white/10 p-4 space-y-3 pointer-events-auto text-center">
+          <span class="text-[10px] font-mono text-brand-gold uppercase tracking-widest">Web Audio Synth Engine</span>
+          
+          <div class="flex items-center justify-center gap-4">
+            <button onclick="toggleStageMusic()" id="stagePlayBtn" class="w-12 h-12 rounded-full bg-brand-cyan text-black text-lg flex items-center justify-center font-black hover:scale-105 transition-all shadow-lg shadow-brand-cyan/30">
+              <i class="fa-solid fa-pause"></i>
+            </button>
+            <button onclick="triggerBassDrop()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-purple to-brand-magenta text-white text-xs font-black hover:brightness-125 transition-all shadow-md">
+              💥 BASS DROP
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-volume-high text-xs text-slate-400"></i>
+            <input type="range" id="stageVolume" min="0" max="1" step="0.05" value="0.7" oninput="setStageVolume(this.value)" class="w-full accent-brand-cyan">
+          </div>
+        </div>
+
+        <!-- Right Stage Effects (1 Col) -->
+        <div class="bg-black/70 backdrop-blur-md rounded-2xl border border-white/10 p-3 flex flex-col gap-2 pointer-events-auto text-center">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">StageFX Lighting</span>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="setLaserColor('cyan')" class="py-2 rounded-xl bg-brand-cyan/20 border border-brand-cyan text-brand-cyan font-bold text-xs">Cyan Lasers</button>
+            <button onclick="setLaserColor('magenta')" class="py-2 rounded-xl bg-brand-magenta/20 border border-brand-magenta text-brand-magenta font-bold text-xs">Magenta</button>
+            <button onclick="setLaserColor('gold')" class="py-2 rounded-xl bg-brand-gold/20 border border-brand-gold text-brand-gold font-bold text-xs">Gold Lasers</button>
+            <button onclick="setLaserColor('rainbow')" class="py-2 rounded-xl bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-magenta text-white font-bold text-xs">Rainbow</button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
-  <!-- CONCERT ARENA STAGE OVERLAY -->
-  <div class="concert-arena-overlay" id="concertArena">
-    <div class="arena-header">
-      <div class="arena-title">
-        <span style="color: var(--accent-cyan);" id="arenaArtistName">Lumina Vex</span>
-        <span style="font-size: 0.8rem; color: var(--text-muted);" id="arenaVenueName">@ The Cyber Dome</span>
-      </div>
-      <button class="modal-close-btn" style="position: static;" onclick="closeConcertArena()">&times;</button>
-    </div>
-
-    <!-- Canvas Stage & Lightshow -->
-    <div class="visualizer-container">
-      <canvas id="stageCanvas"></canvas>
-    </div>
-
-    <!-- Control Bar -->
-    <div class="arena-controls">
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <button class="audio-play-btn" id="audioToggleBtn" onclick="toggleAudioPlayback()">
-          ▶
-        </button>
+  <!-- ==================== MODAL: MERCH LINE CROWD MINI-GAME ==================== -->
+  <div id="merchGameModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl hidden flex flex-col p-4 md:p-8 overflow-y-auto">
+    <div class="max-w-4xl w-full mx-auto space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-brand-border pb-4">
         <div>
-          <div style="font-size: 0.9rem; font-weight: 800;" id="arenaTrackTitle">Track Title</div>
-          <div style="font-size: 0.75rem; color: var(--accent-cyan);">Procedural Web Audio Synth</div>
+          <h2 class="text-2xl font-black text-white">THE MERCH QUEUE RUNNER</h2>
+          <p class="text-xs font-mono text-slate-400">Navigate the crowd! Tap VIP Fast-Pass nodes and avoid slow walkers to reach the merch booth.</p>
+        </div>
+        <button onclick="closeModal('merchGameModal')" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Mini Game Canvas View -->
+      <div id="merchGameArea" class="bg-[#131720] border border-brand-border rounded-3xl p-6 relative flex flex-col items-center justify-center min-h-[360px] space-y-6">
+        
+        <div class="flex justify-between w-full max-w-md text-xs font-mono">
+          <span>Distance to Booth: <strong id="merchProgressText" class="text-brand-cyan">0%</strong></span>
+          <span>Combo Streak: <strong id="merchComboText" class="text-brand-gold">1x Multiplier</strong></span>
+        </div>
+
+        <div class="w-full max-w-md bg-slate-800 rounded-full h-4 overflow-hidden p-0.5 border border-brand-border">
+          <div id="merchProgressBar" class="bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-magenta h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+        </div>
+
+        <!-- Interactive Tap Box -->
+        <div id="merchTapZone" onclick="handleMerchTap()" class="w-full max-w-md h-44 bg-[#0b0d10] border-2 border-dashed border-brand-cyan/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-brand-cyan transition-all relative overflow-hidden group">
+          <div id="merchNodeContainer" class="absolute inset-0 pointer-events-none"></div>
+          <i class="fa-solid fa-person-running text-4xl text-brand-cyan group-hover:scale-110 transition-all mb-2 animate-bounce"></i>
+          <span class="text-sm font-bold text-white uppercase tracking-wider">TAP FAST TO RUSH CROWD!</span>
+          <span class="text-[10px] text-slate-400">Tap fast-pass nodes for 5x Combo Boost!</span>
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <button class="crowd-cheer-btn" onclick="triggerCrowdCheer()">
-          📣 Crowd Cheer Effect
+      <!-- MERCH BOOTH STORE CATALOG (Unlocked upon reaching 100% or instant skip) -->
+      <div id="merchStoreCatalog" class="bg-[#131720] border border-brand-border rounded-3xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-black text-brand-gold flex items-center gap-2">
+            <i class="fa-solid fa-store"></i> EXCLUSIVE TOUR MERCH CATALOG
+          </h3>
+          <span class="text-xs font-mono bg-brand-gold/10 text-brand-gold px-2.5 py-1 rounded-full border border-brand-gold/30">Official Tour Items</span>
+        </div>
+
+        <div id="merchItemsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== CART SLIDE-OUT DRAWER ==================== -->
+  <div id="cartDrawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#131720] border-l border-brand-border shadow-2xl flex flex-col justify-between translate-x-full transition-transform duration-300">
+    <div class="p-6 space-y-4 flex-1 flex flex-col">
+      <div class="flex items-center justify-between border-b border-brand-border pb-4">
+        <h2 class="text-xl font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-brand-cyan"></i> YOUR CART
+        </h2>
+        <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
         </button>
-        <button class="merch-queue-trigger-btn" onclick="startMerchQueueGame()">
-          🏃 Head to Merch Table Queue
+      </div>
+
+      <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <!-- JS rendered items -->
+      </div>
+    </div>
+
+    <!-- Cart Summary Bottom -->
+    <div class="p-6 bg-[#0b0d10] border-t border-brand-border space-y-4">
+      <div class="space-y-2 text-xs font-mono">
+        <div class="flex justify-between text-slate-400">
+          <span>Subtotal:</span>
+          <span id="cartSubtotal" class="text-white font-bold">$0</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span>Dopamine Pass Fee Waiver:</span>
+          <span class="text-emerald-400 font-bold">$0 (WAIVED!)</span>
+        </div>
+        <div class="flex justify-between text-base font-black border-t border-slate-800 pt-2 text-white">
+          <span>Total Cost:</span>
+          <span id="cartTotal" class="text-brand-gold">$0</span>
+        </div>
+      </div>
+
+      <button onclick="checkoutCart()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-gold via-brand-magenta to-brand-cyan text-black font-black hover:brightness-125 transition-all shadow-xl shadow-brand-gold/20 flex items-center justify-center gap-2">
+        <span>CHECKOUT WITH VIRTUAL WALLET</span>
+        <i class="fa-solid fa-bolt"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: MY TICKET WALLET ==================== -->
+  <div id="ticketWalletModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl hidden flex flex-col p-4 md:p-8 overflow-y-auto">
+    <div class="max-w-4xl w-full mx-auto space-y-6">
+      <div class="flex items-center justify-between border-b border-brand-border pb-4">
+        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-ticket text-brand-cyan"></i> MY TICKET WALLET
+        </h2>
+        <button onclick="closeModal('ticketWalletModal')" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
         </button>
       </div>
-    </div>
-  </div>
 
-  <!-- GAMIFIED MERCH QUEUE TAP / ARROW GAME OVERLAY -->
-  <div class="game-overlay" id="gameOverlay">
-    <div class="game-box">
-      <button class="modal-close-btn" onclick="closeGameOverlay()">&times;</button>
-      <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--accent-cyan);">Navigating Venue Crowd Queue</h2>
-      <p style="font-size: 0.8rem; color: var(--text-muted);">
-        Use Arrow Keys / WASD or Touch Buttons to guide your avatar through the concert crowd to the Merch Table!
-      </p>
-
-      <div class="game-canvas-wrap">
-        <canvas id="queueCanvas" width="600" height="380"></canvas>
-      </div>
-
-      <div class="touch-pad">
-        <div></div>
-        <button class="touch-btn" onclick="moveGamePlayer(0, -15)">▲</button>
-        <div></div>
-        <button class="touch-btn" onclick="moveGamePlayer(-15, 0)">◄</button>
-        <button class="touch-btn" onclick="moveGamePlayer(0, 15)">▼</button>
-        <button class="touch-btn" onclick="moveGamePlayer(15, 0)">►</button>
-      </div>
-
-      <div class="game-controls-hint">Tip: Grab ⚡ Speed Drinks for extra boost!</div>
-    </div>
-  </div>
-
-  <!-- MODAL: EXCLUSIVE MERCH BOOTH MODAL -->
-  <div class="modal-overlay" id="merchBoothModal">
-    <div class="modal-container">
-      <button class="modal-close-btn" onclick="closeModal('merchBoothModal')">&times;</button>
-      <div class="modal-title" style="color: var(--accent-purple);">🎉 You Reached the Official Merch Booth!</div>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-        Claim tour-exclusive hoodies, vinyls, and graphic tees at $0 cost.
-      </p>
-
-      <div class="merch-grid" id="merchCatalogGrid">
-        <!-- Catalog Items injected via JS -->
+      <div id="ticketWalletContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered via JS -->
       </div>
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toast-container"></div>
+  <!-- ==================== MODAL: MY MERCH STASH ==================== -->
+  <div id="merchStashModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl hidden flex flex-col p-4 md:p-8 overflow-y-auto">
+    <div class="max-w-4xl w-full mx-auto space-y-6">
+      <div class="flex items-center justify-between border-b border-brand-border pb-4">
+        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-shirt text-brand-magenta"></i> MY MERCH STASH
+        </h2>
+        <button onclick="closeModal('merchStashModal')" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
 
-  <!-- ==========================================================================
-     JAVASCRIPT APPLICATION ENGINE
-     ========================================================================== -->
+      <div id="merchStashContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CONFETTI CANVAS OVERLAY ==================== -->
+  <canvas id="confettiCanvas" class="fixed inset-0 z-50 pointer-events-none"></canvas>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
     /* ==========================================================================
-       1. ARTIST & EVENT DATABASE
+       1. INITIAL STATE & DATA MODEL
        ========================================================================== */
-    const ARTISTS_DB = [
+    const CONCERTS = [
       {
-        id: 'lumina',
-        name: 'Lumina Vex',
-        genre: 'Electronic / Synthwave',
-        tour: 'Neon Horizon Tour',
-        venue: 'The Cyber Dome (Las Vegas, NV)',
-        timeStr: 'TONIGHT - 8:00 PM',
-        countdownSec: 180,
-        originalPrice: 240,
-        aiRating: '✨ 9.9/10 EXTREME VALUE',
-        color1: '#00f2fe', color2: '#4facfe',
-        tracks: ['Cybernetic Dreams', 'Neon Highway', 'Virtual Overdrive'],
-        synthType: 'synthwave',
-        merch: [
-          { id: 'm1', title: 'Holographic Cyber Hoodie', variant: 'Tour Exclusive', price: 95 },
-          { id: 'm2', title: 'Neon Horizon Heavyweight Tee', variant: 'Limited Run', price: 45 },
-          { id: 'm3', title: 'Glitch Foil Screenprinted Poster', variant: 'Numbered #/500', price: 55 },
-          { id: 'm4', title: 'Double LP Neon Blue Vinyl', variant: 'Collector Edition', price: 60 }
-        ]
+        id: 'ts-eras',
+        artist: 'Taylor Swift',
+        tour: 'The Eras World Tour',
+        venue: 'SoFi Stadium, Los Angeles',
+        image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: false,
+        countdownSecs: 180,
+        lowPrice: 180,
+        badge: '⚡ HOT DROP',
+        color: 'from-pink-500 to-rose-700',
+        track: 'Cruel Summer (Synthesized Electro Remix)'
       },
       {
-        id: 'velvet',
-        name: 'The Velvet Horizon',
-        genre: 'Indie / Alternative',
-        tour: 'Midnight Echoes Tour',
-        venue: 'Starlight Amphitheater (Austin, TX)',
-        timeStr: 'In 2 Hours',
-        countdownSec: 7200,
-        originalPrice: 165,
-        aiRating: '🔥 9.7/10 STEAL',
-        color1: '#9d4edd', color2: '#ff0844',
-        tracks: ['Echoes in the Dark', 'Velvet Sky', 'Indie Rain'],
-        synthType: 'indie',
-        merch: [
-          { id: 'm5', title: 'Vintage Wash Echoes Sweatshirt', variant: 'Organic Cotton', price: 85 },
-          { id: 'm6', title: 'Starlight Tour Graphic Tee', variant: 'Soft-spun', price: 40 },
-          { id: 'm7', title: 'Midnight Echoes Cassette Tape', variant: 'Clear Magenta', price: 25 }
-        ]
+        id: 'weeknd-afterhours',
+        artist: 'The Weeknd',
+        tour: 'After Hours Stadium Tour',
+        venue: 'MetLife Stadium, East Rutherford',
+        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: true,
+        countdownSecs: 0,
+        lowPrice: 150,
+        badge: '🔴 LIVE NOW',
+        color: 'from-red-600 to-purple-900',
+        track: 'Blinding Lights (Stadium Bass Drive)'
       },
       {
-        id: 'aurora',
-        name: 'Aurora Glow',
-        genre: 'Pop / Dance',
-        tour: 'Starlight Eclipse World Tour',
-        venue: 'The Sphere Arena (Los Angeles, CA)',
-        timeStr: 'Tomorrow - 9:00 PM',
-        countdownSec: 86400,
-        originalPrice: 320,
-        aiRating: '⭐ 9.8/10 VIP VIEW',
-        color1: '#ff0844', color2: '#ffb703',
-        tracks: ['Glow Up', 'Electric Eclipse', 'Dance Till Sunrise'],
-        synthType: 'pop',
-        merch: [
-          { id: 'm8', title: 'Glow-In-The-Dark Tour Hoodie', variant: 'VIP Variant', price: 110 },
-          { id: 'm9', title: 'Starlight Eclipse Crop Top', variant: 'Tour Edition', price: 42 },
-          { id: 'm10', title: 'Luminous VIP Tour Strap & Cap', variant: 'Combo Pack', price: 50 }
-        ]
+        id: 'billie-hitme',
+        artist: 'Billie Eilish',
+        tour: 'Hit Me Hard and Soft Tour',
+        venue: 'Madison Square Garden, NY',
+        image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: false,
+        countdownSecs: 420,
+        lowPrice: 120,
+        badge: '⚡ PRICE DROP',
+        color: 'from-emerald-500 to-teal-800',
+        track: 'LUNCH (Synth Grooves)'
       },
       {
-        id: 'valkyrie',
-        name: 'Valkyrie Overdrive',
-        genre: 'Cyber Metal / Heavy Synth',
-        tour: 'Ragnarok Live',
-        venue: 'Industrial Coliseum (Chicago, IL)',
-        timeStr: 'In 4 Hours',
-        countdownSec: 14400,
-        originalPrice: 195,
-        aiRating: '⚡ 9.6/10 FRONT PIT',
-        color1: '#00e676', color2: '#00f2fe',
-        tracks: ['Ragnarok Synth', 'Cyber Wrath', 'Heavy Distortion'],
-        synthType: 'metal',
-        merch: [
-          { id: 'm11', title: 'Ragnarok Heavy Metal Hoodie', variant: 'Distressed Black', price: 90 },
-          { id: 'm12', title: 'Cyber Wrath Long Sleeve', variant: 'Sleeve Prints', price: 50 }
-        ]
+        id: 'drake-blur',
+        artist: 'Drake & 21 Savage',
+        tour: "It's All A Blur Tour",
+        venue: 'Crypto.com Arena, Los Angeles',
+        image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: true,
+        countdownSecs: 0,
+        lowPrice: 190,
+        badge: '🔴 LIVE NOW',
+        color: 'from-amber-500 to-yellow-700',
+        track: 'Rich Baby Daddy (Trap Synth Wave)'
       },
       {
-        id: 'solar',
-        name: 'Solar Eclipse',
-        genre: 'R&B / Soul',
-        tour: 'Velvet Nights Tour',
-        venue: 'Crystal Palace Hall (New York, NY)',
-        timeStr: 'In 1 Day',
-        countdownSec: 90000,
-        originalPrice: 210,
-        aiRating: '💎 9.9/10 BEST VALUE',
-        color1: '#ffb703', color2: '#9d4edd',
-        tracks: ['Midnight Silk', 'Velvet Groove', 'Solar Rays'],
-        synthType: 'rnb',
-        merch: [
-          { id: 'm13', title: 'Silk Velvet Satin Tour Jacket', variant: 'Embroidered', price: 140 },
-          { id: 'm14', title: 'Solar Rays Gold Foil Poster', variant: 'Signed', price: 65 }
-        ]
+        id: 'coldplay-spheres',
+        artist: 'Coldplay',
+        tour: 'Music of the Spheres Tour',
+        venue: 'Wembley Stadium, London',
+        image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: false,
+        countdownSecs: 600,
+        lowPrice: 110,
+        badge: '⏳ UPCOMING',
+        color: 'from-cyan-500 to-blue-800',
+        track: 'A Sky Full of Stars (Laser Synth)'
       },
       {
-        id: 'mindecho',
-        name: 'Mind Echo',
-        genre: 'Hip-Hop / Lo-Fi Beats',
-        tour: 'Sub-Zero Tour',
-        venue: 'The Underground Arena (Seattle, WA)',
-        timeStr: 'In 3 Hours',
-        countdownSec: 10800,
-        originalPrice: 140,
-        aiRating: '🎧 9.5/10 LO-FI LOUNGE',
-        color1: '#4facfe', color2: '#00e676',
-        tracks: ['Chill Sub-Zero', 'Coffee & Vinyl', 'Rainy Echo'],
-        synthType: 'lofi',
-        merch: [
-          { id: 'm15', title: 'Sub-Zero Oversized Lo-Fi Hoodie', variant: 'Heavyweight', price: 85 },
-          { id: 'm16', title: 'Coffee & Vinyl Slipmat Pair', variant: 'Turntable Gear', price: 30 }
-        ]
+        id: 'dualipa-optimism',
+        artist: 'Dua Lipa',
+        tour: 'Radical Optimism Tour',
+        venue: 'O2 Arena, London',
+        image: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: true,
+        countdownSecs: 0,
+        lowPrice: 135,
+        badge: '🔴 LIVE NOW',
+        color: 'from-purple-500 to-pink-600',
+        track: 'Houdini (Disco Funk Synthesizer)'
+      },
+      {
+        id: 'olivia-guts',
+        artist: 'Olivia Rodrigo',
+        tour: 'GUTS World Tour',
+        venue: 'TD Garden, Boston',
+        image: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc436?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: false,
+        countdownSecs: 240,
+        lowPrice: 125,
+        badge: '⚡ HOT DROP',
+        color: 'from-violet-600 to-indigo-900',
+        track: 'get him back! (Pop Punk Drive)'
+      },
+      {
+        id: 'kendrick-steppers',
+        artist: 'Kendrick Lamar',
+        tour: 'The Big Steppers Tour',
+        venue: 'Barclays Center, Brooklyn',
+        image: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=800&q=80',
+        doorsOpen: false,
+        countdownSecs: 300,
+        lowPrice: 160,
+        badge: '⏳ UPCOMING',
+        color: 'from-slate-600 to-slate-900',
+        track: 'N95 (Rhodes Bass Line)'
       }
     ];
 
-    const SEAT_TIERS = [
-      { id: 'sec-pit', name: 'VIP Pit / Front Row', desc: 'Direct stage proximity, front row lasers & audio blasts', origPrice: 350, ai: '✨ 9.9/10 BEST VIEW' },
-      { id: 'sec-lower', name: 'Lower Bowl Center', desc: 'Optimal centered acoustics and full stage visuals', origPrice: 220, ai: '🔥 9.7/10 ACOUSTIC CHOICE' },
-      { id: 'sec-mezz', name: 'Mezzanine Front Row', desc: 'Elevated panorama view of stage & audience glow', origPrice: 180, ai: '⭐ 9.5/10 PANORAMIC' },
-      { id: 'sec-upper', name: 'Upper Deck Club', desc: 'Great overall atmosphere with quick lounge access', origPrice: 110, ai: '💎 9.2/10 VALUE' }
+    const MERCH_CATALOG = [
+      { id: 'm1', name: 'World Tour Heavyweight Hoodie', price: 85, icon: 'fa-shirt', color: 'text-brand-magenta' },
+      { id: 'm2', name: 'Vintage Acid Wash Tour Tee', price: 45, icon: 'fa-shirt', color: 'text-brand-cyan' },
+      { id: 'm3', name: 'Holographic VIP Tour Poster', price: 30, icon: 'fa-image', color: 'text-brand-gold' },
+      { id: 'm4', name: 'Limited Signed Vinyl Record', price: 65, icon: 'fa-compact-disc', color: 'text-purple-400' },
+      { id: 'm5', name: 'Embroidered Tour Dad Hat', price: 35, icon: 'fa-hat-cowboy', color: 'text-emerald-400' }
     ];
 
-    /* ==========================================================================
-       2. GLOBAL STATE ENGINE WITH LOCALSTORAGE PERSISTENCE
-       ========================================================================== */
-    let AppState = {
-      walletMode: 'unlimited', // 'unlimited' or 'custom'
-      customLimit: 500,
-      totalSaved: 0,
-      acquiredTickets: [],
-      acquiredMerch: [],
+    // State Variables
+    let state = {
+      wallet: 1000,
+      cart: [],
+      ticketWallet: [],
+      merchStash: [],
       fastForward: false,
-      selectedArtistId: 'lumina',
-      selectedSeatSec: 'sec-pit'
+      activeFilter: 'all',
+      selectedConcert: null,
+      selectedSeats: [],
+      merchProgress: 0,
+      merchCombo: 1
     };
 
+    /* Load from localStorage if available */
     function loadState() {
-      const saved = localStorage.getItem('dopamine_simulator_state');
+      const saved = localStorage.getItem('dopamine_stage_state');
       if (saved) {
         try {
-          AppState = { ...AppState, ...JSON.parse(saved) };
-        } catch (e) {
-          console.error('State load error:', e);
-        }
+          const parsed = JSON.parse(saved);
+          state.wallet = parsed.wallet ?? 1000;
+          state.ticketWallet = parsed.ticketWallet ?? [];
+          state.merchStash = parsed.merchStash ?? [];
+          state.cart = parsed.cart ?? [];
+        } catch(e){}
       }
     }
-
     function saveState() {
-      localStorage.setItem('dopamine_simulator_state', JSON.stringify(AppState));
-      updateHeaderWidgets();
+      localStorage.setItem('dopamine_stage_state', JSON.stringify({
+        wallet: state.wallet,
+        ticketWallet: state.ticketWallet,
+        merchStash: state.merchStash,
+        cart: state.cart
+      }));
     }
 
     /* ==========================================================================
-       3. WEB AUDIO API SYNTHESIZER & VISUALIZER ENGINE
+       2. WEB AUDIO API SYNTHESIZER & SOUND EFFECTS
        ========================================================================== */
     let audioCtx = null;
-    let mainGain = null;
-    let analyser = null;
-    let synthInterval = null;
-    let isPlayingAudio = false;
 
-    function initWebAudio() {
+    function getAudioContext() {
       if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContext();
-        mainGain = audioCtx.createGain();
-        mainGain.gain.value = 0.3;
-        
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-
-        mainGain.connect(analyser);
-        analyser.connect(audioCtx.destination);
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
+      return audioCtx;
     }
 
-    function playTone(freq, type = 'sine', duration = 0.2, gainVal = 0.2) {
-      if (!audioCtx || !isPlayingAudio) return;
+    // Sound 1: Cha-Ching Purchase SFX
+    function playSoundChaChing() {
       try {
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        g.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(g);
-        g.connect(mainGain);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    function startProceduralSynth(synthType) {
-      initWebAudio();
-      isPlayingAudio = true;
-      document.getElementById('audioToggleBtn').innerText = '⏸';
-
-      if (synthInterval) clearInterval(synthInterval);
-
-      let step = 0;
-      const synthScales = {
-        synthwave: [110, 130.81, 146.83, 164.81, 196.00, 220.00, 261.63],
-        indie: [130.81, 146.83, 164.81, 174.61, 196.00, 220.00],
-        pop: [261.63, 293.66, 329.63, 392.00, 440.00, 523.25],
-        metal: [82.41, 87.31, 98.00, 110.00, 123.47],
-        rnb: [146.83, 174.61, 196.00, 220.00, 261.63, 329.63],
-        lofi: [130.81, 155.56, 174.61, 196.00, 233.08]
-      };
-
-      const scale = synthScales[synthType] || synthScales.synthwave;
-
-      synthInterval = setInterval(() => {
-        if (!isPlayingAudio) return;
-        const note = scale[step % scale.length];
-        const oscType = synthType === 'metal' ? 'sawtooth' : (synthType === 'pop' ? 'square' : 'triangle');
-        playTone(note, oscType, 0.25, 0.25);
-
-        // Sub bass pulse on quarter beats
-        if (step % 4 === 0) {
-          playTone(scale[0] / 2, 'sine', 0.4, 0.4);
-        }
-        step++;
-      }, 200);
-    }
-
-    function toggleAudioPlayback() {
-      if (isPlayingAudio) {
-        isPlayingAudio = false;
-        if (synthInterval) clearInterval(synthInterval);
-        document.getElementById('audioToggleBtn').innerText = '▶';
-      } else {
-        const artist = ARTISTS_DB.find(a => a.id === AppState.selectedArtistId) || ARTISTS_DB[0];
-        startProceduralSynth(artist.synthType);
-      }
-    }
-
-    function triggerCrowdCheer() {
-      initWebAudio();
-      showToast("📣 Crowd Cheers Enthusiastically!");
-      if (!audioCtx) return;
-
-      // Synthesize noise cheer
-      const bufferSize = audioCtx.sampleRate * 1.5;
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buffer;
-
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.value = 1000;
-      filter.Q.value = 1.0;
-
-      const g = audioCtx.createGain();
-      g.gain.setValueAtTime(0.01, audioCtx.currentTime);
-      g.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.3);
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
-
-      noise.connect(filter);
-      filter.connect(g);
-      g.connect(mainGain);
-
-      noise.start();
-    }
-
-    /* ==========================================================================
-       4. CONCERT ARENA CANVAS VISUALIZER
-       ========================================================================== */
-    let stageCanvas, stageCtx, animationFrameId;
-
-    function initStageCanvas() {
-      stageCanvas = document.getElementById('stageCanvas');
-      if (!stageCanvas) return;
-      stageCtx = stageCanvas.getContext('2d');
-      resizeStageCanvas();
-      window.addEventListener('resize', resizeStageCanvas);
-    }
-
-    function resizeStageCanvas() {
-      if (!stageCanvas) return;
-      stageCanvas.width = stageCanvas.parentElement.clientWidth;
-      stageCanvas.height = stageCanvas.parentElement.clientHeight;
-    }
-
-    function renderStageVisualizer() {
-      if (!stageCtx) return;
-      const w = stageCanvas.width;
-      const h = stageCanvas.height;
-
-      stageCtx.fillStyle = '#050608';
-      stageCtx.fillRect(0, 0, w, h);
-
-      // Frequency Audio Data
-      let freqArray = new Uint8Array(32);
-      if (analyser && isPlayingAudio) {
-        analyser.getByteFrequencyData(freqArray);
-      } else {
-        for (let i = 0; i < 32; i++) freqArray[i] = Math.sin(Date.now() * 0.005 + i) * 80 + 80;
-      }
-
-      // 1. Draw Sweeping Spotlight Lasers
-      const time = Date.now() * 0.002;
-      const numLasers = 6;
-      for (let i = 0; i < numLasers; i++) {
-        const angle = Math.sin(time + i * 0.8) * 0.6;
-        const startX = (w / (numLasers + 1)) * (i + 1);
-        stageCtx.save();
-        stageCtx.translate(startX, 0);
-        stageCtx.rotate(angle);
-
-        const gradient = stageCtx.createLinearGradient(0, 0, 0, h);
-        gradient.addColorStop(0, 'rgba(0, 242, 254, 0.6)');
-        gradient.addColorStop(1, 'rgba(157, 78, 221, 0)');
-
-        stageCtx.fillStyle = gradient;
-        stageCtx.beginPath();
-        stageCtx.moveTo(-15, 0);
-        stageCtx.lineTo(15, 0);
-        stageCtx.lineTo(60, h);
-        stageCtx.lineTo(-60, h);
-        stageCtx.closePath();
-        stageCtx.fill();
-        stageCtx.restore();
-      }
-
-      // 2. Draw Equalizer Frequency Bars
-      const barWidth = w / 32;
-      for (let i = 0; i < 32; i++) {
-        const val = freqArray[i];
-        const barHeight = (val / 255) * (h * 0.4);
-        
-        const grad = stageCtx.createLinearGradient(0, h - barHeight, 0, h);
-        grad.addColorStop(0, '#ff0844');
-        grad.addColorStop(0.5, '#9d4edd');
-        grad.addColorStop(1, '#00f2fe');
-
-        stageCtx.fillStyle = grad;
-        stageCtx.fillRect(i * barWidth, h - barHeight - 80, barWidth - 4, barHeight);
-      }
-
-      // 3. Draw Audience Silhouettes with Glow
-      stageCtx.fillStyle = '#0a0c12';
-      stageCtx.beginPath();
-      stageCtx.moveTo(0, h);
-      for (let x = 0; x <= w; x += 30) {
-        const bob = Math.sin(x * 0.05 + time * 4) * 8;
-        stageCtx.lineTo(x, h - 60 + bob);
-      }
-      stageCtx.lineTo(w, h);
-      stageCtx.closePath();
-      stageCtx.fill();
-
-      animationFrameId = requestAnimationFrame(renderStageVisualizer);
-    }
-
-    /* ==========================================================================
-       5. GAMIFIED MERCH QUEUE CANVAS MINI-GAME
-       ========================================================================== */
-    let queueCanvas, queueCtx, gameLoopId;
-    let player = { x: 300, y: 340, radius: 12, speed: 4 };
-    let targetBooth = { x: 250, y: 20, width: 100, height: 30 };
-    let crowd = [];
-    let powerups = [];
-
-    function initQueueGame() {
-      queueCanvas = document.getElementById('queueCanvas');
-      if (!queueCanvas) return;
-      queueCtx = queueCanvas.getContext('2d');
-
-      // Setup Crowd Obstacles
-      crowd = [];
-      for (let i = 0; i < 18; i++) {
-        crowd.push({
-          x: Math.random() * (queueCanvas.width - 40) + 20,
-          y: Math.random() * 220 + 80,
-          radius: 10 + Math.random() * 4,
-          dx: (Math.random() - 0.5) * 1.5,
-          dy: (Math.random() - 0.5) * 1.0
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const freqs = [987.77, 1318.51, 1760.00]; // B5, E6, A6
+        freqs.forEach((f, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.35);
         });
-      }
-
-      // Powerups
-      powerups = [
-        { x: 150, y: 180, radius: 8, claimed: false },
-        { x: 450, y: 120, radius: 8, claimed: false }
-      ];
-
-      player.x = queueCanvas.width / 2;
-      player.y = queueCanvas.height - 30;
-      player.speed = 4;
-
-      window.addEventListener('keydown', handleGameKeydown);
+      } catch(e){}
     }
 
-    function handleGameKeydown(e) {
-      if (!document.getElementById('gameOverlay').classList.contains('active')) return;
-      if (e.key === 'ArrowUp' || e.key === 'w') moveGamePlayer(0, -player.speed * 2.5);
-      if (e.key === 'ArrowDown' || e.key === 's') moveGamePlayer(0, player.speed * 2.5);
-      if (e.key === 'ArrowLeft' || e.key === 'a') moveGamePlayer(-player.speed * 2.5, 0);
-      if (e.key === 'ArrowRight' || e.key === 'd') moveGamePlayer(player.speed * 2.5, 0);
+    // Sound 2: Soft Seat Selection Chime
+    function playSoundChime() {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } catch(e){}
     }
 
-    function moveGamePlayer(dx, dy) {
-      player.x = Math.max(15, Math.min(queueCanvas.width - 15, player.x + dx));
-      player.y = Math.max(15, Math.min(queueCanvas.height - 15, player.y + dy));
-    }
+    // Sound 3: Bass Drop Synth
+    function triggerBassDrop() {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 1.2);
+        
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.2);
 
-    function runQueueGameLoop() {
-      if (!queueCtx) return;
-      const w = queueCanvas.width;
-      const h = queueCanvas.height;
-
-      queueCtx.fillStyle = '#0d0f17';
-      queueCtx.fillRect(0, 0, w, h);
-
-      // Draw Goal: Merch Booth
-      queueCtx.fillStyle = '#9d4edd';
-      queueCtx.shadowBlur = 15;
-      queueCtx.shadowColor = '#9d4edd';
-      queueCtx.fillRect(targetBooth.x, targetBooth.y, targetBooth.width, targetBooth.height);
-      queueCtx.shadowBlur = 0;
-
-      queueCtx.fillStyle = '#fff';
-      queueCtx.font = 'bold 11px sans-serif';
-      queueCtx.fillText('MERCH BOOTH', targetBooth.x + 12, targetBooth.y + 18);
-
-      // Update & Draw Crowd
-      crowd.forEach(c => {
-        c.x += c.dx;
-        c.y += c.dy;
-        if (c.x < 15 || c.x > w - 15) c.dx *= -1;
-        if (c.y < 60 || c.y > h - 40) c.dy *= -1;
-
-        queueCtx.fillStyle = '#3a3d52';
-        queueCtx.beginPath();
-        queueCtx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
-        queueCtx.fill();
-
-        // Soft collision bump
-        const dist = Math.hypot(player.x - c.x, player.y - c.y);
-        if (dist < player.radius + c.radius) {
-          player.y += 3; // Fun bump backward
+        // Flash canvas background
+        if (stageCanvasCtx) {
+          stageCanvasCtx.fillStyle = '#ffffff';
+          stageCanvasCtx.fillRect(0,0,stageCanvas.width, stageCanvas.height);
         }
-      });
+      } catch(e){}
+    }
 
-      // Draw Powerups
-      powerups.forEach(p => {
-        if (!p.claimed) {
-          queueCtx.fillStyle = '#ffb703';
-          queueCtx.beginPath();
-          queueCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          queueCtx.fill();
-
-          const dist = Math.hypot(player.x - p.x, player.y - p.y);
-          if (dist < player.radius + p.radius) {
-            p.claimed = true;
-            player.speed = 7;
-            showToast("⚡ VIP Speed Drink Collected! Speed Up!");
-          }
+    // Sound 4: Crowd Cheer Noise
+    function triggerStageCheer() {
+      try {
+        const ctx = getAudioContext();
+        const bufferSize = ctx.sampleRate * 1.5;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
         }
-      });
 
-      // Draw Player
-      queueCtx.fillStyle = '#00f2fe';
-      queueCtx.shadowBlur = 15;
-      queueCtx.shadowColor = '#00f2fe';
-      queueCtx.beginPath();
-      queueCtx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-      queueCtx.fill();
-      queueCtx.shadowBlur = 0;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
 
-      // Win Condition Check
-      if (player.y <= targetBooth.y + targetBooth.height + 10 &&
-          player.x >= targetBooth.x && player.x <= targetBooth.x + targetBooth.width) {
-        cancelAnimationFrame(gameLoopId);
-        window.removeEventListener('keydown', handleGameKeydown);
-        closeGameOverlay();
-        openMerchBoothModal();
-        showToast("🎉 You made it to the front of the Merch Queue!");
-        return;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1000;
+        filter.Q.value = 1.0;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        noise.start();
+      } catch(e){}
+    }
+
+    /* Synthesized Stage Track Loop Engine */
+    let stageAudioLoop = null;
+    let stageAudioGain = null;
+    let isStageMusicPlaying = false;
+
+    function startStageMusicEngine(concert) {
+      stopStageMusicEngine();
+      try {
+        const ctx = getAudioContext();
+        stageAudioGain = ctx.createGain();
+        stageAudioGain.gain.value = 0.7;
+        stageAudioGain.connect(ctx.destination);
+
+        // Create repeating synth loop
+        let step = 0;
+        const baseFreqs = [261.63, 329.63, 392.00, 523.25]; // C E G C
+        
+        stageAudioLoop = setInterval(() => {
+          if (!isStageMusicPlaying) return;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          
+          const freq = baseFreqs[step % baseFreqs.length] * (step % 2 === 0 ? 1 : 1.25);
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          
+          g.gain.setValueAtTime(0.2, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+          
+          osc.connect(g);
+          g.connect(stageAudioGain);
+          
+          osc.start();
+          osc.stop(ctx.currentTime + 0.25);
+          step++;
+        }, 220);
+
+        isStageMusicPlaying = true;
+        document.getElementById('stagePlayBtn').innerHTML = '<i class="fa-solid fa-pause"></i>';
+      } catch(e){}
+    }
+
+    function stopStageMusicEngine() {
+      if (stageAudioLoop) {
+        clearInterval(stageAudioLoop);
+        stageAudioLoop = null;
       }
+      isStageMusicPlaying = false;
+      const btn = document.getElementById('stagePlayBtn');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    }
 
-      gameLoopId = requestAnimationFrame(runQueueGameLoop);
+    function toggleStageMusic() {
+      if (isStageMusicPlaying) {
+        stopStageMusicEngine();
+      } else {
+        if (state.selectedConcert) startStageMusicEngine(state.selectedConcert);
+      }
+    }
+
+    function setStageVolume(val) {
+      if (stageAudioGain) stageAudioGain.gain.value = parseFloat(val);
     }
 
     /* ==========================================================================
-       6. UI CONTROLLERS & EVENT HANDLERS
+       3. CONCERT GRID RENDERER & COUNTDOWN GATING
        ========================================================================== */
-    function renderEventsGrid(filterText = '') {
-      const container = document.getElementById('eventsGrid');
-      container.innerHTML = '';
+    function renderConcerts() {
+      const grid = document.getElementById('concertsGrid');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      grid.innerHTML = '';
 
-      const filtered = ARTISTS_DB.filter(a => 
-        a.name.toLowerCase().includes(filterText.toLowerCase()) ||
-        a.venue.toLowerCase().includes(filterText.toLowerCase()) ||
-        a.genre.toLowerCase().includes(filterText.toLowerCase())
-      );
+      let openCount = 0;
 
-      filtered.forEach(artist => {
+      CONCERTS.forEach(c => {
+        const matchesSearch = c.artist.toLowerCase().includes(search) || 
+                              c.tour.toLowerCase().includes(search) || 
+                              c.venue.toLowerCase().includes(search);
+        
+        const isLiveNow = c.doorsOpen || state.fastForward;
+
+        if (isLiveNow) openCount++;
+
+        // Filter checks
+        if (state.activeFilter === 'live' && !isLiveNow) return;
+        if (state.activeFilter === 'drop' && !c.badge.includes('PRICE DROP') && !c.badge.includes('HOT')) return;
+        if (!matchesSearch) return;
+
+        // Check if user owns ticket
+        const ownsTicket = state.ticketWallet.some(t => t.concertId === c.id);
+
         const card = document.createElement('div');
-        card.className = 'artist-card';
+        card.className = "bg-[#131720] border border-brand-border hover:border-brand-cyan/60 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group";
+
         card.innerHTML = `
-          <div class="card-banner">
-            <svg viewBox="0 0 300 160">
-              <defs>
-                <linearGradient id="grad-${artist.id}" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="${artist.color1}" />
-                  <stop offset="100%" stop-color="${artist.color2}" />
-                </linearGradient>
-              </defs>
-              <rect width="300" height="160" fill="url(#grad-${artist.id})" opacity="0.3"/>
-              <circle cx="150" cy="80" r="60" fill="none" stroke="${artist.color1}" stroke-width="2" opacity="0.5"/>
-              <path d="M 0,160 Q 150,20 300,160" fill="none" stroke="${artist.color2}" stroke-width="3"/>
-            </svg>
-            <div class="price-drop-badge">🔥 PRICE DROP -100% OFF</div>
-            <div class="genre-tag">${artist.genre}</div>
+          <div>
+            <!-- Banner Image & Badges -->
+            <div class="relative h-44 overflow-hidden">
+              <img src="${c.image}" alt="${c.artist}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-[#131720] via-transparent to-black/40"></div>
+              
+              <!-- Status Badge -->
+              <div class="absolute top-3 left-3">
+                ${isLiveNow ? `
+                  <span class="px-3 py-1 rounded-full bg-red-600/90 text-white font-black text-[10px] tracking-wider uppercase flex items-center gap-1.5 shadow-lg shadow-red-600/30">
+                    <span class="w-2 h-2 rounded-full bg-white animate-ping"></span> 🔴 DOORS OPEN LIVE
+                  </span>
+                ` : `
+                  <span class="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-brand-gold/40 text-brand-gold font-extrabold text-[10px] tracking-wider uppercase font-mono">
+                    ⏳ ${formatCountdown(c.countdownSecs)}
+                  </span>
+                `}
+              </div>
+
+              <!-- Price Drop Badge -->
+              <div class="absolute top-3 right-3">
+                <span class="px-2.5 py-1 rounded-full bg-brand-cyan/20 border border-brand-cyan text-brand-cyan font-bold text-[10px]">
+                  From $${c.lowPrice}
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-5 space-y-2">
+              <span class="text-[10px] font-mono text-brand-magenta tracking-widest uppercase font-bold">${c.artist}</span>
+              <h3 class="text-lg font-black text-white leading-tight group-hover:text-brand-cyan transition-colors">${c.tour}</h3>
+              <p class="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                <i class="fa-solid fa-location-dot text-slate-500"></i> ${c.venue}
+              </p>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="artist-name">${artist.name}</div>
-            <div class="tour-title">${artist.tour}</div>
-            
-            <div class="event-info">
-              <div class="event-detail-row">
-                <span>Venue:</span>
-                <span>${artist.venue}</span>
-              </div>
-              <div class="event-detail-row">
-                <span>Showtime:</span>
-                <span id="countdown-${artist.id}">${artist.timeStr}</span>
-              </div>
-            </div>
 
-            <div class="ai-rating-chip">${artist.aiRating}</div>
+          <!-- Card Action Footer -->
+          <div class="p-5 pt-0 space-y-2">
+            <!-- Seat Selection Button -->
+            <button onclick="openSeatSelection('${c.id}')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-bold text-xs transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-chair text-brand-cyan"></i>
+              <span>SELECT SEATS MAP</span>
+            </button>
 
-            <div class="card-actions">
-              <button class="btn-primary" onclick="openSeatModal('${artist.id}')">
-                🎟️ Claim $0 Ticket
+            <!-- Concert Stage Gate Button -->
+            ${isLiveNow ? `
+              <button onclick="enterLiveStage('${c.id}')" class="w-full py-3 rounded-xl bg-gradient-to-r ${c.color} text-white font-black text-xs hover:brightness-125 transition-all shadow-lg shadow-brand-magenta/20 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-door-open"></i>
+                <span>ENTER LIVE STAGE ${ownsTicket ? '🎟️ (TICKET OWNED)' : ''}</span>
               </button>
-              <button class="btn-secondary" onclick="openConcertArena('${artist.id}')">
-                🎧 Preview
+            ` : `
+              <button disabled class="w-full py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed flex items-center justify-center gap-2">
+                <i class="fa-solid fa-lock"></i>
+                <span>STAGE LOCKED (WAIT FOR DOORS)</span>
               </button>
-            </div>
+            `}
           </div>
         `;
-        container.appendChild(card);
+
+        grid.appendChild(card);
       });
+
+      document.getElementById('statDoorsOpen').innerText = `${openCount} Ready`;
+      document.getElementById('tourCountBadge').innerText = `${CONCERTS.length} Events`;
     }
 
-    function renderTicketWallet() {
-      const container = document.getElementById('ticketWalletList');
-      container.innerHTML = '';
+    function formatCountdown(totalSecs) {
+      if (totalSecs <= 0) return "DOORS OPEN";
+      const m = Math.floor(totalSecs / 60);
+      const s = totalSecs % 60;
+      return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+    }
 
-      if (AppState.acquiredTickets.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 3rem; color: var(--text-muted); background: var(--bg-card); border-radius: 18px;">
-            <h3>No Tickets Claimed Yet</h3>
-            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Explore Live Tour Drops and claim instant $0 VIP seats!</p>
-          </div>
-        `;
+    // Interval to countdown timer
+    setInterval(() => {
+      CONCERTS.forEach(c => {
+        if (c.countdownSecs > 0 && !state.fastForward) {
+          c.countdownSecs--;
+          if (c.countdownSecs === 0) c.doorsOpen = true;
+        }
+      });
+      renderConcerts();
+    }, 1000);
+
+    function setFilter(filter) {
+      state.activeFilter = filter;
+      ['all', 'live', 'drop'].forEach(f => {
+        const btn = document.getElementById(`filter-${f}`);
+        if (f === filter) {
+          btn.className = "px-3.5 py-1.5 rounded-full bg-brand-cyan text-black font-bold transition-all";
+        } else {
+          btn.className = "px-3.5 py-1.5 rounded-full bg-[#131720] border border-brand-border hover:border-slate-500 text-slate-300 transition-all";
+        }
+      });
+      renderConcerts();
+    }
+
+    function toggleFastForward() {
+      state.fastForward = !state.fastForward;
+      const btn = document.getElementById('fastForwardBtn');
+      const txt = document.getElementById('fastForwardText');
+      
+      if (state.fastForward) {
+        btn.className = "px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-gold text-black transition-all flex items-center gap-1.5 shadow-lg shadow-brand-gold/30 animate-pulse";
+        txt.innerText = "Fast-Forward ACTIVE";
+      } else {
+        btn.className = "px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-brand-purple to-brand-magenta text-white transition-all flex items-center gap-1.5 shadow-md";
+        txt.innerText = "Unlock All Doors";
+      }
+      renderConcerts();
+    }
+
+    function resetView() {
+      state.activeFilter = 'all';
+      document.getElementById('searchInput').value = '';
+      setFilter('all');
+    }
+
+    /* ==========================================================================
+       4. FULL-SCREEN INTERACTIVE SEAT SELECTION MODAL
+       ========================================================================== */
+    function openSeatSelection(concertId) {
+      const concert = CONCERTS.find(c => c.id === concertId);
+      if (!concert) return;
+
+      state.selectedConcert = concert;
+      state.selectedSeats = [];
+
+      document.getElementById('seatModalTitle').innerText = `${concert.artist} - ${concert.tour}`;
+      document.getElementById('seatModalVenue').innerText = `${concert.venue} • Interactive 3D Venue Map`;
+
+      // Build Seats Grid
+      buildSeatGrids(concert);
+
+      updateSeatInspector();
+      openModal('seatModal');
+
+      // Random price drop alert trigger
+      if (Math.random() > 0.3) {
+        setTimeout(() => {
+          const alert = document.getElementById('modalFlashAlert');
+          alert.classList.remove('hidden');
+          playSoundChime();
+        }, 1200);
+      } else {
+        document.getElementById('modalFlashAlert').classList.add('hidden');
+      }
+    }
+
+    function buildSeatGrids(concert) {
+      const pitContainer = document.getElementById('gridPit');
+      const vipContainer = document.getElementById('gridVip');
+      const lowerContainer = document.getElementById('gridLower');
+      const upperContainer = document.getElementById('gridUpper');
+
+      pitContainer.innerHTML = '';
+      vipContainer.innerHTML = '';
+      lowerContainer.innerHTML = '';
+      upperContainer.innerHTML = '';
+
+      // Create Pit GA (12 seats)
+      for (let i = 1; i <= 12; i++) {
+        pitContainer.appendChild(createSeatBtn('PIT', `A${i}`, concert.lowPrice + 320, 'seat-pit', '🔥 9.9/10 Stage View'));
+      }
+      // Create VIP Floor (16 seats)
+      for (let i = 1; i <= 16; i++) {
+        vipContainer.appendChild(createSeatBtn('VIP', `F${i}`, concert.lowPrice + 200, 'seat-vip', '🌟 VIP Lounge & Perks'));
+      }
+      // Create Lower Bowl (20 seats)
+      for (let i = 1; i <= 20; i++) {
+        lowerContainer.appendChild(createSeatBtn('LOWER', `Sec 102-${i}`, concert.lowPrice + 80, 'seat-lower', '⚡ 9.2/10 Prime View'));
+      }
+      // Create Upper Level (24 seats)
+      for (let i = 1; i <= 24; i++) {
+        upperContainer.appendChild(createSeatBtn('UPPER', `Sec 314-${i}`, concert.lowPrice, 'seat-upper', '⭐ 8.1/10 Panoramic View'));
+      }
+    }
+
+    function createSeatBtn(section, seatNo, price, classStyle, viewRating) {
+      const btn = document.createElement('button');
+      btn.className = `h-9 rounded-lg border text-[10px] font-bold transition-all flex items-center justify-center font-mono ${classStyle}`;
+      btn.innerText = seatNo;
+      btn.onclick = () => toggleSeatSelect(btn, section, seatNo, price, viewRating);
+      return btn;
+    }
+
+    function toggleSeatSelect(btn, section, seatNo, price, viewRating) {
+      playSoundChime();
+      const existingIdx = state.selectedSeats.findIndex(s => s.seatNo === seatNo && s.section === section);
+
+      if (existingIdx > -1) {
+        state.selectedSeats.splice(existingIdx, 1);
+        btn.classList.remove('seat-selected');
+      } else {
+        state.selectedSeats.push({ section, seatNo, price, viewRating });
+        btn.classList.add('seat-selected');
+      }
+
+      updateSeatInspector();
+    }
+
+    function updateSeatInspector() {
+      const inspector = document.getElementById('seatInspector');
+      const countEl = document.getElementById('selectedSeatCount');
+      const totalEl = document.getElementById('selectedSeatTotal');
+      const addBtn = document.getElementById('addSeatToCartBtn');
+
+      if (state.selectedSeats.length === 0) {
+        inspector.innerHTML = `<p class="text-xs text-slate-500">Click any seat on the map to preview view rating and actual pricing.</p>`;
+        countEl.innerText = "0 Seats";
+        totalEl.innerText = "$0";
+        addBtn.disabled = true;
         return;
       }
 
-      AppState.acquiredTickets.forEach(ticket => {
-        const stub = document.createElement('div');
-        stub.className = 'ticket-stub';
-        stub.innerHTML = `
-          <div class="ticket-info">
-            <div class="ticket-artist">${ticket.artistName}</div>
-            <div class="ticket-venue">${ticket.venue}</div>
-            <div class="ticket-seat">SELECTION: ${ticket.sectionName} | Row A, Seat 12</div>
-            <div style="font-size: 0.75rem; color: var(--accent-green); margin-top: 0.3rem;">
-              Paid: $0 (Simulated Savings: $${ticket.origPrice})
+      let total = 0;
+      let html = `<div class="space-y-2 max-h-48 overflow-y-auto pr-1">`;
+      state.selectedSeats.forEach(s => {
+        total += s.price;
+        html += `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono">
+            <div>
+              <span class="font-bold text-white block">${s.section} - Seat ${s.seatNo}</span>
+              <span class="text-[10px] text-brand-cyan">${s.viewRating}</span>
             </div>
+            <span class="font-bold text-brand-gold">$${s.price}</span>
           </div>
-          <div class="ticket-barcode">
-            <svg width="80" height="40" viewBox="0 0 100 40">
-              <rect x="0" y="0" width="6" height="40" fill="#fff"/>
-              <rect x="10" y="0" width="3" height="40" fill="#fff"/>
-              <rect x="16" y="0" width="8" height="40" fill="#fff"/>
-              <rect x="28" y="0" width="4" height="40" fill="#fff"/>
-              <rect x="36" y="0" width="10" height="40" fill="#fff"/>
-              <rect x="50" y="0" width="5" height="40" fill="#fff"/>
-              <rect x="60" y="0" width="12" height="40" fill="#fff"/>
-              <rect x="76" y="0" width="4" height="40" fill="#fff"/>
-              <rect x="84" y="0" width="8" height="40" fill="#fff"/>
-            </svg>
-            <button class="enter-show-btn" onclick="openConcertArena('${ticket.artistId}')">
-              🚀 Enter Show
+        `;
+      });
+      html += `</div>`;
+
+      inspector.innerHTML = html;
+      countEl.innerText = `${state.selectedSeats.length} Seats`;
+      totalEl.innerText = `$${total}`;
+      addBtn.disabled = false;
+    }
+
+    function addSelectedSeatsToCart() {
+      if (!state.selectedConcert || state.selectedSeats.length === 0) return;
+
+      state.selectedSeats.forEach(s => {
+        state.cart.push({
+          id: 'ticket-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          type: 'ticket',
+          concertId: state.selectedConcert.id,
+          artist: state.selectedConcert.artist,
+          tour: state.selectedConcert.tour,
+          venue: state.selectedConcert.venue,
+          section: s.section,
+          seatNo: s.seatNo,
+          price: s.price,
+          qty: 1
+        });
+      });
+
+      playSoundChaChing();
+      saveState();
+      updateCartUI();
+      closeModal('seatModal');
+      toggleCartDrawer();
+      triggerConfetti();
+    }
+
+    /* ==========================================================================
+       5. MERCH QUEUE CROWD NAVIGATION MINI-GAME
+       ========================================================================== */
+    function openMerchFromStage() {
+      closeStageModal();
+      openModal('merchGameModal');
+      resetMerchGame();
+    }
+
+    function resetMerchGame() {
+      state.merchProgress = 0;
+      state.merchCombo = 1;
+      updateMerchGameUI();
+      renderMerchCatalog();
+    }
+
+    function handleMerchTap() {
+      playSoundChime();
+      const gain = 12 * state.merchCombo;
+      state.merchProgress = Math.min(100, state.merchProgress + gain);
+
+      if (Math.random() > 0.6) {
+        state.merchCombo = Math.min(5, state.merchCombo + 1);
+      }
+
+      updateMerchGameUI();
+
+      if (state.merchProgress >= 100) {
+        playSoundChaChing();
+        triggerConfetti();
+      }
+    }
+
+    function updateMerchGameUI() {
+      document.getElementById('merchProgressText').innerText = `${Math.floor(state.merchProgress)}%`;
+      document.getElementById('merchComboText').innerText = `${state.merchCombo}x Combo`;
+      document.getElementById('merchProgressBar').style.width = `${state.merchProgress}%`;
+    }
+
+    function renderMerchCatalog() {
+      const grid = document.getElementById('merchItemsGrid');
+      grid.innerHTML = '';
+
+      MERCH_CATALOG.forEach(m => {
+        const item = document.createElement('div');
+        item.className = "bg-[#0b0d10] border border-brand-border rounded-2xl p-4 flex flex-col justify-between space-y-3";
+        item.innerHTML = `
+          <div class="space-y-2 text-center">
+            <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto">
+              <i class="fa-solid ${m.icon} ${m.color} text-xl"></i>
+            </div>
+            <h4 class="text-xs font-bold text-white">${m.name}</h4>
+            <span class="text-sm font-black font-mono text-brand-gold">$${m.price}</span>
+          </div>
+
+          <div class="space-y-2">
+            <select id="size-${m.id}" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-1.5 text-[10px] text-slate-300 font-mono">
+              <option value="S">Size: Small (S)</option>
+              <option value="M" selected>Size: Medium (M)</option>
+              <option value="L">Size: Large (L)</option>
+              <option value="XL">Size: X-Large (XL)</option>
+            </select>
+
+            <button onclick="addMerchToCart('${m.id}')" class="w-full py-2 rounded-xl bg-brand-magenta hover:bg-rose-600 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-cart-plus"></i> Add to Cart
             </button>
           </div>
         `;
-        container.appendChild(stub);
+        grid.appendChild(item);
+      });
+    }
+
+    function addMerchToCart(merchId) {
+      const item = MERCH_CATALOG.find(m => m.id === merchId);
+      if (!item) return;
+
+      const size = document.getElementById(`size-${merchId}`).value;
+
+      state.cart.push({
+        id: 'merch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'merch',
+        name: item.name,
+        size: size,
+        price: item.price,
+        qty: 1
+      });
+
+      playSoundChaChing();
+      saveState();
+      updateCartUI();
+      closeModal('merchGameModal');
+      toggleCartDrawer();
+    }
+
+    /* ==========================================================================
+       6. LIVE STAGE CANVAS VISUALIZER
+       ========================================================================== */
+    let stageCanvas = null;
+    let stageCanvasCtx = null;
+    let stageAnimFrame = null;
+    let laserColor = 'cyan';
+
+    function enterLiveStage(concertId) {
+      const concert = CONCERTS.find(c => c.id === concertId);
+      if (!concert) return;
+
+      state.selectedConcert = concert;
+
+      document.getElementById('stageArtistName').innerText = `${concert.artist} - LIVE STAGE`;
+      document.getElementById('stageTrackTitle').innerText = `Now Playing: ${concert.track}`;
+
+      openModal('stageModal');
+      initStageCanvas();
+      startStageMusicEngine(concert);
+      initFanChat();
+    }
+
+    function initStageCanvas() {
+      stageCanvas = document.getElementById('stageCanvas');
+      stageCanvasCtx = stageCanvas.getContext('2d');
+      resizeStageCanvas();
+      window.addEventListener('resize', resizeStageCanvas);
+
+      cancelAnimationFrame(stageAnimFrame);
+      animateStage();
+    }
+
+    function resizeStageCanvas() {
+      if (stageCanvas) {
+        stageCanvas.width = window.innerWidth;
+        stageCanvas.height = window.innerHeight;
+      }
+    }
+
+    let timeStep = 0;
+    function animateStage() {
+      if (!stageCanvasCtx) return;
+      timeStep += 0.03;
+
+      const w = stageCanvas.width;
+      const h = stageCanvas.height;
+
+      // Dark background clear
+      stageCanvasCtx.fillStyle = 'rgba(11, 13, 16, 0.25)';
+      stageCanvasCtx.fillRect(0, 0, w, h);
+
+      // Spotlights Laser Beams
+      const beamCount = 8;
+      for (let i = 0; i < beamCount; i++) {
+        const xStart = (w / (beamCount - 1)) * i;
+        const xEnd = w / 2 + Math.sin(timeStep + i) * (w * 0.4);
+
+        stageCanvasCtx.beginPath();
+        stageCanvasCtx.moveTo(xStart, 0);
+        stageCanvasCtx.lineTo(xEnd, h);
+
+        let strokeStyle = 'rgba(0, 242, 254, 0.3)';
+        if (laserColor === 'magenta') strokeStyle = 'rgba(255, 0, 127, 0.3)';
+        if (laserColor === 'gold') strokeStyle = 'rgba(255, 215, 0, 0.3)';
+        if (laserColor === 'rainbow') strokeStyle = `hsla(${(timeStep * 50 + i * 40) % 360}, 100%, 50%, 0.4)`;
+
+        stageCanvasCtx.strokeStyle = strokeStyle;
+        stageCanvasCtx.lineWidth = 6;
+        stageCanvasCtx.shadowBlur = 20;
+        stageCanvasCtx.shadowColor = strokeStyle;
+        stageCanvasCtx.stroke();
+      }
+
+      // Audio Spectrum Visualizer Bars at Bottom
+      const barCount = 32;
+      const barWidth = w / barCount;
+      for (let i = 0; i < barCount; i++) {
+        const height = Math.abs(Math.sin(timeStep * 2 + i * 0.3)) * (h * 0.3) + 20;
+        stageCanvasCtx.fillStyle = 'rgba(255, 0, 127, 0.6)';
+        stageCanvasCtx.fillRect(i * barWidth, h - height, barWidth - 4, height);
+      }
+
+      stageAnimFrame = requestAnimationFrame(animateStage);
+    }
+
+    function setLaserColor(color) {
+      laserColor = color;
+    }
+
+    function closeStageModal() {
+      stopStageMusicEngine();
+      cancelAnimationFrame(stageAnimFrame);
+      closeModal('stageModal');
+    }
+
+    /* Fan Chat Simulation */
+    const FAN_MESSAGES = [
+      "OMGGG SHE JUST WALKED OUT! 😭🔥",
+      "THIS LIGHT SHOW IS ABSOLUTELY INSANE!!",
+      "MERCH BOOTH HAS LONG QUEUES FAST-PASS NOW!",
+      "BEST CONCERT EXPERIENCE OF MY LIFE ❤️",
+      "BASS DROP WAS UNREAL 🔥⚡",
+      "VIP FLOOR VIEW IS 10/10 WOW",
+      "SETLIST IS GOATED!!"
+    ];
+
+    let chatInterval = null;
+    function initFanChat() {
+      const container = document.getElementById('fanChatContainer');
+      container.innerHTML = '';
+      clearInterval(chatInterval);
+
+      chatInterval = setInterval(() => {
+        const msg = FAN_MESSAGES[Math.floor(Math.random() * FAN_MESSAGES.length)];
+        const div = document.createElement('div');
+        div.className = "text-slate-300 flex items-center gap-1.5 animate-bounce-gentle";
+        div.innerHTML = `<span class="text-brand-cyan font-bold">@Fan_${Math.floor(Math.random()*900+100)}:</span> <span>${msg}</span>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+      }, 2500);
+    }
+
+    /* ==========================================================================
+       7. CART & VIRTUAL CHECKOUT ENGINE
+       ========================================================================== */
+    function toggleCartDrawer() {
+      const drawer = document.getElementById('cartDrawer');
+      drawer.classList.toggle('translate-x-full');
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const list = document.getElementById('cartItemsList');
+      list.innerHTML = '';
+
+      let subtotal = 0;
+
+      if (state.cart.length === 0) {
+        list.innerHTML = `
+          <div class="text-center py-12 text-slate-500 space-y-2">
+            <i class="fa-solid fa-cart-flatbed text-3xl"></i>
+            <p class="text-xs font-mono">Your dopamine cart is empty.</p>
+          </div>
+        `;
+      } else {
+        state.cart.forEach((item, idx) => {
+          subtotal += item.price * item.qty;
+
+          const div = document.createElement('div');
+          div.className = "p-3 rounded-2xl bg-[#0b0d10] border border-brand-border flex items-center justify-between text-xs font-mono";
+          
+          if (item.type === 'ticket') {
+            div.innerHTML = `
+              <div>
+                <span class="font-bold text-white block">${item.artist}</span>
+                <span class="text-[10px] text-slate-400">${item.section} • Seat ${item.seatNo}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-bold text-brand-gold">$${item.price}</span>
+                <button onclick="removeCartItem(${idx})" class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            `;
+          } else {
+            div.innerHTML = `
+              <div>
+                <span class="font-bold text-white block">${item.name}</span>
+                <span class="text-[10px] text-brand-magenta">Size: ${item.size}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-bold text-brand-gold">$${item.price}</span>
+                <button onclick="removeCartItem(${idx})" class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            `;
+          }
+
+          list.appendChild(div);
+        });
+      }
+
+      document.getElementById('cartSubtotal').innerText = `$${subtotal}`;
+      document.getElementById('cartTotal').innerText = `$${subtotal}`;
+      document.getElementById('cartTotalHeader').innerText = `$${subtotal}`;
+      document.getElementById('cartCountBadge').innerText = state.cart.length;
+    }
+
+    function removeCartItem(idx) {
+      state.cart.splice(idx, 1);
+      saveState();
+      updateCartUI();
+    }
+
+    function checkoutCart() {
+      if (state.cart.length === 0) return;
+
+      let total = state.cart.reduce((sum, item) => sum + item.price, 0);
+
+      if (state.wallet < total) {
+        alert("Insufficient Dopamine Cash in Virtual Wallet! Click +$500 to Refill.");
+        return;
+      }
+
+      state.wallet -= total;
+
+      // Transfer items to tickets & merch
+      state.cart.forEach(item => {
+        if (item.type === 'ticket') {
+          state.ticketWallet.push({
+            id: item.id,
+            concertId: item.concertId,
+            artist: item.artist,
+            tour: item.tour,
+            venue: item.venue,
+            section: item.section,
+            seatNo: item.seatNo,
+            price: item.price,
+            purchasedAt: new Date().toLocaleTimeString()
+          });
+        } else {
+          state.merchStash.push({
+            id: item.id,
+            name: item.name,
+            size: item.size,
+            price: item.price,
+            purchasedAt: new Date().toLocaleTimeString()
+          });
+        }
+      });
+
+      state.cart = [];
+      playSoundChaChing();
+      triggerConfetti();
+      saveState();
+      updateWalletUI();
+      updateCartUI();
+      toggleCartDrawer();
+
+      alert("🎉 CHECKOUT SUCCESSFUL! Tickets issued into 'My Ticket Wallet' and Merch into 'My Merch Stash'.");
+    }
+
+    function addWalletFunds(amount) {
+      playSoundChaChing();
+      state.wallet += amount;
+      saveState();
+      updateWalletUI();
+      triggerConfetti();
+    }
+
+    function updateWalletUI() {
+      document.getElementById('walletBalance').innerText = `$${state.wallet.toLocaleString()}`;
+      document.getElementById('ticketBadge').innerText = state.ticketWallet.length;
+      document.getElementById('merchBadge').innerText = state.merchStash.length;
+      renderTicketWallet();
+      renderMerchStash();
+    }
+
+    /* ==========================================================================
+       8. MODAL MANAGERS & WALLET VIEWS
+       ========================================================================== */
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      if (id === 'ticketWalletModal') renderTicketWallet();
+      if (id === 'merchStashModal') renderMerchStash();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function renderTicketWallet() {
+      const container = document.getElementById('ticketWalletContainer');
+      container.innerHTML = '';
+
+      if (state.ticketWallet.length === 0) {
+        container.innerHTML = `<p class="col-span-2 text-center text-slate-500 font-mono py-8">No ticket stubs owned yet.</p>`;
+        return;
+      }
+
+      state.ticketWallet.forEach(t => {
+        const card = document.createElement('div');
+        card.className = "bg-[#131720] border border-brand-border rounded-3xl p-5 flex flex-col justify-between space-y-4 relative overflow-hidden";
+        card.innerHTML = `
+          <div class="flex justify-between items-start border-b border-brand-border pb-3">
+            <div>
+              <span class="text-[10px] font-mono text-brand-cyan uppercase font-bold">DIGITAL PASS STUB</span>
+              <h3 class="text-base font-black text-white">${t.artist}</h3>
+              <p class="text-xs text-slate-400 font-mono">${t.tour}</p>
+            </div>
+            <!-- Generated SVG QR Code -->
+            <div class="w-12 h-12 bg-white rounded-lg p-1 flex items-center justify-center">
+              <i class="fa-solid fa-qrcode text-black text-3xl"></i>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-[#0b0d10] p-3 rounded-2xl border border-brand-border">
+            <div><span class="text-slate-500 block">Section</span> <strong class="text-white">${t.section}</strong></div>
+            <div><span class="text-slate-500 block">Seat</span> <strong class="text-white">${t.seatNo}</strong></div>
+            <div><span class="text-slate-500 block">Price Paid</span> <strong class="text-brand-gold">$${t.price}</strong></div>
+            <div><span class="text-slate-500 block">Issued</span> <strong class="text-slate-300">${t.purchasedAt}</strong></div>
+          </div>
+
+          <button onclick="closeModal('ticketWalletModal'); enterLiveStage('${t.concertId}');" class="w-full py-2.5 rounded-xl bg-brand-cyan text-black font-black text-xs hover:brightness-125 transition-all">
+            LAUNCH CONCERT STAGE ⚡
+          </button>
+        `;
+        container.appendChild(card);
       });
     }
 
     function renderMerchStash() {
-      const container = document.getElementById('merchStashGrid');
+      const container = document.getElementById('merchStashContainer');
       container.innerHTML = '';
 
-      if (AppState.acquiredMerch.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted); background: var(--bg-card); border-radius: 18px;">
-            <h3>Your Merch Stash is Empty</h3>
-            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Enter a concert, navigate the queue, and grab exclusive tour apparel!</p>
-          </div>
-        `;
+      if (state.merchStash.length === 0) {
+        container.innerHTML = `<p class="col-span-3 text-center text-slate-500 font-mono py-8">No tour merch in stash yet.</p>`;
         return;
       }
 
-      AppState.acquiredMerch.forEach(item => {
+      state.merchStash.forEach(m => {
         const card = document.createElement('div');
-        card.className = 'merch-item-card';
+        card.className = "bg-[#131720] border border-brand-border rounded-3xl p-4 space-y-2 text-center font-mono";
         card.innerHTML = `
-          <div class="merch-preview">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="1.5">
-              <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/>
-            </svg>
+          <div class="w-12 h-12 rounded-2xl bg-brand-magenta/20 border border-brand-magenta flex items-center justify-center mx-auto text-brand-magenta text-xl">
+            <i class="fa-solid fa-shirt"></i>
           </div>
-          <div class="merch-title">${item.title}</div>
-          <div class="merch-variant">${item.variant}</div>
-          <div style="font-size: 0.8rem; color: var(--accent-cyan);">Size: ${item.size || 'L'}</div>
-          <div style="font-size: 0.75rem; color: var(--accent-green); font-weight: bold;">Claimed ($0)</div>
+          <h4 class="text-xs font-bold text-white">${m.name}</h4>
+          <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">Size: ${m.size}</span>
+          <span class="block text-xs font-bold text-brand-gold">$${m.price}</span>
         `;
         container.appendChild(card);
       });
     }
 
-    /* Modal Navigation Helpers */
-    function openSeatModal(artistId) {
-      AppState.selectedArtistId = artistId;
-      const artist = ARTISTS_DB.find(a => a.id === artistId);
-      document.getElementById('seatModalArtist').innerText = artist.name + ' - ' + artist.tour;
-      document.getElementById('seatModalVenue').innerText = artist.venue;
+    /* ==========================================================================
+       9. LIGHTWEIGHT CANVAS CONFETTI
+       ========================================================================== */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
 
-      // Render Seat Sections
-      const list = document.getElementById('seatSectionsList');
-      list.innerHTML = '';
-      SEAT_TIERS.forEach((sec, idx) => {
-        const row = document.createElement('div');
-        row.className = `seat-section-row ${idx === 0 ? 'selected' : ''}`;
-        row.onclick = () => selectSeatSection(sec, row);
-        row.innerHTML = `
-          <div>
-            <div class="section-name">${sec.name}</div>
-            <div class="section-tag">${sec.desc}</div>
-          </div>
-          <div class="section-price">
-            <div class="price-original">$${sec.origPrice}</div>
-            <div class="price-free">$0</div>
-          </div>
-        `;
-        list.appendChild(row);
-      });
+      const particles = [];
+      const colors = ['#00f2fe', '#ff007f', '#ffd700', '#7928ca', '#ffffff'];
 
-      selectSeatSection(SEAT_TIERS[0], list.children[0]);
-      document.getElementById('seatModal').classList.add('open');
-    }
-
-    function selectSeatSection(sec, element) {
-      AppState.selectedSeatSec = sec.id;
-      document.querySelectorAll('.seat-section-row').forEach(r => r.classList.remove('selected'));
-      if (element) element.classList.add('selected');
-
-      document.getElementById('seatAiRating').innerText = sec.ai;
-      document.getElementById('selectedSecTitle').innerText = sec.name;
-      document.getElementById('selectedSecDesc').innerText = sec.desc;
-      document.getElementById('modalOrigPrice').innerText = '$' + sec.origPrice;
-
-      // Render Viewpoint SVG Preview
-      document.getElementById('viewpointPreview').innerHTML = `
-        <svg width="100%" height="100%" viewBox="0 0 200 100">
-          <rect width="200" height="100" fill="#0d0f17"/>
-          <path d="M 20,80 L 100,20 L 180,80 Z" fill="none" stroke="var(--accent-cyan)" stroke-width="1.5" opacity="0.6"/>
-          <circle cx="100" cy="30" r="10" fill="var(--accent-pink)"/>
-          <text x="100" y="90" fill="#fff" font-size="8" text-anchor="middle">SIMULATED VIEW: ${sec.name}</text>
-        </svg>
-      `;
-    }
-
-    function confirmTicketClaim() {
-      const artist = ARTISTS_DB.find(a => a.id === AppState.selectedArtistId);
-      const sec = SEAT_TIERS.find(s => s.id === AppState.selectedSeatSec) || SEAT_TIERS[0];
-
-      AppState.acquiredTickets.push({
-        artistId: artist.id,
-        artistName: artist.name,
-        venue: artist.venue,
-        sectionName: sec.name,
-        origPrice: sec.origPrice
-      });
-
-      AppState.totalSaved += sec.origPrice;
-      saveState();
-      closeModal('seatModal');
-      renderTicketWallet();
-      showToast(`🎉 Ticket Secured! Saved $${sec.origPrice} on ${sec.name}`);
-    }
-
-    function openConcertArena(artistId) {
-      AppState.selectedArtistId = artistId;
-      const artist = ARTISTS_DB.find(a => a.id === artistId) || ARTISTS_DB[0];
-
-      document.getElementById('arenaArtistName').innerText = artist.name;
-      document.getElementById('arenaVenueName').innerText = '@ ' + artist.venue;
-      document.getElementById('arenaTrackTitle').innerText = artist.tracks[0];
-
-      document.getElementById('concertArena').classList.add('active');
-      initStageCanvas();
-      renderStageVisualizer();
-      startProceduralSynth(artist.synthType);
-    }
-
-    function closeConcertArena() {
-      document.getElementById('concertArena').classList.remove('active');
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      if (synthInterval) clearInterval(synthInterval);
-      isPlayingAudio = false;
-    }
-
-    function startMerchQueueGame() {
-      document.getElementById('gameOverlay').classList.add('active');
-      initQueueGame();
-      runQueueGameLoop();
-    }
-
-    function closeGameOverlay() {
-      document.getElementById('gameOverlay').classList.remove('active');
-      if (gameLoopId) cancelAnimationFrame(gameLoopId);
-    }
-
-    function openMerchBoothModal() {
-      const artist = ARTISTS_DB.find(a => a.id === AppState.selectedArtistId) || ARTISTS_DB[0];
-      const catalogGrid = document.getElementById('merchCatalogGrid');
-      catalogGrid.innerHTML = '';
-
-      artist.merch.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'merch-item-card';
-        card.innerHTML = `
-          <div class="merch-preview">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="1.5">
-              <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/>
-            </svg>
-          </div>
-          <div class="merch-title">${item.title}</div>
-          <div class="merch-variant">${item.variant}</div>
-          <div class="size-selector">
-            <button class="size-btn" onclick="selectMerchSize(this, 'S')">S</button>
-            <button class="size-btn" onclick="selectMerchSize(this, 'M')">M</button>
-            <button class="size-btn selected" onclick="selectMerchSize(this, 'L')">L</button>
-            <button class="size-btn" onclick="selectMerchSize(this, 'XL')">XL</button>
-          </div>
-          <button class="claim-merch-btn" onclick="claimMerchItem('${item.id}', '${item.title}', '${item.variant}', ${item.price})">
-            Claim Instant ($0)
-          </button>
-        `;
-        catalogGrid.appendChild(card);
-      });
-
-      document.getElementById('merchBoothModal').classList.add('open');
-    }
-
-    function selectMerchSize(btn, size) {
-      const parent = btn.parentElement;
-      parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    }
-
-    function claimMerchItem(id, title, variant, origPrice) {
-      AppState.acquiredMerch.push({
-        id, title, variant, price: origPrice, size: 'L'
-      });
-      AppState.totalSaved += origPrice;
-      saveState();
-      renderMerchStash();
-      showToast(`👕 Added "${title}" to your Merch Stash!`);
-      closeModal('merchBoothModal');
-    }
-
-    /* Modal open/close helpers */
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
-
-    function openWalletModal() {
-      document.getElementById('walletModal').classList.add('open');
-    }
-
-    function setWalletMode(mode) {
-      AppState.walletMode = mode;
-      saveState();
-    }
-
-    function updateCustomLimit(val) {
-      AppState.customLimit = parseFloat(val) || 500;
-      saveState();
-    }
-
-    function resetSpentWallet() {
-      AppState.totalSaved = 0;
-      AppState.acquiredTickets = [];
-      AppState.acquiredMerch = [];
-      saveState();
-      renderTicketWallet();
-      renderMerchStash();
-      closeModal('walletModal');
-      showToast("🔄 Wallet and Saved Metrics Reset!");
-    }
-
-    function toggleFastForward() {
-      AppState.fastForward = !AppState.fastForward;
-      const btn = document.getElementById('ffGlobalBtn');
-      if (AppState.fastForward) {
-        btn.classList.add('active-ff');
-        showToast("⚡ Fast Forward Active! Countdown timers accelerated!");
-      } else {
-        btn.classList.remove('active-ff');
-        showToast("⏸ Standard Time Flow Restored");
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.5) * 14 - 4,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1
+        });
       }
-    }
 
-    function updateHeaderWidgets() {
-      document.getElementById('ticketCountBadge').innerText = AppState.acquiredTickets.length;
-      document.getElementById('merchCountBadge').innerText = AppState.acquiredMerch.length;
-      document.getElementById('statSaved').innerText = '$' + AppState.totalSaved.toLocaleString();
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
 
-      if (AppState.walletMode === 'unlimited') {
-        document.getElementById('headerWalletText').innerText = 'UNLIMITED';
-      } else {
-        const remaining = Math.max(0, AppState.customLimit - AppState.totalSaved);
-        document.getElementById('headerWalletText').innerText = '$' + remaining.toLocaleString();
-      }
-    }
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.2; // gravity
+          p.alpha -= 0.015;
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
-
-      document.getElementById(tabId).classList.add('active');
-      document.getElementById('btn-' + tabId).classList.add('active');
-    }
-
-    function handleSearch() {
-      const q = document.getElementById('searchInput').value;
-      renderEventsGrid(q);
-    }
-
-    function showToast(message) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = `<span>✨</span> <div>${message}</div>`;
-      container.appendChild(toast);
-
-      setTimeout(() => {
-        if (toast.parentElement) toast.parentElement.removeChild(toast);
-      }, 4000);
-    }
-
-    /* Periodic Countdown Timer */
-    setInterval(() => {
-      ARTISTS_DB.forEach(a => {
-        if (a.countdownSec > 0) {
-          a.countdownSec -= AppState.fastForward ? 100 : 1;
-          if (a.countdownSec <= 0) {
-            a.countdownSec = 0;
-            const el = document.getElementById(`countdown-${a.id}`);
-            if (el) el.innerText = '🔴 SHOWTIME NOW! WAITING FOR YOU';
-          } else {
-            const mins = Math.floor(a.countdownSec / 60);
-            const secs = a.countdownSec % 60;
-            const el = document.getElementById(`countdown-${a.id}`);
-            if (el) el.innerText = `Starts in ${mins}m ${secs}s`;
+          if (p.alpha > 0) {
+            active = true;
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.alpha;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
           }
-        }
-      });
-    }, 1000);
+        });
 
-    /* Initial Load Initialization */
+        if (active) requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    /* Initial Onload Boot */
     window.onload = function() {
       loadState();
-      renderEventsGrid();
-      renderTicketWallet();
-      renderMerchStash();
-      updateHeaderWidgets();
+      updateWalletUI();
+      renderConcerts();
     };
   </script>
 </body>
