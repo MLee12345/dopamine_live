@@ -80,6 +80,8 @@
       filter: brightness(1.25);
     }
     .seat-section.selected {
+      stroke: #ffffff;
+      stroke-width: 4px;
       filter: drop-shadow(0 0 7px rgba(244, 244, 245, 0.38)) brightness(1.22);
       opacity: 1 !important;
     }
@@ -94,6 +96,9 @@
     }
     .wheel-spin {
       transition: transform 1.25s cubic-bezier(0.12, 0.8, 0.2, 1);
+    }
+    .wheel-face {
+      background: conic-gradient(#18181b 0 45deg, #3f3f46 45deg 90deg, #18181b 90deg 135deg, #52525b 135deg 180deg, #18181b 180deg 225deg, #3f3f46 225deg 270deg, #18181b 270deg 315deg, #71717a 315deg 360deg);
     }
     .hold-fill {
       transition: width 0.08s linear;
@@ -154,7 +159,11 @@
 
       <!-- Right Navigation Links -->
       <nav class="flex items-center space-x-2 sm:space-x-4">
-        <button onclick="addWalletMoney(25)" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
+        <button onclick="openWheelModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
+          <i class="fa-solid fa-circle-notch text-emerald-400"></i>
+          <span id="discountNavText">Spin</span>
+        </button>
+        <button onclick="openWalletModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
           <i class="fa-solid fa-wallet text-emerald-400"></i>
           <span id="walletBalanceText">$0</span>
         </button>
@@ -188,37 +197,6 @@
           <p class="text-zinc-400 text-sm sm:text-base font-normal">
             Find the show, preview the artist, hold to checkout, and keep your ticket wallet in one place.
           </p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center justify-between">
-          <div>
-            <div class="text-xs text-zinc-500 uppercase font-bold">Wallet</div>
-            <div id="walletPanelBalance" class="text-2xl font-extrabold text-white">$0</div>
-            <div class="text-xs text-zinc-500">Earns while you browse</div>
-          </div>
-          <button onclick="addWalletMoney(50)" class="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 rounded-md text-xs font-bold">
-            Add $50
-          </button>
-        </div>
-
-        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-xs text-zinc-500 uppercase font-bold">Daily Wheel</div>
-              <div id="discountText" class="text-lg font-bold text-white">No discount active</div>
-            </div>
-            <button onclick="spinDiscountWheel()" class="relative w-16 h-16 rounded-full border border-zinc-700 bg-zinc-950 flex items-center justify-center text-xs font-black text-zinc-200 wheel-spin" id="discountWheel">
-              SPIN
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-          <div class="text-xs text-zinc-500 uppercase font-bold">Session Rewards</div>
-          <div class="text-lg font-bold text-white"><span id="siteTimeText">0:00</span> on site</div>
-          <div class="text-xs text-zinc-500">Wallet gets $5 every 45 seconds</div>
         </div>
       </div>
 
@@ -490,7 +468,7 @@
         <div class="space-y-3 py-2">
           <button id="joinQueueBox" onclick="chargeMerchAccess()" class="w-full bg-zinc-950 border border-zinc-800 hover:border-emerald-500 rounded-xl p-4 text-left transition-all">
             <span class="block text-sm font-bold text-white">Charge merch access</span>
-            <span class="block text-xs text-zinc-400 mt-1">Keep clicking to fill the bar before it drains.</span>
+            <span class="block text-xs text-zinc-400 mt-1">Tap constantly. The bar drains fast if you pause.</span>
           </button>
 
           <!-- Progress Bar Decay -->
@@ -529,6 +507,67 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL 3: WALLET -->
+  <div id="walletModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
+        <div>
+          <h3 class="text-lg font-bold text-white">Wallet</h3>
+          <p class="text-xs text-zinc-400">Add funds or let site-time rewards build up.</p>
+        </div>
+        <button onclick="closeWalletModal()" class="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+          <div class="text-xs text-zinc-500 uppercase font-bold">Balance</div>
+          <div id="walletModalBalance" class="text-4xl font-extrabold text-white">$0</div>
+          <div class="text-xs text-zinc-500 mt-1"><span id="siteTimeText">0:00</span> on site. Wallet gets $5 every 45 seconds.</div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="addWalletMoney(10)" class="py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$10</button>
+          <button onclick="addWalletMoney(25)" class="py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$25</button>
+          <button onclick="addWalletMoney(50)" class="py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$50</button>
+          <button onclick="addWalletMoney(100)" class="py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$100</button>
+        </div>
+        <div class="flex gap-2">
+          <input id="customWalletAmount" type="number" min="1" placeholder="Custom amount" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500">
+          <button onclick="addCustomWalletMoney()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg text-sm font-bold">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: DAILY WHEEL -->
+  <div id="wheelModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
+        <div>
+          <h3 class="text-lg font-bold text-white">Daily Deals Wheel</h3>
+          <p class="text-xs text-zinc-400">Spin once per day for checkout discounts and wallet deals.</p>
+        </div>
+        <button onclick="closeWheelModal()" class="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="flex items-center justify-center">
+          <button onclick="spinDiscountWheel()" class="relative w-44 h-44 rounded-full border-4 border-zinc-700 wheel-face wheel-spin flex items-center justify-center text-white text-lg font-black" id="discountWheel">
+            <span class="bg-zinc-950/90 border border-zinc-700 rounded-full w-20 h-20 flex items-center justify-center">SPIN</span>
+          </button>
+        </div>
+        <div id="discountText" class="text-center text-xl font-bold text-white">No discount active</div>
+        <div id="wheelDealList" class="grid grid-cols-2 gap-2 text-xs text-zinc-400">
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">5% off checkout</div>
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">10% off checkout</div>
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">$15 wallet bonus</div>
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">Free-fee checkout</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -838,12 +877,7 @@
         isEnded: false,
         soldOut: idx % 17 === 0,
         priceFrom,
-        image: [
-          'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1000&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=1000&auto=format&fit=crop'
-        ][idx % 4],
+        image: `https://source.unsplash.com/1000x700/?concert,stage,${encodeURIComponent(artist)}`,
         merch: [
           { id: `extra-${idx}-tee`, name: `${artist} Tour Tee`, price: 45 + (idx % 4) * 5, sizes: ['S', 'M', 'L', 'XL'], img: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=300&auto=format&fit=crop' },
           { id: `extra-${idx}-hoodie`, name: `${tour.split(' ')[0]} Hoodie`, price: 80 + (idx % 3) * 10, sizes: ['M', 'L', 'XL'], img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=300&auto=format&fit=crop' }
@@ -893,9 +927,12 @@
       walletBalance: Number(localStorage.getItem('dopamineWallet') || 25),
       discountPct: Number(localStorage.getItem('dopamineDiscount') || 0),
       lastSpinDate: localStorage.getItem('dopamineLastSpin') || '',
+      activeDealLabel: localStorage.getItem('dopamineDealLabel') || '',
       siteSeconds: 0,
       holdTimer: null,
-      holdProgress: 0
+      holdProgress: 0,
+      audioCtx: null,
+      previewOscillator: null
     };
 
     /* ==========================================================================
@@ -1044,7 +1081,7 @@
     /* ==========================================================================
        5. ACCURATE VENUE SEATING MAPS & TICKET RESERVATION PAGE
        ========================================================================== */
-    const SECTION_COLORS = ['#d4d4d8', '#a1a1aa', '#71717a'];
+    const SECTION_COLORS = ['#8b8b8f', '#8b8b8f', '#8b8b8f'];
 
     function openTicketModal(concertId) {
       state.selectedConcert = CONCERTS.find(c => c.id === concertId);
@@ -1094,9 +1131,45 @@
       `).join('');
     }
 
-    function previewTicketTrack(idx) {
+    async function previewTicketTrack(idx) {
       const track = getArtistPlaylist(state.selectedConcert)[idx];
+      await playPreviewTone(idx);
       showToast(`Previewing ${track}`, 'info');
+    }
+
+    async function playPreviewTone(idx = 0) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        showToast('Audio preview is not supported in this browser.', 'info');
+        return false;
+      }
+
+      if (!state.audioCtx) state.audioCtx = new AudioContextClass();
+      if (state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+      if (state.previewOscillator) {
+        try { state.previewOscillator.stop(); } catch (e) {}
+        state.previewOscillator = null;
+      }
+
+      const osc = state.audioCtx.createOscillator();
+      const gain = state.audioCtx.createGain();
+      const now = state.audioCtx.currentTime + 0.03;
+      const base = 220 + idx * 70 + (state.selectedConcert.artist.length % 9) * 12;
+      osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(base, now);
+      osc.frequency.exponentialRampToValueAtTime(base * 1.55, now + 0.45);
+      osc.frequency.setValueAtTime(base * 1.12, now + 0.76);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.22, now + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
+      osc.connect(gain).connect(state.audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 1.38);
+      osc.onended = () => {
+        if (state.previewOscillator === osc) state.previewOscillator = null;
+      };
+      state.previewOscillator = osc;
+      return true;
     }
 
     function getSectionColor(venue, secId) {
@@ -1114,9 +1187,9 @@
           <rect x="108" y="154" width="84" height="24" rx="4" fill="#18181b" stroke="#71717a"/>
           <text x="150" y="170" fill="#e4e4e7" font-size="9" font-weight="700" text-anchor="middle">STAGE</text>
 
-          <rect id="svg-${front.id}" onclick="selectSectionById('${front.id}')" class="seat-section" x="95" y="116" width="110" height="26" rx="6" fill="#d4d4d8" opacity="0.88"/>
-          <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="#a1a1aa" opacity="0.82"/>
-          <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="#71717a" opacity="0.78"/>
+          <rect id="svg-${front.id}" onclick="selectSectionById('${front.id}')" class="seat-section" x="95" y="116" width="110" height="26" rx="6" fill="#8b8b8f" opacity="0.86"/>
+          <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="#8b8b8f" opacity="0.86"/>
+          <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="#8b8b8f" opacity="0.86"/>
 
           <text class="section-label" x="150" y="134" text-anchor="middle">${front.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
           <text class="section-label" x="150" y="95" text-anchor="middle">${middle.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
@@ -1525,6 +1598,7 @@
       document.querySelectorAll('.playlist-btn').forEach((btn, btnIdx) => {
         btn.className = `playlist-btn px-3 py-2 rounded-lg text-xs text-left ${btnIdx === idx ? 'bg-emerald-500 text-black font-bold' : 'text-zinc-300 hover:bg-zinc-800'}`;
       });
+      playPreviewTone(idx);
       showToast(`Playing ${track}`, 'info');
     }
 
@@ -1609,12 +1683,12 @@
       if (!state.queueStarted) {
         state.queueStarted = true;
         state.queueTimer = setInterval(() => {
-          state.queueCharge = Math.max(0, state.queueCharge - 6);
+          state.queueCharge = Math.max(0, state.queueCharge - 10);
           updateQueueUI();
-        }, 300);
+        }, 220);
       }
 
-      state.queueCharge = Math.min(100, state.queueCharge + 18);
+      state.queueCharge = Math.min(100, state.queueCharge + 7);
       updateQueueUI();
 
       if (state.queueCharge >= 100) {
@@ -1825,16 +1899,49 @@
       localStorage.setItem('dopamineWallet', state.walletBalance.toFixed(0));
       localStorage.setItem('dopamineDiscount', state.discountPct.toString());
       localStorage.setItem('dopamineLastSpin', state.lastSpinDate);
+      localStorage.setItem('dopamineDealLabel', state.activeDealLabel);
       const walletText = `$${state.walletBalance.toFixed(0)}`;
       document.getElementById('walletBalanceText').innerText = walletText;
-      document.getElementById('walletPanelBalance').innerText = walletText;
-      document.getElementById('discountText').innerText = state.discountPct > 0 ? `${state.discountPct}% off checkout` : 'No discount active';
+      const modalBalance = document.getElementById('walletModalBalance');
+      if (modalBalance) modalBalance.innerText = walletText;
+      document.getElementById('discountNavText').innerText = state.discountPct > 0 ? `${state.discountPct}%` : 'Spin';
+      const discountText = document.getElementById('discountText');
+      if (discountText) discountText.innerText = state.activeDealLabel || 'No discount active';
     }
 
     function addWalletMoney(amount, quiet = false) {
       state.walletBalance += amount;
       updateWalletUI();
       if (!quiet) showToast(`$${amount} added to wallet.`, 'success');
+    }
+
+    function openWalletModal() {
+      updateWalletUI();
+      document.getElementById('walletModal').classList.remove('hidden');
+    }
+
+    function closeWalletModal() {
+      document.getElementById('walletModal').classList.add('hidden');
+    }
+
+    function addCustomWalletMoney() {
+      const input = document.getElementById('customWalletAmount');
+      const amount = Math.max(0, Math.round(Number(input.value || 0)));
+      if (!amount) {
+        showToast('Enter a wallet amount first.', 'info');
+        return;
+      }
+      addWalletMoney(amount);
+      input.value = '';
+    }
+
+    function openWheelModal() {
+      updateWalletUI();
+      document.getElementById('wheelModal').classList.remove('hidden');
+    }
+
+    function closeWheelModal() {
+      document.getElementById('wheelModal').classList.add('hidden');
     }
 
     function startWalletRewards() {
@@ -1857,14 +1964,25 @@
         return;
       }
 
-      const rewards = [5, 10, 15, 20, 25, 30];
-      const reward = rewards[Math.floor(Math.random() * rewards.length)];
-      state.discountPct = reward;
+      const deals = [
+        { label: '5% off checkout', discount: 5, wallet: 0 },
+        { label: '10% off checkout', discount: 10, wallet: 0 },
+        { label: '15% off checkout', discount: 15, wallet: 0 },
+        { label: '20% off checkout', discount: 20, wallet: 0 },
+        { label: '$15 wallet bonus', discount: 0, wallet: 15 },
+        { label: '$30 wallet bonus', discount: 0, wallet: 30 },
+        { label: 'Free-fee checkout', discount: 12, wallet: 0 },
+        { label: '25% off one order', discount: 25, wallet: 0 }
+      ];
+      const deal = deals[Math.floor(Math.random() * deals.length)];
+      state.discountPct = deal.discount;
+      state.activeDealLabel = deal.label;
+      if (deal.wallet) state.walletBalance += deal.wallet;
       state.lastSpinDate = today;
       const wheel = document.getElementById('discountWheel');
-      wheel.style.transform = `rotate(${720 + reward * 11}deg)`;
+      wheel.style.transform = `rotate(${900 + deals.indexOf(deal) * 47}deg)`;
       updateWalletUI();
-      showToast(`Daily wheel unlocked ${reward}% off.`, 'success');
+      showToast(`Daily wheel unlocked ${deal.label}.`, 'success');
     }
 
     function launchConfetti() {
