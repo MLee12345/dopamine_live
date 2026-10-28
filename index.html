@@ -39,8 +39,8 @@
 
   <style>
     body {
-      background-color: #09090b;
-      color: #f4f4f5;
+      background-color: #0d0d0d;
+      color: #eeeeee;
       font-family: 'Inter', sans-serif;
     }
     /* Subtle custom scrollbar */
@@ -64,9 +64,9 @@
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     }
     .concert-card:hover {
-      transform: translateY(-4px) scale(1.015);
-      box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15);
-      border-color: #3f3f46;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px -18px rgba(255, 255, 255, 0.22);
+      border-color: #52525b;
     }
 
     /* Venue map section interactive styling */
@@ -77,10 +77,10 @@
       stroke-linejoin: round;
     }
     .seat-section:hover {
-      filter: brightness(1.2) saturate(1.15);
+      filter: brightness(1.25);
     }
     .seat-section.selected {
-      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.55)) brightness(1.15);
+      filter: drop-shadow(0 0 7px rgba(244, 244, 245, 0.38)) brightness(1.22);
       opacity: 1 !important;
     }
     .section-label {
@@ -91,6 +91,24 @@
       stroke: #09090b;
       stroke-width: 4px;
       pointer-events: none;
+    }
+    .wheel-spin {
+      transition: transform 1.25s cubic-bezier(0.12, 0.8, 0.2, 1);
+    }
+    .hold-fill {
+      transition: width 0.08s linear;
+    }
+    .confetti-piece {
+      position: fixed;
+      top: -12px;
+      width: 7px;
+      height: 12px;
+      z-index: 80;
+      pointer-events: none;
+      animation: confettiFall 1.6s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(100vh) rotate(640deg); opacity: 0; }
     }
     .spend-pop {
       animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -136,6 +154,10 @@
 
       <!-- Right Navigation Links -->
       <nav class="flex items-center space-x-2 sm:space-x-4">
+        <button onclick="addWalletMoney(25)" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
+          <i class="fa-solid fa-wallet text-emerald-400"></i>
+          <span id="walletBalanceText">$0</span>
+        </button>
         <button onclick="navigateTo('discover')" id="nav-discover" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-emerald-400 bg-zinc-900 border border-zinc-800">
           <i class="fa-solid fa-compass mr-1.5"></i> Discover
         </button>
@@ -153,22 +175,51 @@
     <!-- PAGE 1: DISCOVER / CONCERT CATALOGUE -->
     <section id="page-discover" class="space-y-8">
       
-      <!-- Sleek Clean Hero Banner -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 p-6 sm:p-10 shadow-2xl">
+      <!-- Clean Hero Banner -->
+      <div class="relative overflow-hidden rounded-lg bg-zinc-900 border border-zinc-800 p-6 sm:p-8 shadow-xl">
         <div class="relative z-10 max-w-2xl space-y-3">
-          <div class="inline-flex items-center space-x-2 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Real-Time Venue Ticketing Engine</span>
+          <div class="inline-flex items-center space-x-2 bg-zinc-950 border border-zinc-700 px-3 py-1 rounded-md text-zinc-300 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Live inventory, wallet rewards, daily discounts</span>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Live Music. <span class="bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">Instant Dopamine.</span>
+            Live Music. <span class="text-emerald-300">Actual Seat Choices.</span>
           </h1>
           <p class="text-zinc-400 text-sm sm:text-base font-normal">
-            Secure tickets to iconic venues worldwide with real seating capacity maps, dynamic merch queues, and live virtual stage access directly inside your ticket wallet.
+            Find the show, preview the artist, hold to checkout, and keep your ticket wallet in one place.
           </p>
         </div>
-        <!-- Decorative subtle background glow -->
-        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-zinc-500 uppercase font-bold">Wallet</div>
+            <div id="walletPanelBalance" class="text-2xl font-extrabold text-white">$0</div>
+            <div class="text-xs text-zinc-500">Earns while you browse</div>
+          </div>
+          <button onclick="addWalletMoney(50)" class="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 rounded-md text-xs font-bold">
+            Add $50
+          </button>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs text-zinc-500 uppercase font-bold">Daily Wheel</div>
+              <div id="discountText" class="text-lg font-bold text-white">No discount active</div>
+            </div>
+            <button onclick="spinDiscountWheel()" class="relative w-16 h-16 rounded-full border border-zinc-700 bg-zinc-950 flex items-center justify-center text-xs font-black text-zinc-200 wheel-spin" id="discountWheel">
+              SPIN
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+          <div class="text-xs text-zinc-500 uppercase font-bold">Session Rewards</div>
+          <div class="text-lg font-bold text-white"><span id="siteTimeText">0:00</span> on site</div>
+          <div class="text-xs text-zinc-500">Wallet gets $5 every 45 seconds</div>
+        </div>
       </div>
 
       <!-- Category Filter Pills -->
@@ -181,7 +232,7 @@
           <button onclick="filterGenre('Hip-Hop', this)" class="genre-pill px-4 py-1.5 rounded-lg text-xs font-medium border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all">Hip-Hop / Bass</button>
         </div>
         <div class="hidden sm:block text-xs text-zinc-500">
-          Showing <span id="concertCount" class="text-zinc-300 font-semibold">10</span> Live Events
+          Showing <span id="concertCount" class="text-zinc-300 font-semibold">60</span> Live Events
         </div>
       </div>
 
@@ -240,9 +291,9 @@
         <div class="lg:col-span-7 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col items-center justify-center min-h-[420px]">
           <div class="w-full flex items-center justify-between mb-4">
             <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-layer-group"></i> Section Color Map
+              <i class="fa-solid fa-layer-group"></i> Venue Diagram
             </div>
-            <div class="text-[11px] text-zinc-500">Tap a color block to choose seats</div>
+            <div class="text-[11px] text-zinc-500">Tap a gray section to choose seats</div>
           </div>
 
           <div id="venueSvgContainer" class="w-full h-80 flex items-center justify-center">
@@ -255,6 +306,16 @@
         </div>
 
         <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Music Preview</label>
+              <span id="previewArtistLabel" class="text-[11px] text-zinc-500">Artist playlist</span>
+            </div>
+            <div id="ticketPreviewTracks" class="space-y-2">
+              <!-- Artist tracks rendered here -->
+            </div>
+          </div>
+
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
             <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Choose Seating Section</label>
             <div id="sectionList" class="space-y-2 max-h-80 overflow-y-auto pr-1">
@@ -315,8 +376,9 @@
             </div>
           </div>
 
-          <button onclick="completeTicketCheckout()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-lock"></i> Buy Tickets
+          <button id="holdBuyButton" onpointerdown="startHoldToBuy(event)" onpointerup="cancelHoldToBuy()" onpointerleave="cancelHoldToBuy()" onpointercancel="cancelHoldToBuy()" class="relative overflow-hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+            <span id="holdBuyFill" class="hold-fill absolute left-0 top-0 h-full w-0 bg-white/35"></span>
+            <span class="relative z-10 flex items-center gap-2"><i class="fa-solid fa-lock"></i> Press and Hold to Buy</span>
           </button>
         </div>
       </div>
@@ -360,11 +422,9 @@
             </div>
           </div>
 
-          <!-- Camera Selector Controls -->
-          <div class="pointer-events-auto flex items-center space-x-1.5 bg-zinc-950/80 backdrop-blur-md border border-zinc-800 p-1.5 rounded-xl">
-            <button onclick="setStageCam('Main Stage', this)" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-black">Main Cam</button>
-            <button onclick="setStageCam('Pit Cam', this)" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-400 hover:text-white">Pit Cam</button>
-            <button onclick="setStageCam('Crowd View', this)" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-400 hover:text-white">Crowd Cam</button>
+          <!-- Artist Playlist Controls -->
+          <div id="stagePlaylistControls" class="pointer-events-auto flex flex-col gap-1.5 bg-zinc-950/80 backdrop-blur-md border border-zinc-800 p-2 rounded-xl min-w-48">
+            <!-- Dynamic playlist buttons -->
           </div>
         </div>
 
@@ -375,7 +435,7 @@
               <i class="fa-solid fa-pause" id="audioIcon"></i>
             </button>
             <div>
-              <div class="text-xs font-semibold text-white" id="camStatusLabel">Camera: Main Stage Angle</div>
+              <div class="text-xs font-semibold text-white" id="camStatusLabel">Playlist: Track 1</div>
               <div class="text-[11px] text-zinc-400 flex items-center gap-1">
                 <i class="fa-solid fa-users text-emerald-400"></i> <span id="stageViewerCount">14,289</span> tuning in
               </div>
@@ -728,6 +788,74 @@
       }
     ];
 
+    const EXTRA_ARTISTS = [
+      ['Olivia Rodrigo', 'GUTS Spilled Live', 'Pop'], ['Post Malone', 'Big Stage Rodeo', 'Pop'],
+      ['Doja Cat', 'Scarlet Arena Run', 'Hip-Hop'], ['Tyler, The Creator', 'Chromakopia Nights', 'Hip-Hop'],
+      ['Charli XCX', 'Brat Summer Forever', 'Electronic'], ['Sabrina Carpenter', 'Short n Sweet Tour', 'Pop'],
+      ['Lana Del Rey', 'Stadium Poetry', 'Pop'], ['Drake', 'For All The Dogs Live', 'Hip-Hop'],
+      ['Raye', 'My 21st Century Symphony', 'Pop'], ['Hozier', 'Unreal Unearth Evening', 'Rock'],
+      ['Paramore', 'This Is Why Live', 'Rock'], ['Mitski', 'The Land Is Inhospitable', 'Rock'],
+      ['LCD Soundsystem', 'Residency Weekender', 'Electronic'], ['Flume', 'Palaces Rebuilt', 'Electronic'],
+      ['Rosalia', 'Motomami Return', 'Pop'], ['Ariana Grande', 'Eternal Sunshine Live', 'Pop'],
+      ['Travis Scott', 'Circus Maximus', 'Hip-Hop'], ['J. Cole', 'Dreamville Live', 'Hip-Hop'],
+      ['Phoebe Bridgers', 'Moon Song Sessions', 'Rock'], ['The 1975', 'Still At Their Very Best', 'Rock'],
+      ['Burna Boy', 'I Told Them Tour', 'Hip-Hop'], ['Peso Pluma', 'Exodo Live', 'Hip-Hop'],
+      ['Karol G', 'Mañana Será Bonito', 'Pop'], ['Reneé Rapp', 'Snow Angel Tour', 'Pop'],
+      ['Steve Lacy', 'Gemini Rights Live', 'Rock'], ['Vampire Weekend', 'Only God Was Above Us', 'Rock'],
+      ['Disclosure', 'Alchemy Nights', 'Electronic'], ['Jamie xx', 'In Waves Live', 'Electronic'],
+      ['Beyoncé', 'Renaissance Revisited', 'Pop'], ['Bruno Mars', 'Moonshine Residency', 'Pop'],
+      ['Metro Boomin', 'Heroes & Villains Live', 'Hip-Hop'], ['21 Savage', 'American Dream Tour', 'Hip-Hop'],
+      ['Clairo', 'Charm Live', 'Rock'], ['Boygenius', 'The Record Encore', 'Rock'],
+      ['ODESZA', 'Last Goodbye Finale', 'Electronic'], ['Calvin Harris', 'Summer Frequency', 'Electronic'],
+      ['Nicki Minaj', 'Pink Friday 2 Live', 'Hip-Hop'], ['Megan Thee Stallion', 'Hot Girl Summer', 'Hip-Hop'],
+      ['Gracie Abrams', 'The Secret Of Us', 'Pop'], ['Chappell Roan', 'Midwest Princess Ball', 'Pop'],
+      ['Glass Animals', 'Tour Of Earth', 'Rock'], ['King Gizzard', 'Marathon Set', 'Rock'],
+      ['Skrillex', 'Basement Transmission', 'Electronic'], ['Four Tet', 'All Night Field', 'Electronic'],
+      ['A$AP Rocky', 'Don’t Be Dumb Live', 'Hip-Hop'], ['Ice Spice', 'Y2K Live', 'Hip-Hop'],
+      ['Kacey Musgraves', 'Deeper Well Tour', 'Pop'], ['Noah Kahan', 'Stick Season Forever', 'Rock'],
+      ['Caroline Polachek', 'Desire Live', 'Pop'], ['Justice', 'Hyperdrama Live', 'Electronic']
+    ];
+
+    const EXTRA_DATES = [
+      'TUE, DEC 1 • 7:30 PM', 'WED, DEC 2 • 8:00 PM', 'THU, DEC 3 • 8:30 PM', 'FRI, DEC 4 • 9:00 PM',
+      'SAT, DEC 5 • 7:00 PM', 'SUN, DEC 6 • 6:30 PM', 'MON, DEC 7 • 8:00 PM', 'TUE, DEC 8 • 7:30 PM',
+      'WED, DEC 9 • 8:00 PM', 'THU, DEC 10 • 8:30 PM'
+    ];
+
+    EXTRA_ARTISTS.forEach(([artist, tour, genre], idx) => {
+      const venueIds = Object.keys(VENUES);
+      const venueId = venueIds[idx % venueIds.length];
+      const venue = VENUES[venueId];
+      const priceFrom = 75 + ((idx * 11) % 95);
+      CONCERTS.push({
+        id: artist.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        artist,
+        tour,
+        genre,
+        venueId,
+        date: EXTRA_DATES[idx % EXTRA_DATES.length],
+        isLiveNow: false,
+        isEnded: false,
+        soldOut: idx % 17 === 0,
+        priceFrom,
+        image: [
+          'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=1000&auto=format&fit=crop'
+        ][idx % 4],
+        merch: [
+          { id: `extra-${idx}-tee`, name: `${artist} Tour Tee`, price: 45 + (idx % 4) * 5, sizes: ['S', 'M', 'L', 'XL'], img: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=300&auto=format&fit=crop' },
+          { id: `extra-${idx}-hoodie`, name: `${tour.split(' ')[0]} Hoodie`, price: 80 + (idx % 3) * 10, sizes: ['M', 'L', 'XL'], img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=300&auto=format&fit=crop' }
+        ],
+        playlist: [`${artist} - Opener`, `${artist} - Fan Favorite`, `${artist} - Encore Cut`]
+      });
+
+      venue.sections.forEach((sec, secIdx) => {
+        sec.seatsAvailable = Math.max(0, sec.seatsAvailable - ((idx + secIdx) % 9));
+      });
+    });
+
     /* ==========================================================================
        2. APP STATE MANAGEMENT
        ========================================================================== */
@@ -760,7 +888,14 @@
       queueTimer: null,
       merchCart: {},
       stageCam: 'Main Stage',
-      ticketUrgencyTimer: null
+      stageTrackIndex: 0,
+      ticketUrgencyTimer: null,
+      walletBalance: Number(localStorage.getItem('dopamineWallet') || 25),
+      discountPct: Number(localStorage.getItem('dopamineDiscount') || 0),
+      lastSpinDate: localStorage.getItem('dopamineLastSpin') || '',
+      siteSeconds: 0,
+      holdTimer: null,
+      holdProgress: 0
     };
 
     /* ==========================================================================
@@ -770,6 +905,8 @@
       pruneEndedTickets();
       renderConcerts();
       updateTicketBadge();
+      updateWalletUI();
+      startWalletRewards();
       initStageVisualizer();
       startSpendingPopups();
     };
@@ -828,8 +965,10 @@
 
       filtered.forEach(concert => {
         const venue = VENUES[concert.venueId];
+        const soldOut = concert.soldOut || venue.sections.every(sec => sec.seatsAvailable <= 0);
+        concert.soldOut = soldOut;
         const card = document.createElement('div');
-        card.className = "concert-card bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between";
+        card.className = `concert-card bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex flex-col justify-between ${soldOut ? 'opacity-70' : ''}`;
 
         card.innerHTML = `
           <div>
@@ -842,8 +981,12 @@
                 <i class="fa-solid fa-location-dot text-emerald-400 mr-1"></i> ${venue.name}
               </div>
 
-              ${concert.isLiveNow ? `
-                <div class="absolute top-3 right-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
+              ${soldOut ? `
+                <div class="absolute top-3 right-3 bg-zinc-950/90 border border-zinc-500/60 text-zinc-200 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-lg">
+                  SOLD OUT
+                </div>
+              ` : concert.isLiveNow ? `
+                <div class="absolute top-3 right-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-lg">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> TONIGHT
                 </div>
               ` : ''}
@@ -875,8 +1018,8 @@
               <span class="text-[10px] text-zinc-500 block uppercase">From</span>
               <span class="text-lg font-extrabold text-white">$${concert.priceFrom}</span>
             </div>
-            <button onclick="openTicketModal('${concert.id}')" class="px-5 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md">
-              See Tickets
+            <button ${soldOut ? 'disabled' : `onclick="openTicketModal('${concert.id}')"`} class="px-5 py-2.5 ${soldOut ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-zinc-100 hover:bg-white text-zinc-950'} font-bold text-xs rounded-md transition-all shadow-md">
+              ${soldOut ? 'Sold Out' : 'See Tickets'}
             </button>
           </div>
         `;
@@ -901,12 +1044,17 @@
     /* ==========================================================================
        5. ACCURATE VENUE SEATING MAPS & TICKET RESERVATION PAGE
        ========================================================================== */
-    const SECTION_COLORS = ['#00e5ff', '#ffcc00', '#ff4d8d', '#7c3aed'];
+    const SECTION_COLORS = ['#d4d4d8', '#a1a1aa', '#71717a'];
 
     function openTicketModal(concertId) {
       state.selectedConcert = CONCERTS.find(c => c.id === concertId);
       const venue = VENUES[state.selectedConcert.venueId];
-      state.selectedSection = venue.sections[0];
+      if (state.selectedConcert.soldOut || venue.sections.every(sec => sec.seatsAvailable <= 0)) {
+        showToast('That show just sold out.', 'info');
+        renderConcerts();
+        return;
+      }
+      state.selectedSection = venue.sections.find(sec => sec.seatsAvailable > 0) || venue.sections[0];
       state.selectedQty = 1;
       state.pendingCheckout = null;
 
@@ -915,6 +1063,7 @@
 
       renderVenueSvgMap(venue);
       renderSectionList(venue);
+      renderTicketPreviewTracks();
       updateModalTotals();
       startTicketUrgency();
 
@@ -923,6 +1072,31 @@
 
     function closeTicketModal() {
       navigateTo('discover');
+    }
+
+    function getArtistPlaylist(concert) {
+      return concert.playlist || [
+        `${concert.artist} - Soundcheck Intro`,
+        `${concert.artist} - Live Single`,
+        `${concert.artist} - Encore Preview`
+      ];
+    }
+
+    function renderTicketPreviewTracks() {
+      if (!state.selectedConcert) return;
+      document.getElementById('previewArtistLabel').innerText = state.selectedConcert.artist;
+      const container = document.getElementById('ticketPreviewTracks');
+      container.innerHTML = getArtistPlaylist(state.selectedConcert).map((track, idx) => `
+        <button onclick="previewTicketTrack(${idx})" class="w-full flex items-center justify-between bg-zinc-950 border border-zinc-800 hover:border-zinc-700 rounded-lg px-3 py-2 text-left">
+          <span class="text-xs text-zinc-200 truncate">${track}</span>
+          <span class="text-[10px] text-zinc-500"><i class="fa-solid fa-play mr-1"></i>${idx === 0 ? '0:30' : '0:45'}</span>
+        </button>
+      `).join('');
+    }
+
+    function previewTicketTrack(idx) {
+      const track = getArtistPlaylist(state.selectedConcert)[idx];
+      showToast(`Previewing ${track}`, 'info');
     }
 
     function getSectionColor(venue, secId) {
@@ -934,92 +1108,21 @@
     function renderVenueSvgMap(venue) {
       const svgContainer = document.getElementById('venueSvgContainer');
       
-      let svgHtml = '';
-      if (venue.svgType === 'sphere') {
-        // Dome Arc SVG for Sphere Las Vegas
-        svgHtml = `
-          <svg viewBox="0 0 300 200" class="w-full h-full">
-            <!-- Outer Dome Boundary -->
-            <path d="M 30,170 A 130,130 0 0,1 270,170 Z" fill="none" stroke="#3f3f46" stroke-width="2" stroke-dasharray="4 4"/>
-            <!-- 300 Level Arc -->
-            <path id="svg-sec-300" onclick="selectSectionById('sec-300')" class="seat-section" d="M 45,160 A 115,115 0 0,1 255,160" fill="none" stroke="${getSectionColor(venue, 'sec-300')}" stroke-width="22" opacity="0.85"/>
-            <!-- 200 Level Arc -->
-            <path id="svg-sec-200" onclick="selectSectionById('sec-200')" class="seat-section" d="M 75,150 A 85,85 0 0,1 225,150" fill="none" stroke="${getSectionColor(venue, 'sec-200')}" stroke-width="24" opacity="0.9"/>
-            <!-- Floor Level -->
-            <path id="svg-sec-floor" onclick="selectSectionById('sec-floor')" class="seat-section" d="M 105,145 A 50,50 0 0,1 195,145" fill="none" stroke="${getSectionColor(venue, 'sec-floor')}" stroke-width="28"/>
-            <text class="section-label" x="150" y="46" text-anchor="middle">300</text>
-            <text class="section-label" x="150" y="82" text-anchor="middle">200</text>
-            <text class="section-label" x="150" y="122" text-anchor="middle">FLOOR</text>
-            <!-- Stage Center -->
-            <rect x="110" y="155" width="80" height="25" rx="5" fill="#18181b" stroke="#52525b" stroke-width="1.5"/>
-            <text x="150" y="172" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">16K LED STAGE</text>
-          </svg>
-        `;
-      } else if (venue.svgType === 'arena') {
-        // Oval Arena SVG for MSG & O2 Arena
-        svgHtml = `
-          <svg viewBox="0 0 300 200" class="w-full h-full">
-            <!-- Stage West/North -->
-            <rect x="30" y="70" width="40" height="60" rx="4" fill="#18181b" stroke="#52525b" stroke-width="1.5"/>
-            <text x="50" y="104" fill="#ffffff" font-size="9" font-weight="bold" text-anchor="middle">STAGE</text>
-            
-            <!-- Floor Pit -->
-            <rect id="svg-sec-ga" onclick="selectSectionById('sec-ga')" class="seat-section" x="80" y="75" width="55" height="50" rx="6" fill="${getSectionColor(venue, 'sec-ga')}" opacity="0.92"/>
-            <rect id="svg-sec-pit" onclick="selectSectionById('sec-pit')" class="seat-section" x="80" y="75" width="55" height="50" rx="6" fill="${getSectionColor(venue, 'sec-pit')}" opacity="0.92"/>
+      const [front, middle, back] = venue.sections;
+      const svgHtml = `
+        <svg viewBox="0 0 300 200" class="w-full h-full">
+          <rect x="108" y="154" width="84" height="24" rx="4" fill="#18181b" stroke="#71717a"/>
+          <text x="150" y="170" fill="#e4e4e7" font-size="9" font-weight="700" text-anchor="middle">STAGE</text>
 
-            <!-- Lower Bowl Ring -->
-            <path id="svg-sec-100" onclick="selectSectionById('sec-100')" class="seat-section" d="M 145,55 L 230,55 A 45,45 0 0,1 230,145 L 145,145 Z" fill="none" stroke="${getSectionColor(venue, 'sec-100')}" stroke-width="24" opacity="0.9"/>
-            <path id="svg-sec-l1" onclick="selectSectionById('sec-l1')" class="seat-section" d="M 145,55 L 230,55 A 45,45 0 0,1 230,145 L 145,145 Z" fill="none" stroke="${getSectionColor(venue, 'sec-l1')}" stroke-width="24" opacity="0.9"/>
+          <rect id="svg-${front.id}" onclick="selectSectionById('${front.id}')" class="seat-section" x="95" y="116" width="110" height="26" rx="6" fill="#d4d4d8" opacity="0.88"/>
+          <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="#a1a1aa" opacity="0.82"/>
+          <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="#71717a" opacity="0.78"/>
 
-            <!-- Upper Bowl Ring -->
-            <path id="svg-sec-200" onclick="selectSectionById('sec-200')" class="seat-section" d="M 145,28 L 245,28 A 70,70 0 0,1 245,172 L 145,172 Z" fill="none" stroke="${getSectionColor(venue, 'sec-200')}" stroke-width="18" opacity="0.78"/>
-            <path id="svg-sec-l4" onclick="selectSectionById('sec-l4')" class="seat-section" d="M 145,28 L 245,28 A 70,70 0 0,1 245,172 L 145,172 Z" fill="none" stroke="${getSectionColor(venue, 'sec-l4')}" stroke-width="18" opacity="0.78"/>
-            <text class="section-label" x="108" y="104" text-anchor="middle">${venue.sections[0].id.includes('pit') ? 'PIT' : 'GA'}</text>
-            <text class="section-label" x="208" y="101" text-anchor="middle">${venue.sections[1].id.includes('l1') ? 'L1' : '100'}</text>
-            <text class="section-label" x="242" y="101" text-anchor="middle">${venue.sections[2].id.includes('l4') ? 'L4' : '200'}</text>
-          </svg>
-        `;
-      } else if (venue.svgType === 'amphitheater') {
-        // Red Rocks Stepped Slope
-        svgHtml = `
-          <svg viewBox="0 0 300 200" class="w-full h-full">
-            <!-- Rocks Formations sides -->
-            <path d="M 10,10 L 60,190" stroke="#78350f" stroke-width="10" stroke-linecap="round"/>
-            <path d="M 290,10 L 240,190" stroke="#78350f" stroke-width="10" stroke-linecap="round"/>
-            <!-- Stage -->
-            <rect x="80" y="160" width="140" height="25" rx="4" fill="#18181b" stroke="#52525b"/>
-            <text x="150" y="176" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">NATURAL ROCK STAGE</text>
-
-            <!-- Front VIP Rows -->
-            <path id="svg-sec-vip" onclick="selectSectionById('sec-vip')" class="seat-section" d="M 90,140 L 210,140" fill="none" stroke="${getSectionColor(venue, 'sec-vip')}" stroke-width="18"/>
-            <!-- Mid Rows -->
-            <path id="svg-sec-mid" onclick="selectSectionById('sec-mid')" class="seat-section" d="M 75,100 L 225,100" fill="none" stroke="${getSectionColor(venue, 'sec-mid')}" stroke-width="24" opacity="0.9"/>
-            <!-- Top GA Rows -->
-            <path id="svg-sec-top" onclick="selectSectionById('sec-top')" class="seat-section" d="M 60,50 L 240,50" fill="none" stroke="${getSectionColor(venue, 'sec-top')}" stroke-width="30" opacity="0.8"/>
-            <text class="section-label" x="150" y="144" text-anchor="middle">VIP</text>
-            <text class="section-label" x="150" y="104" text-anchor="middle">MID</text>
-            <text class="section-label" x="150" y="54" text-anchor="middle">GA</text>
-          </svg>
-        `;
-      } else {
-        // Hollywood Bowl Shell Layout
-        svgHtml = `
-          <svg viewBox="0 0 300 200" class="w-full h-full">
-            <!-- Concentric Shell Stage -->
-            <path d="M 110,170 A 40,40 0 0,1 190,170 Z" fill="#27272a" stroke="#ffffff"/>
-            <text x="150" y="160" fill="#ffffff" font-size="9" font-weight="bold" text-anchor="middle">BOWL SHELL</text>
-            <!-- Pool Circle -->
-            <path id="svg-sec-pool" onclick="selectSectionById('sec-pool')" class="seat-section" d="M 100,135 A 50,50 0 0,1 200,135" fill="none" stroke="${getSectionColor(venue, 'sec-pool')}" stroke-width="18"/>
-            <!-- Garden Boxes -->
-            <path id="svg-sec-[garden]" onclick="selectSectionById('sec-[garden]')" class="seat-section" d="M 80,105 A 75,75 0 0,1 220,105" fill="none" stroke="${getSectionColor(venue, 'sec-[garden]')}" stroke-width="22" opacity="0.9"/>
-            <!-- Terrace -->
-            <path id="svg-sec-[terrace]" onclick="selectSectionById('sec-[terrace]')" class="seat-section" d="M 60,70 A 100,100 0 0,1 240,70" fill="none" stroke="${getSectionColor(venue, 'sec-[terrace]')}" stroke-width="26" opacity="0.8"/>
-            <text class="section-label" x="150" y="136" text-anchor="middle">POOL</text>
-            <text class="section-label" x="150" y="106" text-anchor="middle">GARDEN</text>
-            <text class="section-label" x="150" y="70" text-anchor="middle">TERRACE</text>
-          </svg>
-        `;
-      }
+          <text class="section-label" x="150" y="134" text-anchor="middle">${front.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
+          <text class="section-label" x="150" y="95" text-anchor="middle">${middle.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
+          <text class="section-label" x="150" y="54" text-anchor="middle">${back.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
+        </svg>
+      `;
 
       svgContainer.innerHTML = svgHtml;
       renderSectionLegend(venue);
@@ -1029,8 +1132,8 @@
     function renderSectionLegend(venue) {
       const legend = document.getElementById('sectionLegend');
       legend.innerHTML = venue.sections.map(sec => `
-        <button onclick="selectSectionById('${sec.id}')" class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-left hover:border-zinc-700 transition-colors" style="border-left: 5px solid ${getSectionColor(venue, sec.id)}">
-          <span class="w-4 h-4 rounded-sm border border-white/40" style="background:${getSectionColor(venue, sec.id)}"></span>
+        <button onclick="selectSectionById('${sec.id}')" class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-left hover:border-zinc-700 transition-colors">
+          <span class="w-4 h-4 rounded-sm border border-white/20" style="background:${getSectionColor(venue, sec.id)}"></span>
           <span class="truncate">${sec.name}</span>
         </button>
       `).join('');
@@ -1043,19 +1146,20 @@
       venue.sections.forEach(sec => {
         const item = document.createElement('div');
         const isSelected = state.selectedSection.id === sec.id;
+        const isSoldOut = sec.seatsAvailable <= 0;
         item.className = `p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
           isSelected 
             ? 'bg-emerald-950/50 border-emerald-500 text-white' 
-            : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+            : isSoldOut ? 'bg-zinc-950 border-zinc-900 text-zinc-600 opacity-60' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
         }`;
-        item.onclick = () => selectSection(sec);
+        item.onclick = () => isSoldOut ? showToast('That section is sold out.', 'info') : selectSection(sec);
 
         item.innerHTML = `
           <div class="flex items-start gap-3">
-            <span class="w-4 h-4 rounded-sm mt-1 border border-white/40" style="background:${getSectionColor(venue, sec.id)}"></span>
+            <span class="w-4 h-4 rounded-sm mt-1 border border-white/20" style="background:${getSectionColor(venue, sec.id)}"></span>
             <div>
             <div class="text-xs font-bold text-white">${sec.name}</div>
-            <div class="text-[11px] text-zinc-500">${sec.seatsAvailable} passes available</div>
+            <div class="text-[11px] text-zinc-500">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
             </div>
           </div>
           <div class="text-right">
@@ -1068,6 +1172,10 @@
     }
 
     function selectSection(sec) {
+      if (sec.seatsAvailable <= 0) {
+        showToast('That section is sold out.', 'info');
+        return;
+      }
       state.selectedSection = sec;
       const venue = VENUES[state.selectedConcert.venueId];
       renderSectionList(venue);
@@ -1089,7 +1197,8 @@
 
     function updateQty(delta) {
       const next = state.selectedQty + delta;
-      if (next >= 1 && next <= 8) {
+      const maxQty = Math.min(8, state.selectedSection.seatsAvailable);
+      if (next >= 1 && next <= maxQty) {
         state.selectedQty = next;
         document.getElementById('ticketQtyText').innerText = state.selectedQty;
         updateModalTotals();
@@ -1102,6 +1211,10 @@
     }
 
     function confirmTicketPurchase() {
+      if (state.selectedSection.seatsAvailable <= 0) {
+        showToast('That section just sold out.', 'info');
+        return;
+      }
       state.pendingCheckout = {
         concertId: state.selectedConcert.id,
         sectionName: state.selectedSection.name,
@@ -1132,7 +1245,8 @@
       const concert = state.selectedConcert;
       const venue = VENUES[concert.venueId];
       const fees = Math.round(state.pendingCheckout.totalPaid * 0.12);
-      const finalTotal = state.pendingCheckout.totalPaid + fees;
+      const discount = Math.round(state.pendingCheckout.totalPaid * (state.discountPct / 100));
+      const finalTotal = state.pendingCheckout.totalPaid + fees - discount;
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
@@ -1158,12 +1272,45 @@
             <span class="text-zinc-400">Service and venue fees</span>
             <span class="text-zinc-200">$${fees}</span>
           </div>
+          <div class="flex items-center justify-between">
+            <span class="text-zinc-400">Daily wheel discount</span>
+            <span class="text-emerald-300">-${discount}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-zinc-400">Wallet balance</span>
+            <span class="text-zinc-200">$${state.walletBalance.toFixed(0)}</span>
+          </div>
           <div class="flex items-center justify-between pt-3 border-t border-zinc-800">
             <span class="text-white font-bold">Total</span>
             <span class="text-2xl font-extrabold text-emerald-400">$${finalTotal}</span>
           </div>
         </div>
       `;
+    }
+
+    function startHoldToBuy(event) {
+      event.preventDefault();
+      if (state.holdTimer) clearInterval(state.holdTimer);
+      state.holdProgress = 0;
+      document.getElementById('holdBuyFill').style.width = '0%';
+      state.holdTimer = setInterval(() => {
+        state.holdProgress += 4;
+        document.getElementById('holdBuyFill').style.width = `${Math.min(100, state.holdProgress)}%`;
+        if (state.holdProgress >= 100) {
+          cancelHoldToBuy(false);
+          completeTicketCheckout();
+        }
+      }, 55);
+    }
+
+    function cancelHoldToBuy(reset = true) {
+      if (state.holdTimer) clearInterval(state.holdTimer);
+      state.holdTimer = null;
+      if (reset && state.holdProgress < 100) {
+        state.holdProgress = 0;
+        const fill = document.getElementById('holdBuyFill');
+        if (fill) fill.style.width = '0%';
+      }
     }
 
     function startTicketUrgency() {
@@ -1173,13 +1320,20 @@
 
         const venue = VENUES[state.selectedConcert.venueId];
         const hotSection = venue.sections[Math.floor(Math.random() * venue.sections.length)];
-        const bought = Math.min(hotSection.seatsAvailable, Math.floor(Math.random() * 5) + 1);
+        const selloutBurst = Math.random() < 0.12;
+        const bought = selloutBurst ? hotSection.seatsAvailable : Math.min(hotSection.seatsAvailable, Math.floor(Math.random() * 9) + 2);
         if (bought <= 0) return;
 
         hotSection.seatsAvailable -= bought;
+        state.selectedConcert.soldOut = venue.sections.every(sec => sec.seatsAvailable <= 0);
         renderSectionList(venue);
         if (state.activeTab === 'ticket-select') renderSectionLegend(venue);
-        showToast(`${bought} ${hotSection.name} ticket${bought > 1 ? 's were' : ' was'} just bought.`, 'info');
+        showToast(selloutBurst ? `${hotSection.name} just sold out.` : `${bought} ${hotSection.name} ticket${bought > 1 ? 's were' : ' was'} just bought.`, 'info');
+        if (state.selectedConcert.soldOut) {
+          showToast(`${state.selectedConcert.artist} is sold out.`, 'info');
+          navigateTo('discover');
+          renderConcerts();
+        }
       }, 6500);
     }
 
@@ -1197,6 +1351,17 @@
         return;
       }
 
+      const venue = VENUES[state.selectedConcert.venueId];
+      const purchasedSection = venue.sections.find(sec => sec.name === state.pendingCheckout.sectionName);
+      if (purchasedSection && purchasedSection.seatsAvailable < state.pendingCheckout.qty) {
+        showToast('Those seats sold out while you were checking out.', 'info');
+        state.selectedConcert.soldOut = venue.sections.every(sec => sec.seatsAvailable <= 0);
+        navigateTo('discover');
+        renderConcerts();
+        return;
+      }
+
+      if (purchasedSection) purchasedSection.seatsAvailable -= state.pendingCheckout.qty;
       const existingTicket = state.userTickets.find(t => t.concertId === state.pendingCheckout.concertId);
       const newTicket = {
         ticketId: 't-' + Math.floor(1000 + Math.random() * 9000),
@@ -1222,10 +1387,13 @@
 
       state.pendingCheckout = null;
       stopTicketUrgency();
+      launchConfetti();
       updateTicketBadge();
+      updateWalletUI();
 
       showToast(existingTicket ? 'Tickets merged into your existing concert pass.' : `Success! ${newTicket.qty} ticket(s) added to your wallet.`, 'success');
       navigateTo('discover');
+      renderConcerts();
     }
 
     /* ==========================================================================
@@ -1333,10 +1501,31 @@
 
       document.getElementById('stageArtistName').innerText = concert.artist;
       document.getElementById('stageVenueName').innerText = `${venue.name} • ${venue.city}`;
-      document.getElementById('stageTrackTitle').innerText = `${concert.artist} - Live Audio Feed`;
-      setStageCam('Main Stage');
+      state.stageTrackIndex = 0;
+      renderStagePlaylist(concert);
+      setPlaylistTrack(0);
 
       navigateTo('stage');
+    }
+
+    function renderStagePlaylist(concert) {
+      const controls = document.getElementById('stagePlaylistControls');
+      controls.innerHTML = getArtistPlaylist(concert).map((track, idx) => `
+        <button onclick="setPlaylistTrack(${idx})" class="playlist-btn px-3 py-2 rounded-lg text-xs text-left ${idx === 0 ? 'bg-emerald-500 text-black font-bold' : 'text-zinc-300 hover:bg-zinc-800'}">
+          ${idx + 1}. ${track.replace(`${concert.artist} - `, '')}
+        </button>
+      `).join('');
+    }
+
+    function setPlaylistTrack(idx) {
+      state.stageTrackIndex = idx;
+      const track = getArtistPlaylist(state.selectedConcert)[idx];
+      document.getElementById('stageTrackTitle').innerText = track;
+      document.getElementById('camStatusLabel').innerText = `Playlist: Track ${idx + 1}`;
+      document.querySelectorAll('.playlist-btn').forEach((btn, btnIdx) => {
+        btn.className = `playlist-btn px-3 py-2 rounded-lg text-xs text-left ${btnIdx === idx ? 'bg-emerald-500 text-black font-bold' : 'text-zinc-300 hover:bg-zinc-800'}`;
+      });
+      showToast(`Playing ${track}`, 'info');
     }
 
     /* ==========================================================================
@@ -1420,12 +1609,12 @@
       if (!state.queueStarted) {
         state.queueStarted = true;
         state.queueTimer = setInterval(() => {
-          state.queueCharge = Math.max(0, state.queueCharge - 4);
+          state.queueCharge = Math.max(0, state.queueCharge - 6);
           updateQueueUI();
-        }, 450);
+        }, 300);
       }
 
-      state.queueCharge = Math.min(100, state.queueCharge + 26);
+      state.queueCharge = Math.min(100, state.queueCharge + 18);
       updateQueueUI();
 
       if (state.queueCharge >= 100) {
@@ -1564,15 +1753,16 @@
         step += 0.03;
         const width = canvas.width;
         const height = canvas.height;
-        const bars = state.stageCam === 'Pit Cam' ? 64 : 40;
+        const bars = 42 + state.stageTrackIndex * 8;
         const barWidth = width / bars;
-        const palette = {
-          'Main Stage': ['#059669', '#10b981', '#8b5cf6'],
-          'Pit Cam': ['#f97316', '#facc15', '#ef4444'],
-          'Crowd View': ['#38bdf8', '#22c55e', '#a78bfa']
-        }[state.stageCam] || ['#059669', '#10b981', '#8b5cf6'];
+        const palettes = [
+          ['#e4e4e7', '#a1a1aa', '#22c55e'],
+          ['#fafafa', '#d4d4d8', '#38bdf8'],
+          ['#f4f4f5', '#a1a1aa', '#f59e0b']
+        ];
+        const palette = palettes[state.stageTrackIndex % palettes.length];
 
-        if (state.stageCam === 'Crowd View') {
+        if (state.stageTrackIndex === 2) {
           for (let i = 0; i < 90; i++) {
             const x = (Math.sin(step + i * 12.9898) * 43758.5453) % 1 * width;
             const y = height * 0.42 + (Math.cos(step * 0.7 + i) * height * 0.22);
@@ -1586,7 +1776,7 @@
         }
 
         for (let i = 0; i < bars; i++) {
-          const intensity = state.stageCam === 'Pit Cam' ? 0.72 : state.stageCam === 'Crowd View' ? 0.34 : 0.5;
+          const intensity = 0.45 + state.stageTrackIndex * 0.1;
           const barHeight = Math.abs(Math.sin(step + i * 0.2) * (height * intensity)) + 20;
           const x = i * barWidth;
           const y = height - barHeight;
@@ -1602,7 +1792,7 @@
 
         ctx.fillStyle = 'rgba(244, 244, 245, 0.85)';
         ctx.font = '700 11px Inter, sans-serif';
-        ctx.fillText(state.stageCam.toUpperCase(), 18, height - 22);
+        ctx.fillText(`TRACK ${state.stageTrackIndex + 1}`, 18, height - 22);
       }
 
       draw();
@@ -1620,17 +1810,6 @@
       }
     }
 
-    function setStageCam(camName, clickedButton = null) {
-      state.stageCam = camName;
-      document.getElementById('camStatusLabel').innerText = `Camera: ${camName}`;
-      document.querySelectorAll('.cam-btn').forEach(b => {
-        b.className = "cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-400 hover:text-white";
-      });
-      const activeButton = clickedButton || Array.from(document.querySelectorAll('.cam-btn')).find(btn => btn.textContent.toLowerCase().includes(camName.split(' ')[0].toLowerCase()));
-      if (activeButton) activeButton.className = "cam-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-black";
-      showToast(`Switched to ${camName} feed.`, 'info');
-    }
-
     /* ==========================================================================
        9. UTILITY TOAST NOTIFICATIONS
        ========================================================================== */
@@ -1641,6 +1820,65 @@
       { name: 'Noah', city: 'Brooklyn', item: 'checked out with merch', amount: 128 },
       { name: 'Sam', city: 'Los Angeles', item: 'reserved VIP seats', amount: 560 }
     ];
+
+    function updateWalletUI() {
+      localStorage.setItem('dopamineWallet', state.walletBalance.toFixed(0));
+      localStorage.setItem('dopamineDiscount', state.discountPct.toString());
+      localStorage.setItem('dopamineLastSpin', state.lastSpinDate);
+      const walletText = `$${state.walletBalance.toFixed(0)}`;
+      document.getElementById('walletBalanceText').innerText = walletText;
+      document.getElementById('walletPanelBalance').innerText = walletText;
+      document.getElementById('discountText').innerText = state.discountPct > 0 ? `${state.discountPct}% off checkout` : 'No discount active';
+    }
+
+    function addWalletMoney(amount, quiet = false) {
+      state.walletBalance += amount;
+      updateWalletUI();
+      if (!quiet) showToast(`$${amount} added to wallet.`, 'success');
+    }
+
+    function startWalletRewards() {
+      setInterval(() => {
+        state.siteSeconds += 1;
+        const mins = Math.floor(state.siteSeconds / 60);
+        const secs = String(state.siteSeconds % 60).padStart(2, '0');
+        document.getElementById('siteTimeText').innerText = `${mins}:${secs}`;
+        if (state.siteSeconds % 45 === 0) {
+          addWalletMoney(5, true);
+          showToast('$5 site-time reward added to wallet.', 'success');
+        }
+      }, 1000);
+    }
+
+    function spinDiscountWheel() {
+      const today = new Date().toLocaleDateString();
+      if (state.lastSpinDate === today) {
+        showToast('Daily spin already used. Come back tomorrow.', 'info');
+        return;
+      }
+
+      const rewards = [5, 10, 15, 20, 25, 30];
+      const reward = rewards[Math.floor(Math.random() * rewards.length)];
+      state.discountPct = reward;
+      state.lastSpinDate = today;
+      const wheel = document.getElementById('discountWheel');
+      wheel.style.transform = `rotate(${720 + reward * 11}deg)`;
+      updateWalletUI();
+      showToast(`Daily wheel unlocked ${reward}% off.`, 'success');
+    }
+
+    function launchConfetti() {
+      const colors = ['#22c55e', '#e4e4e7', '#facc15', '#38bdf8'];
+      for (let i = 0; i < 42; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = `${Math.random() * 0.35}s`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2200);
+      }
+    }
 
     function startSpendingPopups() {
       setTimeout(showSpendingPopup, 2500);
