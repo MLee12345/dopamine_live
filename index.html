@@ -168,6 +168,65 @@
     .toast-animate {
       animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+    .account-input-error {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14) !important;
+    }
+    .filter-menu {
+      max-height: 245px;
+      overflow-y: auto;
+      box-shadow: 0 18px 38px -24px rgba(49, 46, 129, 0.6);
+    }
+    .price-range-wrap {
+      position: relative;
+      height: 24px;
+    }
+    .price-track,
+    .price-range-active {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 11px;
+      height: 4px;
+      border-radius: 999px;
+    }
+    .price-track {
+      background: #c7d2fe;
+    }
+    .price-range-active {
+      background: linear-gradient(90deg, #4f46e5, #10b981);
+    }
+    .price-range-input {
+      position: absolute;
+      width: 100%;
+      height: 24px;
+      pointer-events: none;
+      appearance: none;
+      background: transparent;
+      left: 0;
+      top: 0;
+    }
+    .price-range-input::-webkit-slider-thumb {
+      appearance: none;
+      pointer-events: auto;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 3px solid #4f46e5;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28);
+      cursor: grab;
+    }
+    .price-range-input::-moz-range-thumb {
+      pointer-events: auto;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 3px solid #4f46e5;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28);
+      cursor: grab;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-black">
@@ -218,9 +277,6 @@
         <button onclick="navigateTo('profile')" id="nav-profile" class="px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors">
           <i class="fa-solid fa-user mr-1.5"></i> Profile
         </button>
-        <button onclick="logoutAccount()" id="nav-logout" class="hidden px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors">
-          <i class="fa-solid fa-right-from-bracket mr-1.5"></i> Log out
-        </button>
       </nav>
     </div>
   </header>
@@ -230,29 +286,46 @@
 
     <!-- PAGE 0: ACCOUNT START -->
     <section id="page-account" class="hidden min-h-[78vh] grid place-items-center">
-      <div class="w-full max-w-md bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xl shadow-indigo-950/10">
+      <div class="w-full max-w-lg overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
+        <div class="p-6 sm:p-8 bg-[linear-gradient(135deg,_#312e81,_#111827_52%,_#09090b)]">
+          <div class="grid grid-cols-3 gap-2 mb-6">
+            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
+              <div class="text-xl font-black">24k</div>
+              <div class="text-[10px] text-indigo-100">fans live</div>
+            </div>
+            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
+              <div class="text-xl font-black">$5</div>
+              <div class="text-[10px] text-indigo-100">wallet drops</div>
+            </div>
+            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
+              <div class="text-xl font-black">8</div>
+              <div class="text-[10px] text-indigo-100">daily wins</div>
+            </div>
+          </div>
         <div id="accountChoiceView" class="space-y-3">
-          <button onclick="showAccountForm('login')" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl py-3 text-sm font-bold">Log in</button>
-          <button onclick="showAccountForm('signup')" class="w-full bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-xl py-3 text-sm font-bold">Sign up</button>
-          <div class="pt-2 border-t border-zinc-100">
-            <button onclick="skipAccount()" class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-xl py-3 text-sm font-bold">Skip to DopamineLive</button>
-            <p class="text-[11px] text-zinc-500 mt-2 text-center">Skipping keeps a guest session on this device until you log out.</p>
+          <button onclick="showAccountForm('login')" class="w-full bg-emerald-400 hover:bg-emerald-300 text-zinc-950 rounded-2xl py-3.5 text-sm font-black shadow-lg shadow-emerald-500/20">Log in</button>
+          <button onclick="showAccountForm('signup')" class="w-full bg-white hover:bg-indigo-50 border border-white text-indigo-900 rounded-2xl py-3.5 text-sm font-black">Sign up</button>
+          <div class="pt-2 border-t border-white/10">
+            <button onclick="skipAccount()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-2xl py-3.5 text-sm font-black">Skip to DopamineLive</button>
+            <p class="text-[11px] text-indigo-100 mt-2 text-center">Skipping keeps a guest session on this device until you log out.</p>
           </div>
         </div>
         <div id="accountFormView" class="hidden">
-          <button onclick="showAccountChoices()" class="text-xs font-semibold text-zinc-500 hover:text-indigo-700 mb-5"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>
-          <div class="mb-5"><h2 id="accountFormTitle" class="text-2xl font-bold text-zinc-950">Sign up</h2></div>
+          <button onclick="showAccountChoices()" class="text-xs font-semibold text-indigo-100 hover:text-white mb-5"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>
+          <div class="mb-5"><h2 id="accountFormTitle" class="text-2xl font-black text-white">Sign up</h2></div>
           <div class="space-y-3">
             <label class="block">
-              <span class="text-xs font-semibold text-zinc-600">Username</span>
-              <input id="accountUsername" class="mt-1 w-full bg-white border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-950 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="yourname">
+              <span class="text-xs font-semibold text-indigo-100">Username</span>
+              <input id="accountUsername" class="mt-1 w-full bg-white border border-white rounded-xl px-3 py-2.5 text-sm text-zinc-950 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/25" placeholder="yourname">
             </label>
             <label class="block">
-              <span class="text-xs font-semibold text-zinc-600">Password</span>
-              <input id="accountPassword" type="password" class="mt-1 w-full bg-white border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-950 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="Password">
+              <span class="text-xs font-semibold text-indigo-100">Password</span>
+              <input id="accountPassword" type="password" class="mt-1 w-full bg-white border border-white rounded-xl px-3 py-2.5 text-sm text-zinc-950 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/25" placeholder="Password">
             </label>
-            <button id="accountSubmitButton" onclick="submitAccountForm()" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-bold">Create account</button>
+            <button id="accountSubmitButton" onclick="submitAccountForm()" class="w-full bg-emerald-400 hover:bg-emerald-300 text-zinc-950 rounded-xl py-3 text-sm font-black">Create account</button>
+            <p id="accountError" class="hidden text-xs font-bold text-red-200 bg-red-500/15 border border-red-300/25 rounded-xl px-3 py-2"></p>
           </div>
+        </div>
         </div>
       </div>
     </section>
@@ -279,20 +352,26 @@
       <!-- Marketplace Filters -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 w-full lg:max-w-4xl">
-          <select id="locationFilter" onchange="handleFilters()" class="appearance-none bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2.5 text-xs font-bold text-indigo-950 focus:outline-none focus:border-indigo-500 cursor-pointer">
-            <option value="ALL">Location</option>
-          </select>
-          <select id="dateFilter" onchange="handleFilters()" class="appearance-none bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2.5 text-xs font-bold text-indigo-950 focus:outline-none focus:border-indigo-500 cursor-pointer">
-            <option value="ALL">Any date</option>
-            <option value="TODAY">Today / tomorrow</option>
-            <option value="NOV">November</option>
-            <option value="DEC">December</option>
-            <option value="JAN">January</option>
-            <option value="FEB">February</option>
-          </select>
+          <div class="relative">
+            <button id="locationFilterButton" onclick="toggleFilterMenu('location')" class="w-full bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2.5 text-xs font-bold text-indigo-950 hover:border-indigo-400 focus:outline-none focus:border-indigo-500 flex items-center justify-between">
+              <span>Location</span><i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </button>
+            <div id="locationFilterMenu" class="filter-menu hidden absolute left-0 right-0 top-[calc(100%+6px)] z-30 bg-white border border-indigo-200 rounded-xl p-1"></div>
+          </div>
+          <div class="relative">
+            <button id="dateFilterButton" onclick="toggleFilterMenu('date')" class="w-full bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2.5 text-xs font-bold text-indigo-950 hover:border-indigo-400 focus:outline-none focus:border-indigo-500 flex items-center justify-between">
+              <span>Any date</span><i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </button>
+            <div id="dateFilterMenu" class="filter-menu hidden absolute left-0 right-0 top-[calc(100%+6px)] z-30 bg-white border border-indigo-200 rounded-xl p-1"></div>
+          </div>
           <div class="bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-bold text-indigo-950">
             <div class="flex justify-between"><span>Price</span><span id="priceRangeLabel">$0–$300</span></div>
-            <div class="mt-1 grid grid-cols-2 gap-2"><input id="priceMinFilter" type="range" oninput="handlePriceRange()" class="accent-indigo-700 w-full"><input id="priceMaxFilter" type="range" oninput="handlePriceRange()" class="accent-indigo-700 w-full"></div>
+            <div class="price-range-wrap mt-1">
+              <div class="price-track"></div>
+              <div id="priceRangeActive" class="price-range-active"></div>
+              <input id="priceMinFilter" type="range" oninput="handlePriceRange('min')" class="price-range-input">
+              <input id="priceMaxFilter" type="range" oninput="handlePriceRange('max')" class="price-range-input">
+            </div>
           </div>
           <button onclick="clearFilters()" class="bg-zinc-100 border border-zinc-300 rounded-xl px-3 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-200">
             Clear filters
@@ -322,11 +401,11 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-gradient-to-br from-indigo-700 to-violet-700 rounded-2xl p-5 shadow-lg shadow-indigo-950/15">
           <h3 class="font-bold text-white mb-1"><i class="fa-solid fa-music mr-2 text-teal-200"></i>Concerts attended</h3><p class="text-xs text-indigo-100 mb-4">Your live-show highlight reel</p>
-          <div id="profileConcerts" class="space-y-3"></div>
+          <div id="profileConcerts" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
         </div>
         <div class="bg-gradient-to-br from-zinc-950 to-slate-800 rounded-2xl p-5 shadow-lg">
           <h3 class="font-bold text-white mb-1"><i class="fa-solid fa-bag-shopping mr-2 text-emerald-300"></i>Merch collected</h3><p class="text-xs text-zinc-400 mb-4">Pieces from the nights you chose</p>
-          <div id="profileMerch" class="space-y-3"></div>
+          <div id="profileMerch" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
         </div>
       </div>
     </section>
@@ -374,6 +453,13 @@
         <div id="reservationTimerBadge" class="hidden text-xs bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg font-bold">
           <i class="fa-solid fa-clock mr-1.5"></i> Checkout hold: <span id="reservationTimerText">5:00</span>
         </div>
+      </div>
+
+      <div class="bg-white border border-zinc-200 rounded-lg shadow-sm px-4 py-3 flex flex-wrap items-center gap-2 text-xs font-bold text-zinc-600">
+        <span class="bg-indigo-700 text-white rounded-full px-3 py-1.5">1. Pick a section</span>
+        <span class="bg-zinc-100 text-zinc-700 rounded-full px-3 py-1.5">2. Set quantity</span>
+        <span class="bg-zinc-100 text-zinc-700 rounded-full px-3 py-1.5">3. Hold to buy</span>
+        <span class="ml-auto text-zinc-500 hidden sm:inline">Map, listings, view, and checkout stay on one path.</span>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -608,6 +694,19 @@
         </div>
       </div>
 
+      <div id="merchFrontView" class="hidden p-6 space-y-5 text-center">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-400 text-zinc-950 grid place-items-center text-2xl shadow-lg shadow-emerald-500/30">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-white">You've reached the front!</h3>
+          <p class="text-sm text-zinc-400 mt-1">The booth is holding your place. Continue when you're ready to pick merch.</p>
+        </div>
+        <button onclick="continueToMerchShop()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+          Continue to buy
+        </button>
+      </div>
+
       <!-- VIEW B: EMBEDDED SHOPPING AREA (Triggered when line position reaches front) -->
       <div id="merchShopView" class="hidden p-6 space-y-5">
         
@@ -627,11 +726,37 @@
             <div class="text-xs text-zinc-400">Total Merch Cart</div>
             <div id="merchTotalText" class="text-xl font-extrabold text-emerald-400">$0.00</div>
           </div>
-          <button id="merchCheckoutButton" onclick="executeMerchPurchase()" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-            <i class="fa-solid fa-bag-shopping"></i> Buy & Return to Concert
+          <button id="merchCheckoutButton" onclick="beginMerchCheckout()" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+            <i class="fa-solid fa-bag-shopping"></i> Checkout
           </button>
         </div>
 
+      </div>
+
+      <div id="merchCheckoutView" class="hidden p-6 space-y-5">
+        <div class="flex items-center justify-between bg-amber-950/40 border border-amber-500/30 p-3 rounded-xl text-xs text-amber-200">
+          <span><i class="fa-solid fa-clock mr-1 text-amber-300"></i> Booth checkout expires in</span>
+          <span id="merchCheckoutTimerText" class="font-black text-amber-300">00:20</span>
+        </div>
+        <div id="merchCheckoutSummary" class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-xs font-bold text-zinc-400">Size</span>
+            <select id="merchSizeSelect" class="mt-1 w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+              <option>S</option><option>M</option><option>L</option><option>XL</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-xs font-bold text-zinc-400">Color</span>
+            <select id="merchColorSelect" class="mt-1 w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+              <option>Black</option><option>Cream</option><option>Tour green</option><option>Washed violet</option>
+            </select>
+          </label>
+        </div>
+        <button id="merchHoldButton" onpointerdown="startMerchHoldToBuy(event)" onpointerup="cancelMerchHoldToBuy()" onpointerleave="cancelMerchHoldToBuy()" onpointercancel="cancelMerchHoldToBuy()" class="relative overflow-hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-sm rounded-xl transition-all flex items-center justify-center gap-2">
+          <span id="merchHoldFill" class="hold-fill absolute left-0 top-0 h-full w-0 bg-white/45"></span>
+          <span class="relative z-10 flex items-center gap-2"><i class="fa-solid fa-lock"></i> Press and Hold to Confirm</span>
+        </button>
       </div>
 
     </div>
@@ -1119,8 +1244,12 @@
       merchCart: {},
       merchCarts: loadStoredMerchCarts(),
       merchStock: {},
+      merchInventoryTimer: null,
       merchExpiresAt: 0,
       merchReservationTimer: null,
+      merchHoldTimer: null,
+      merchHoldProgress: 0,
+      queueClicksNeeded: 12,
       stageCam: 'Main Stage',
       stageTrackIndex: 0,
       ticketUrgencyTimer: null,
@@ -1228,17 +1357,18 @@
       const username = usernameInput.value.trim();
       const password = passwordInput.value;
       if (username.length < 3) {
-        showToast('Username needs at least 3 characters.', 'info');
+        setAccountError('Username needs at least 3 characters.', 'username');
         return;
       }
       if (password.length < 4) {
-        showToast('Password needs at least 4 characters.', 'info');
+        setAccountError('Password needs at least 4 characters.', 'password');
         return;
       }
       if (state.users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
-        showToast('That username is already taken on this device.', 'info');
+        setAccountError('That username is already taken.', 'username');
         return;
       }
+      clearAccountError();
       state.users.push({ username, password });
       state.account = { username, guest: false };
       persistAccountState();
@@ -1249,6 +1379,7 @@
 
     function showAccountForm(mode) {
       state.accountMode = mode;
+      clearAccountError();
       document.getElementById('accountChoiceView').classList.add('hidden');
       document.getElementById('accountFormView').classList.remove('hidden');
       document.getElementById('accountFormTitle').innerText = mode === 'login' ? 'Log in' : 'Sign up';
@@ -1258,6 +1389,7 @@
     }
 
     function showAccountChoices() {
+      clearAccountError();
       document.getElementById('accountFormView').classList.add('hidden');
       document.getElementById('accountChoiceView').classList.remove('hidden');
     }
@@ -1267,7 +1399,8 @@
       const username = document.getElementById('accountUsername').value.trim();
       const password = document.getElementById('accountPassword').value;
       const user = state.users.find(entry => entry.username.toLowerCase() === username.toLowerCase() && entry.password === password);
-      if (!user) return showToast('Username or password is incorrect.', 'info');
+      if (!user) return setAccountError('Username or password is incorrect.', 'both');
+      clearAccountError();
       state.account = { username: user.username, guest: false };
       persistAccountState();
       updateAccountUI();
@@ -1290,28 +1423,87 @@
     }
 
     function updateAccountUI() {
-      document.getElementById('nav-logout').classList.toggle('hidden', !state.account);
       const profileName = document.getElementById('profileName');
       if (profileName) profileName.innerText = state.account ? state.account.username : 'Guest';
     }
 
+    function setAccountError(message, field = 'both') {
+      const error = document.getElementById('accountError');
+      const usernameInput = document.getElementById('accountUsername');
+      const passwordInput = document.getElementById('accountPassword');
+      if (error) {
+        error.innerText = message;
+        error.classList.remove('hidden');
+      }
+      usernameInput.classList.toggle('account-input-error', field === 'username' || field === 'both');
+      passwordInput.classList.toggle('account-input-error', field === 'password' || field === 'both');
+    }
+
+    function clearAccountError() {
+      const error = document.getElementById('accountError');
+      const usernameInput = document.getElementById('accountUsername');
+      const passwordInput = document.getElementById('accountPassword');
+      if (error) error.classList.add('hidden');
+      if (usernameInput) usernameInput.classList.remove('account-input-error');
+      if (passwordInput) passwordInput.classList.remove('account-input-error');
+    }
+
     function initFilters() {
-      const locationFilter = document.getElementById('locationFilter');
-      if (!locationFilter) return;
+      const locationMenu = document.getElementById('locationFilterMenu');
+      if (!locationMenu) return;
       const cities = [...new Set(Object.values(VENUES).map(venue => venue.city))].sort();
-      locationFilter.innerHTML = `<option value="ALL">Location</option>` + cities.map(city => `<option value="${city}">${city}</option>`).join('');
+      locationMenu.innerHTML = [{ value: 'ALL', label: 'Location' }, ...cities.map(city => ({ value: city, label: city }))].map(option => `
+        <button onclick="selectFilterOption('location', '${option.value.replace(/'/g, "\\'")}', '${option.label.replace(/'/g, "\\'")}')" class="w-full px-3 py-2 text-left rounded-lg text-xs font-bold text-indigo-950 hover:bg-indigo-50 flex items-center justify-between">
+          <span>${option.label}</span>${state.filters.location === option.value ? '<i class="fa-solid fa-check text-indigo-700"></i>' : ''}
+        </button>
+      `).join('');
+      const dateOptions = [
+        { value: 'ALL', label: 'Any date' },
+        { value: 'TODAY', label: 'Today / tomorrow' },
+        { value: 'NOV', label: 'November' },
+        { value: 'DEC', label: 'December' },
+        { value: 'JAN', label: 'January' },
+        { value: 'FEB', label: 'February' }
+      ];
+      document.getElementById('dateFilterMenu').innerHTML = dateOptions.map(option => `
+        <button onclick="selectFilterOption('date', '${option.value}', '${option.label}')" class="w-full px-3 py-2 text-left rounded-lg text-xs font-bold text-indigo-950 hover:bg-indigo-50 flex items-center justify-between">
+          <span>${option.label}</span>${state.filters.date === option.value ? '<i class="fa-solid fa-check text-indigo-700"></i>' : ''}
+        </button>
+      `).join('');
       const prices = CONCERTS.map(concert => concert.priceFrom);
       const min = Math.min(...prices);
       const max = Math.max(...prices);
-      state.filters.priceMin = min;
-      state.filters.priceMax = max;
+      if (!state.filters.priceMin && !state.filters.priceMax) {
+        state.filters.priceMin = min;
+        state.filters.priceMax = max;
+      }
       ['priceMinFilter', 'priceMaxFilter'].forEach(id => {
         const input = document.getElementById(id);
         input.min = min; input.max = max; input.step = 5;
       });
-      document.getElementById('priceMinFilter').value = min;
-      document.getElementById('priceMaxFilter').value = max;
+      document.getElementById('priceMinFilter').value = state.filters.priceMin;
+      document.getElementById('priceMaxFilter').value = state.filters.priceMax;
+      document.getElementById('locationFilterButton').querySelector('span').innerText = state.filters.location === 'ALL' ? 'Location' : state.filters.location;
+      const dateLabels = { ALL: 'Any date', TODAY: 'Today / tomorrow', NOV: 'November', DEC: 'December', JAN: 'January', FEB: 'February' };
+      document.getElementById('dateFilterButton').querySelector('span').innerText = dateLabels[state.filters.date] || 'Any date';
       updatePriceRangeLabel();
+    }
+
+    function toggleFilterMenu(type) {
+      const active = document.getElementById(`${type}FilterMenu`);
+      ['locationFilterMenu', 'dateFilterMenu'].forEach(id => {
+        const menu = document.getElementById(id);
+        if (menu && menu !== active) menu.classList.add('hidden');
+      });
+      active.classList.toggle('hidden');
+    }
+
+    function selectFilterOption(type, value, label) {
+      state.filters[type] = value;
+      document.getElementById(`${type}FilterButton`).querySelector('span').innerText = label;
+      document.getElementById(`${type}FilterMenu`).classList.add('hidden');
+      initFilters();
+      renderConcerts();
     }
 
     function renderConcerts() {
@@ -1387,16 +1579,20 @@
     }
 
     function handleFilters() {
-      state.filters.location = document.getElementById('locationFilter').value;
-      state.filters.date = document.getElementById('dateFilter').value;
       renderConcerts();
     }
 
-    function handlePriceRange() {
+    function handlePriceRange(changed = 'min') {
       const minInput = document.getElementById('priceMinFilter');
       const maxInput = document.getElementById('priceMaxFilter');
-      state.filters.priceMin = Math.min(Number(minInput.value), Number(maxInput.value));
-      state.filters.priceMax = Math.max(Number(minInput.value), Number(maxInput.value));
+      let minVal = Number(minInput.value);
+      let maxVal = Number(maxInput.value);
+      if (minVal > maxVal) {
+        if (changed === 'min') maxVal = minVal;
+        else minVal = maxVal;
+      }
+      state.filters.priceMin = minVal;
+      state.filters.priceMax = maxVal;
       minInput.value = state.filters.priceMin;
       maxInput.value = state.filters.priceMax;
       updatePriceRangeLabel();
@@ -1405,15 +1601,27 @@
 
     function updatePriceRangeLabel() {
       document.getElementById('priceRangeLabel').innerText = `$${state.filters.priceMin}–$${state.filters.priceMax}`;
+      const minInput = document.getElementById('priceMinFilter');
+      const maxInput = document.getElementById('priceMaxFilter');
+      const active = document.getElementById('priceRangeActive');
+      if (minInput && maxInput && active) {
+        const min = Number(minInput.min);
+        const max = Number(minInput.max);
+        const left = ((state.filters.priceMin - min) / (max - min)) * 100;
+        const right = 100 - ((state.filters.priceMax - min) / (max - min)) * 100;
+        active.style.left = `${left}%`;
+        active.style.right = `${right}%`;
+      }
     }
 
     function clearFilters() {
       const prices = CONCERTS.map(concert => concert.priceFrom);
       state.filters = { location: 'ALL', date: 'ALL', priceMin: Math.min(...prices), priceMax: Math.max(...prices) };
-      document.getElementById('locationFilter').value = 'ALL';
-      document.getElementById('dateFilter').value = 'ALL';
+      document.getElementById('locationFilterButton').querySelector('span').innerText = 'Location';
+      document.getElementById('dateFilterButton').querySelector('span').innerText = 'Any date';
       document.getElementById('priceMinFilter').value = state.filters.priceMin;
       document.getElementById('priceMaxFilter').value = state.filters.priceMax;
+      initFilters();
       updatePriceRangeLabel();
       renderConcerts();
     }
@@ -1876,7 +2084,6 @@
       state.pendingCheckout = null;
       stopTicketUrgency();
       stopReservationTimer();
-      recordConcertHistory(newTicket);
       launchConfetti();
       persistTickets();
       updateTicketBadge();
@@ -1987,10 +2194,16 @@
       }
     }
 
-    function recordConcertHistory(ticket) {
+    function recordConcertHistory(ticket, attendedDate = 'Attended just now') {
       const concert = CONCERTS.find(c => c.id === ticket.concertId);
       if (!concert) return;
       const venue = VENUES[concert.venueId];
+      const existing = state.profileHistory.concerts.find(item => item.concertId === concert.id);
+      if (existing) {
+        existing.date = attendedDate;
+        persistAccountState();
+        return;
+      }
       state.profileHistory.concerts.unshift({
         id: `${ticket.ticketId}-${Date.now()}`,
         concertId: concert.id,
@@ -1999,7 +2212,7 @@
         venue: venue.name,
         section: ticket.sectionName,
         qty: ticket.qty,
-        date: ticket.purchaseDate
+        date: attendedDate
       });
       state.profileHistory.concerts = state.profileHistory.concerts.slice(0, 20);
       persistAccountState();
@@ -2044,6 +2257,14 @@
     function enterLiveStage(concertId) {
       const concert = CONCERTS.find(c => c.id === concertId);
       const venue = VENUES[concert.venueId];
+      const enteringTickets = state.userTickets.filter(ticket => ticket.concertId === concertId);
+      enteringTickets.forEach(ticket => recordConcertHistory(ticket));
+      if (enteringTickets.length) {
+        state.userTickets = state.userTickets.filter(ticket => ticket.concertId !== concertId);
+        persistTickets();
+        updateTicketBadge();
+        showToast('Pass scanned. This show is now in your attended concerts.', 'success');
+      }
       state.selectedConcert = concert;
 
       document.getElementById('stageArtistName').innerText = concert.artist;
@@ -2088,17 +2309,22 @@
       // 1. Randomly select population level with weighted probability
       state.queuePopulationLevel = selectWeightedPopulation();
       state.queuePosition = state.queuePopulationLevel.initialPosition;
+      state.queueClicksNeeded = state.queuePopulationLevel.clicksNeeded;
       state.queueStarted = false;
       state.queueCharge = 0;
       if (state.queueTimer) clearInterval(state.queueTimer);
       stopMerchReservationTimer();
+      stopMerchInventoryTimer();
+      cancelMerchHoldToBuy();
 
       // Reset view states
       document.getElementById('merchQueueView').classList.remove('hidden');
+      document.getElementById('merchFrontView').classList.add('hidden');
       document.getElementById('merchShopView').classList.add('hidden');
+      document.getElementById('merchCheckoutView').classList.add('hidden');
       document.getElementById('merchCheckoutButton').innerHTML = previewOnly
         ? `<i class="fa-solid fa-xmark"></i> Close Preview`
-        : `<i class="fa-solid fa-bag-shopping"></i> Buy & Return to Concert`;
+        : `<i class="fa-solid fa-bag-shopping"></i> Checkout`;
       
       // Update crowd level badge UI
       const badge = document.getElementById('crowdLevelBadge');
@@ -2119,11 +2345,11 @@
     // Weighted Probability Algorithm (Less crowded levels have lower chance)
     function selectWeightedPopulation() {
       const levels = [
-        { level: 1, name: 'Low', weight: 10, initialPosition: 4 },
-        { level: 2, name: 'Moderate', weight: 20, initialPosition: 12 },
-        { level: 3, name: 'Heavy', weight: 35, initialPosition: 24 },
-        { level: 4, name: 'Packed', weight: 25, initialPosition: 40 },
-        { level: 5, name: 'Overflow', weight: 10, initialPosition: 65 }
+        { level: 1, name: 'Low', weight: 10, initialPosition: 4, clicksNeeded: 8, decay: 0.7 },
+        { level: 2, name: 'Moderate', weight: 20, initialPosition: 12, clicksNeeded: 12, decay: 1.0 },
+        { level: 3, name: 'Heavy', weight: 35, initialPosition: 24, clicksNeeded: 18, decay: 1.25 },
+        { level: 4, name: 'Packed', weight: 25, initialPosition: 40, clicksNeeded: 25, decay: 1.5 },
+        { level: 5, name: 'Overflow', weight: 10, initialPosition: 65, clicksNeeded: 34, decay: 1.75 }
       ];
 
       const totalWeight = levels.reduce((acc, l) => acc + l.weight, 0);
@@ -2143,13 +2369,14 @@
 
       if (!state.queueStarted) {
         joinBox.classList.remove('border-emerald-500');
-        document.getElementById('queueStatusSubtext').innerText = 'Repeated clicks fill the bar. Pausing lets it discharge.';
+        document.getElementById('queueStatusSubtext').innerText = `${state.queueClicksNeeded} taps expected for this crowd. Pausing lets it discharge.`;
       } else if (state.queueCharge >= 100) {
         joinBox.classList.add('border-emerald-500');
         document.getElementById('queueStatusSubtext').innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i> Opening booth preview...`;
       } else {
         joinBox.classList.add('border-emerald-500');
-        document.getElementById('queueStatusSubtext').innerHTML = `<i class="fa-solid fa-bolt mr-1 text-emerald-400"></i> ${Math.round(state.queueCharge)}% charged. Keep clicking.`;
+        const clicksLeft = Math.max(1, Math.ceil((100 - state.queueCharge) / (100 / state.queueClicksNeeded)));
+        document.getElementById('queueStatusSubtext').innerHTML = `<i class="fa-solid fa-bolt mr-1 text-emerald-400"></i> ${Math.round(state.queueCharge)}% charged. About ${clicksLeft} tap${clicksLeft > 1 ? 's' : ''} left.`;
       }
     }
 
@@ -2158,30 +2385,49 @@
       if (!state.queueStarted) {
         state.queueStarted = true;
         state.queueTimer = setInterval(() => {
-          state.queueCharge = Math.max(0, state.queueCharge - 1.25);
+          state.queueCharge = Math.max(0, state.queueCharge - state.queuePopulationLevel.decay);
           updateQueueUI();
         }, 350);
       }
 
-      state.queueCharge = Math.min(100, state.queueCharge + 5);
+      const gain = 100 / state.queueClicksNeeded;
+      state.queueCharge = Math.min(100, state.queueCharge + gain);
       updateQueueUI();
 
       if (state.queueCharge >= 100) {
         clearInterval(state.queueTimer);
         state.queueTimer = null;
-        openEmbeddedShop();
+        showMerchFrontReached();
       }
+    }
+
+    function showMerchFrontReached() {
+      document.getElementById('merchQueueView').classList.add('hidden');
+      document.getElementById('merchFrontView').classList.remove('hidden');
+      document.getElementById('merchShopView').classList.add('hidden');
+      document.getElementById('merchCheckoutView').classList.add('hidden');
+      if (!state.merchPreviewOnly) {
+        launchConfetti();
+        playWinSound();
+        showToast("You've reached the front!", 'success');
+      }
+    }
+
+    function continueToMerchShop() {
+      openEmbeddedShop();
     }
 
     function openEmbeddedShop() {
       document.getElementById('merchQueueView').classList.add('hidden');
+      document.getElementById('merchFrontView').classList.add('hidden');
       document.getElementById('merchShopView').classList.remove('hidden');
+      document.getElementById('merchCheckoutView').classList.add('hidden');
       document.getElementById('merchShopStatus').innerHTML = state.merchPreviewOnly
         ? `<i class="fa-solid fa-eye mr-1 text-emerald-400"></i> Merch preview unlocked. Purchasing is available inside the live stage.`
-        : `<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> Booth access unlocked. Complete purchase below.`;
+        : `<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> Booth unlocked. Select merch, then checkout.`;
       document.getElementById('merchCheckoutButton').innerHTML = state.merchPreviewOnly
         ? `<i class="fa-solid fa-xmark"></i> Close Preview`
-        : `<i class="fa-solid fa-bag-shopping"></i> Buy & Return to Concert`;
+        : `<i class="fa-solid fa-bag-shopping"></i> Checkout`;
       document.getElementById('merchTotalPanel').classList.toggle('hidden', state.merchPreviewOnly);
 
       state.merchCart = { ...(state.merchCarts[state.activeMerchConcert.id] || {}) };
@@ -2191,17 +2437,14 @@
       });
       renderMerchItems();
       if (!state.merchPreviewOnly) {
-        launchConfetti();
-        playWinSound();
-        showToast("You're at the front — the merch booth is yours for 20 seconds!", 'success');
-        startMerchReservationTimer();
+        startMerchInventoryTimer();
       }
     }
 
     function startMerchReservationTimer() {
       stopMerchReservationTimer();
       state.merchExpiresAt = Date.now() + 20000;
-      const timer = document.getElementById('merchTimerText');
+      const timer = document.getElementById('merchCheckoutTimerText');
       timer.classList.remove('hidden');
       const update = () => {
         const remaining = Math.max(0, state.merchExpiresAt - Date.now());
@@ -2209,7 +2452,7 @@
         if (remaining <= 0) {
           stopMerchReservationTimer();
           persistActiveMerchCart();
-          showToast('Your booth window closed — your cart was saved for later.', 'info');
+          showToast('Your 20-second checkout expired — your merch cart was saved.', 'info');
           closeMerchModal();
         }
       };
@@ -2223,6 +2466,29 @@
       state.merchExpiresAt = 0;
       const timer = document.getElementById('merchTimerText');
       if (timer) timer.classList.add('hidden');
+      const checkoutTimer = document.getElementById('merchCheckoutTimerText');
+      if (checkoutTimer) checkoutTimer.innerText = '00:20';
+    }
+
+    function startMerchInventoryTimer() {
+      stopMerchInventoryTimer();
+      state.merchInventoryTimer = setInterval(() => {
+        if (!state.activeMerchConcert || state.merchPreviewOnly || document.getElementById('merchModal').classList.contains('hidden')) return;
+        const item = state.activeMerchConcert.merch[Math.floor(Math.random() * state.activeMerchConcert.merch.length)];
+        const stockKey = `${state.activeMerchConcert.id}-${item.id}`;
+        const current = state.merchStock[stockKey] || 6;
+        const crowdLevel = state.queuePopulationLevel ? state.queuePopulationLevel.level : 2;
+        const bought = Math.min(Math.max(0, current - 3), 1 + Math.floor(Math.random() * crowdLevel));
+        if (bought <= 0) return;
+        state.merchStock[stockKey] = Math.max(3, current - bought);
+        renderMerchItems();
+        showToast(`${bought} ${item.name}${bought > 1 ? 's' : ''} just got claimed. ${state.merchStock[stockKey]} left.`, 'info');
+      }, 3500 + Math.random() * 2400);
+    }
+
+    function stopMerchInventoryTimer() {
+      if (state.merchInventoryTimer) clearInterval(state.merchInventoryTimer);
+      state.merchInventoryTimer = null;
     }
 
     function renderMerchItems() {
@@ -2282,14 +2548,8 @@
       document.getElementById('merchTotalText').innerText = `$${total.toFixed(2)}`;
     }
 
-    function executeMerchPurchase() {
+    function beginMerchCheckout() {
       if (state.merchPreviewOnly) {
-        closeMerchModal();
-        return;
-      }
-
-      if (state.merchExpiresAt && Date.now() >= state.merchExpiresAt) {
-        showToast('Your 20-second booth window has closed.', 'info');
         closeMerchModal();
         return;
       }
@@ -2297,6 +2557,61 @@
       const totalItems = Object.values(state.merchCart).reduce((a, b) => a + b, 0);
       if (totalItems === 0) {
         showToast('Please select at least one merch item.', 'info');
+        return;
+      }
+      document.getElementById('merchShopView').classList.add('hidden');
+      document.getElementById('merchCheckoutView').classList.remove('hidden');
+      renderMerchCheckoutSummary();
+      stopMerchInventoryTimer();
+      startMerchReservationTimer();
+    }
+
+    function renderMerchCheckoutSummary() {
+      const container = document.getElementById('merchCheckoutSummary');
+      let total = 0;
+      const rows = Object.keys(state.merchCart).map(id => {
+        const item = state.activeMerchConcert.merch.find(m => m.id === id);
+        if (!item) return '';
+        const qty = state.merchCart[id];
+        total += item.price * qty;
+        return `<div class="flex items-center justify-between text-sm"><span class="text-zinc-300">${item.name} <span class="text-zinc-500">x${qty}</span></span><span class="font-bold text-white">$${item.price * qty}</span></div>`;
+      }).join('');
+      container.innerHTML = `
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Merch checkout</div>
+        <div class="space-y-2">${rows}</div>
+        <div class="flex items-center justify-between pt-3 border-t border-zinc-800"><span class="text-zinc-400 text-sm">Total</span><span class="text-2xl font-black text-emerald-400">$${total.toFixed(2)}</span></div>
+      `;
+    }
+
+    function startMerchHoldToBuy(event) {
+      event.preventDefault();
+      if (state.merchHoldTimer) clearInterval(state.merchHoldTimer);
+      state.merchHoldProgress = 0;
+      document.getElementById('merchHoldFill').style.width = '0%';
+      state.merchHoldTimer = setInterval(() => {
+        state.merchHoldProgress += 4;
+        document.getElementById('merchHoldFill').style.width = `${Math.min(100, state.merchHoldProgress)}%`;
+        if (state.merchHoldProgress >= 100) {
+          cancelMerchHoldToBuy(false);
+          executeMerchPurchase();
+        }
+      }, 55);
+    }
+
+    function cancelMerchHoldToBuy(reset = true) {
+      if (state.merchHoldTimer) clearInterval(state.merchHoldTimer);
+      state.merchHoldTimer = null;
+      if (reset && state.merchHoldProgress < 100) {
+        state.merchHoldProgress = 0;
+        const fill = document.getElementById('merchHoldFill');
+        if (fill) fill.style.width = '0%';
+      }
+    }
+
+    function executeMerchPurchase() {
+      if (state.merchExpiresAt && Date.now() >= state.merchExpiresAt) {
+        showToast('Your 20-second booth checkout has closed.', 'info');
+        closeMerchModal();
         return;
       }
 
@@ -2312,7 +2627,9 @@
       closeMerchModal();
       state.merchCart = {};
       persistActiveMerchCart();
-      showToast(`Merch order placed! Navigating back to show...`, 'success');
+      launchConfetti();
+      playWinSound();
+      showToast(`Merch acquired: ${document.getElementById('merchSizeSelect').value}, ${document.getElementById('merchColorSelect').value}.`, 'success');
       
       // Navigate back to concert / live stage view automatically
       if (state.activeTab === 'stage') {
@@ -2324,7 +2641,9 @@
 
     function closeMerchModal() {
       if (state.queueTimer) clearInterval(state.queueTimer);
+      stopMerchInventoryTimer();
       stopMerchReservationTimer();
+      cancelMerchHoldToBuy();
       document.getElementById('merchModal').classList.add('hidden');
     }
 
