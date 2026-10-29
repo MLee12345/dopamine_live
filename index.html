@@ -39,8 +39,8 @@
 
   <style>
     body {
-      background-color: #0d0d0d;
-      color: #eeeeee;
+      background-color: #f6f7fb;
+      color: #18181b;
       font-family: 'Inter', sans-serif;
     }
     /* Subtle custom scrollbar */
@@ -65,8 +65,8 @@
     }
     .concert-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 24px -18px rgba(255, 255, 255, 0.22);
-      border-color: #52525b;
+      box-shadow: 0 18px 36px -28px rgba(24, 24, 27, 0.45);
+      border-color: #d4d4d8;
     }
 
     /* Venue map section interactive styling */
@@ -95,10 +95,39 @@
       pointer-events: none;
     }
     .wheel-spin {
-      transition: transform 1.25s cubic-bezier(0.12, 0.8, 0.2, 1);
+      transition: transform 4s cubic-bezier(0.08, 0.72, 0.05, 1);
     }
     .wheel-face {
-      background: conic-gradient(#18181b 0 45deg, #3f3f46 45deg 90deg, #18181b 90deg 135deg, #52525b 135deg 180deg, #18181b 180deg 225deg, #3f3f46 225deg 270deg, #18181b 270deg 315deg, #71717a 315deg 360deg);
+      background: conic-gradient(
+        #4f46e5 0 45deg,
+        #10b981 45deg 90deg,
+        #f59e0b 90deg 135deg,
+        #ef4444 135deg 180deg,
+        #06b6d4 180deg 225deg,
+        #8b5cf6 225deg 270deg,
+        #14b8a6 270deg 315deg,
+        #f43f5e 315deg 360deg
+      );
+      box-shadow: inset 0 0 0 10px rgba(255,255,255,0.16), 0 20px 48px -20px rgba(15, 23, 42, 0.65);
+    }
+    .wheel-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 72px;
+      margin-left: -36px;
+      margin-top: -8px;
+      transform-origin: 36px 8px;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1.05;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.55);
+      pointer-events: none;
+    }
+    .wheel-pointer {
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
     }
     .hold-fill {
       transition: width 0.08s linear;
@@ -132,19 +161,19 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-black">
 
   <!-- TOP NAVIGATION BAR -->
-  <header class="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <!-- Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('discover')">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-violet-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+        <div class="w-9 h-9 rounded-lg bg-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/15">
           <i class="fa-solid font-bold text-white text-lg">D</i>
         </div>
         <div class="flex flex-col">
-          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-            Dopamine<span class="text-emerald-400">Live</span>
+          <span class="text-xl font-extrabold tracking-tight text-zinc-950 flex items-center gap-1">
+            Dopamine<span class="text-indigo-700">Live</span>
           </span>
-          <span class="text-[10px] text-zinc-400 tracking-wider font-semibold uppercase -mt-1">Verified Stage Pass</span>
+          <span class="text-[10px] text-zinc-500 tracking-wider font-semibold uppercase -mt-1">Verified Stage Pass</span>
         </div>
       </div>
 
@@ -153,24 +182,24 @@
         <div class="relative w-full">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-sm"></i>
           <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search artists, venues, or cities..." 
-                 class="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/80 focus:ring-1 focus:ring-emerald-500/80 transition-all">
+                 class="w-full bg-zinc-50 border border-zinc-300 rounded-full pl-10 pr-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm">
         </div>
       </div>
 
       <!-- Right Navigation Links -->
       <nav class="flex items-center space-x-2 sm:space-x-4">
-        <button onclick="openWheelModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
-          <i class="fa-solid fa-circle-notch text-emerald-400"></i>
+        <button onclick="openWheelModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold text-zinc-700 bg-white border border-zinc-300 hover:border-indigo-400 transition-colors">
+          <i class="fa-solid fa-circle-notch text-indigo-600"></i>
           <span id="discountNavText">Spin</span>
         </button>
-        <button onclick="openWalletModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors">
-          <i class="fa-solid fa-wallet text-emerald-400"></i>
+        <button onclick="openWalletModal()" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold text-zinc-700 bg-white border border-zinc-300 hover:border-indigo-400 transition-colors">
+          <i class="fa-solid fa-wallet text-indigo-600"></i>
           <span id="walletBalanceText">$0</span>
         </button>
-        <button onclick="navigateTo('discover')" id="nav-discover" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors text-emerald-400 bg-zinc-900 border border-zinc-800">
+        <button onclick="navigateTo('discover')" id="nav-discover" class="px-3 py-2 rounded-full text-sm font-semibold transition-colors text-white bg-indigo-700 border border-indigo-700">
           <i class="fa-solid fa-compass mr-1.5"></i> Discover
         </button>
-        <button onclick="navigateTo('tickets')" id="nav-tickets" class="px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition-colors relative">
+        <button onclick="navigateTo('tickets')" id="nav-tickets" class="px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors relative">
           <i class="fa-solid fa-ticket mr-1.5"></i> My Tickets
           <span id="ticketBadgeCount" class="hidden absolute -top-1 -right-1 bg-emerald-500 text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
         </button>
@@ -185,32 +214,32 @@
     <section id="page-discover" class="space-y-8">
       
       <!-- Clean Hero Banner -->
-      <div class="relative overflow-hidden rounded-lg bg-zinc-900 border border-zinc-800 p-6 sm:p-8 shadow-xl">
+      <div class="relative overflow-hidden rounded-lg bg-indigo-700 border border-indigo-700 p-6 sm:p-8 shadow-xl shadow-indigo-950/10">
         <div class="relative z-10 max-w-2xl space-y-3">
-          <div class="inline-flex items-center space-x-2 bg-zinc-950 border border-zinc-700 px-3 py-1 rounded-md text-zinc-300 text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 px-3 py-1 rounded-md text-indigo-50 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-teal-300"></span>
             <span>Live inventory, wallet rewards, daily discounts</span>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Live Music. <span class="text-emerald-300">Actual Seat Choices.</span>
+            Live Music. <span class="text-teal-200">Actual Seat Choices.</span>
           </h1>
-          <p class="text-zinc-400 text-sm sm:text-base font-normal">
+          <p class="text-indigo-100 text-sm sm:text-base font-normal">
             Find the show, preview the artist, hold to checkout, and keep your ticket wallet in one place.
           </p>
         </div>
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+      <div class="flex items-center justify-between border-b border-zinc-200 pb-4">
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
-          <button onclick="filterGenre('ALL', this)" class="genre-pill active px-4 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 transition-all">All Genres</button>
-          <button onclick="filterGenre('Electronic', this)" class="genre-pill px-4 py-1.5 rounded-lg text-xs font-medium border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all">Electronic / Synth</button>
-          <button onclick="filterGenre('Pop', this)" class="genre-pill px-4 py-1.5 rounded-lg text-xs font-medium border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all">Pop / Arena</button>
-          <button onclick="filterGenre('Rock', this)" class="genre-pill px-4 py-1.5 rounded-lg text-xs font-medium border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all">Indie / Rock</button>
-          <button onclick="filterGenre('Hip-Hop', this)" class="genre-pill px-4 py-1.5 rounded-lg text-xs font-medium border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all">Hip-Hop / Bass</button>
+          <button onclick="filterGenre('ALL', this)" class="genre-pill active px-4 py-1.5 rounded-full text-xs font-semibold border border-indigo-700 bg-indigo-700 text-white transition-all">All Genres</button>
+          <button onclick="filterGenre('Electronic', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Electronic / Synth</button>
+          <button onclick="filterGenre('Pop', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Pop / Arena</button>
+          <button onclick="filterGenre('Rock', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Indie / Rock</button>
+          <button onclick="filterGenre('Hip-Hop', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Hip-Hop / Bass</button>
         </div>
         <div class="hidden sm:block text-xs text-zinc-500">
-          Showing <span id="concertCount" class="text-zinc-300 font-semibold">60</span> Live Events
+          Showing <span id="concertCount" class="text-zinc-900 font-semibold">60</span> Live Events
         </div>
       </div>
 
@@ -468,7 +497,7 @@
         <div class="space-y-3 py-2">
           <button id="joinQueueBox" onclick="chargeMerchAccess()" class="w-full bg-zinc-950 border border-zinc-800 hover:border-emerald-500 rounded-xl p-4 text-left transition-all">
             <span class="block text-sm font-bold text-white">Charge merch access</span>
-            <span class="block text-xs text-zinc-400 mt-1">Tap constantly. The bar drains fast if you pause.</span>
+            <span class="block text-xs text-zinc-400 mt-1">Tap steadily to move up. Short pauses will not wipe you out.</span>
           </button>
 
           <!-- Progress Bar Decay -->
@@ -556,16 +585,29 @@
       </div>
       <div class="p-6 space-y-5">
         <div class="flex items-center justify-center">
-          <button onclick="spinDiscountWheel()" class="relative w-44 h-44 rounded-full border-4 border-zinc-700 wheel-face wheel-spin flex items-center justify-center text-white text-lg font-black" id="discountWheel">
-            <span class="bg-zinc-950/90 border border-zinc-700 rounded-full w-20 h-20 flex items-center justify-center">SPIN</span>
-          </button>
+          <div class="relative">
+            <div class="wheel-pointer absolute left-1/2 -top-2 -translate-x-1/2 z-20 text-zinc-100">
+              <i class="fa-solid fa-caret-down text-3xl"></i>
+            </div>
+            <button onclick="spinDiscountWheel()" class="relative w-56 h-56 rounded-full border-4 border-white wheel-face wheel-spin flex items-center justify-center text-white text-lg font-black overflow-hidden" id="discountWheel">
+              <span class="wheel-label" style="transform: rotate(22.5deg) translateY(-84px) rotate(-22.5deg);">5% OFF</span>
+              <span class="wheel-label" style="transform: rotate(67.5deg) translateY(-84px) rotate(-67.5deg);">10% OFF</span>
+              <span class="wheel-label" style="transform: rotate(112.5deg) translateY(-84px) rotate(-112.5deg);">$15 OFF</span>
+              <span class="wheel-label" style="transform: rotate(157.5deg) translateY(-84px) rotate(-157.5deg);">FREE MERCH</span>
+              <span class="wheel-label" style="transform: rotate(202.5deg) translateY(-84px) rotate(-202.5deg);">$30 OFF</span>
+              <span class="wheel-label" style="transform: rotate(247.5deg) translateY(-84px) rotate(-247.5deg);">FREE TICKET</span>
+              <span class="wheel-label" style="transform: rotate(292.5deg) translateY(-84px) rotate(-292.5deg);">FREE FEES</span>
+              <span class="wheel-label" style="transform: rotate(337.5deg) translateY(-84px) rotate(-337.5deg);">25% OFF</span>
+              <span class="relative z-10 bg-zinc-950/95 border border-white/30 rounded-full w-20 h-20 flex items-center justify-center shadow-xl">SPIN</span>
+            </button>
+          </div>
         </div>
         <div id="discountText" class="text-center text-xl font-bold text-white">No discount active</div>
         <div id="wheelDealList" class="grid grid-cols-2 gap-2 text-xs text-zinc-400">
           <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">5% off checkout</div>
           <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">10% off checkout</div>
-          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">$15 wallet bonus</div>
-          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">Free-fee checkout</div>
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">$15 off checkout</div>
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">Free merch credit</div>
         </div>
       </div>
     </div>
@@ -861,6 +903,19 @@
       'WED, DEC 9 • 8:00 PM', 'THU, DEC 10 • 8:30 PM'
     ];
 
+    const EVENT_IMAGE_POOL = [
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000&auto=format&fit=crop'
+    ];
+
     EXTRA_ARTISTS.forEach(([artist, tour, genre], idx) => {
       const venueIds = Object.keys(VENUES);
       const venueId = venueIds[idx % venueIds.length];
@@ -877,7 +932,7 @@
         isEnded: false,
         soldOut: idx % 17 === 0,
         priceFrom,
-        image: `https://source.unsplash.com/1000x700/?concert,stage,${encodeURIComponent(artist)}`,
+        image: EVENT_IMAGE_POOL[idx % EVENT_IMAGE_POOL.length],
         merch: [
           { id: `extra-${idx}-tee`, name: `${artist} Tour Tee`, price: 45 + (idx % 4) * 5, sizes: ['S', 'M', 'L', 'XL'], img: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=300&auto=format&fit=crop' },
           { id: `extra-${idx}-hoodie`, name: `${tour.split(' ')[0]} Hoodie`, price: 80 + (idx % 3) * 10, sizes: ['M', 'L', 'XL'], img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=300&auto=format&fit=crop' }
@@ -893,21 +948,41 @@
     /* ==========================================================================
        2. APP STATE MANAGEMENT
        ========================================================================== */
+    function readJsonStorage(key, fallback) {
+      try {
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : fallback;
+      } catch (err) {
+        return fallback;
+      }
+    }
+
+    function loadStoredTickets() {
+      return readJsonStorage('dopamineTickets', []).filter(ticket => ticket.ticketId !== 't-1001');
+    }
+
+    function persistTickets() {
+      localStorage.setItem('dopamineTickets', JSON.stringify(state.userTickets));
+    }
+
+    function loadStoredMerchCarts() {
+      return readJsonStorage('dopamineMerchCarts', {});
+    }
+
+    function persistActiveMerchCart() {
+      if (!state.activeMerchConcert) return;
+      const concertId = state.activeMerchConcert.id;
+      const hasItems = Object.keys(state.merchCart).length > 0;
+      if (hasItems) state.merchCarts[concertId] = state.merchCart;
+      else delete state.merchCarts[concertId];
+      localStorage.setItem('dopamineMerchCarts', JSON.stringify(state.merchCarts));
+    }
+
     const state = {
       activeTab: 'discover',
       activeFilter: 'ALL',
       searchTerm: '',
-      userTickets: [
-        {
-          ticketId: 't-1001',
-          concertId: 'fred-again',
-          sectionName: 'General Admission Floor (100s)',
-          qty: 2,
-          totalPaid: 500,
-          purchaseDate: '2 hours ago',
-          doorsOpen: true // Active live show
-        }
-      ],
+      userTickets: loadStoredTickets(),
       selectedConcert: null,
       selectedSection: null,
       selectedQty: 1,
@@ -921,13 +996,16 @@
       merchPreviewOnly: false,
       queueTimer: null,
       merchCart: {},
+      merchCarts: loadStoredMerchCarts(),
       stageCam: 'Main Stage',
       stageTrackIndex: 0,
       ticketUrgencyTimer: null,
       walletBalance: Number(localStorage.getItem('dopamineWallet') || 25),
       discountPct: Number(localStorage.getItem('dopamineDiscount') || 0),
+      discountFlat: Number(localStorage.getItem('dopamineDiscountFlat') || 0),
       lastSpinDate: localStorage.getItem('dopamineLastSpin') || '',
       activeDealLabel: localStorage.getItem('dopamineDealLabel') || '',
+      wheelRotation: 0,
       siteSeconds: 0,
       holdTimer: null,
       holdProgress: 0,
@@ -960,16 +1038,16 @@
       document.getElementById('page-stage').classList.add('hidden');
 
       // Unhighlight nav buttons
-      document.getElementById('nav-discover').className = "px-3 py-2 rounded-lg text-sm font-medium transition-colors text-zinc-400 hover:text-white";
-      document.getElementById('nav-tickets').className = "px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition-colors relative";
+      document.getElementById('nav-discover').className = "px-3 py-2 rounded-full text-sm font-semibold transition-colors text-zinc-600 hover:text-indigo-700";
+      document.getElementById('nav-tickets').className = "px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors relative";
 
       if (tabName === 'discover') {
         document.getElementById('page-discover').classList.remove('hidden');
-        document.getElementById('nav-discover').className = "px-3 py-2 rounded-lg text-sm font-medium transition-colors text-emerald-400 bg-zinc-900 border border-zinc-800";
+        document.getElementById('nav-discover').className = "px-3 py-2 rounded-full text-sm font-semibold transition-colors text-white bg-indigo-700 border border-indigo-700";
       } else if (tabName === 'tickets') {
         pruneEndedTickets();
         document.getElementById('page-tickets').classList.remove('hidden');
-        document.getElementById('nav-tickets').className = "px-3 py-2 rounded-lg text-sm font-medium text-emerald-400 bg-zinc-900 border border-zinc-800 relative";
+        document.getElementById('nav-tickets').className = "px-3 py-2 rounded-full text-sm font-semibold text-white bg-indigo-700 border border-indigo-700 relative";
         renderTicketsView();
       } else if (tabName === 'ticket-select') {
         document.getElementById('page-ticket-select').classList.remove('hidden');
@@ -1005,17 +1083,17 @@
         const soldOut = concert.soldOut || venue.sections.every(sec => sec.seatsAvailable <= 0);
         concert.soldOut = soldOut;
         const card = document.createElement('div');
-        card.className = `concert-card bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex flex-col justify-between ${soldOut ? 'opacity-70' : ''}`;
+        card.className = `concert-card bg-white border border-zinc-200 rounded-lg overflow-hidden flex flex-col justify-between shadow-sm ${soldOut ? 'opacity-70' : ''}`;
 
         card.innerHTML = `
           <div>
             <!-- Image & Venue Badge -->
-            <div class="relative h-48 w-full overflow-hidden bg-zinc-950">
-              <img src="${concert.image}" alt="${concert.artist}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
-              <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-black/30"></div>
+            <div class="relative h-48 w-full overflow-hidden bg-zinc-100">
+              <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10"></div>
               
-              <div class="absolute top-3 left-3 bg-zinc-950/80 backdrop-blur-md border border-zinc-800 text-zinc-300 text-[11px] font-semibold px-2.5 py-1 rounded-lg">
-                <i class="fa-solid fa-location-dot text-emerald-400 mr-1"></i> ${venue.name}
+              <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md border border-white/80 text-zinc-800 text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-sm">
+                <i class="fa-solid fa-location-dot text-indigo-600 mr-1"></i> ${venue.name}
               </div>
 
               ${soldOut ? `
@@ -1023,8 +1101,8 @@
                   SOLD OUT
                 </div>
               ` : concert.isLiveNow ? `
-                <div class="absolute top-3 right-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-lg">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> TONIGHT
+                <div class="absolute top-3 right-3 bg-teal-50 border border-teal-200 text-teal-700 text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-lg">
+                  <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping"></span> TONIGHT
                 </div>
               ` : ''}
             </div>
@@ -1032,18 +1110,17 @@
             <!-- Content Area -->
             <div class="p-5 space-y-3">
               <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">${concert.genre}</span>
-                <h3 class="text-xl font-bold text-white leading-snug">${concert.artist}</h3>
-                <p class="text-xs text-zinc-400 mt-0.5">${concert.tour}</p>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">${concert.genre}</span>
+                <h3 class="text-xl font-bold text-zinc-950 leading-snug">${concert.artist}</h3>
+                <p class="text-xs text-zinc-500 mt-0.5">${concert.tour}</p>
               </div>
 
-              <div class="space-y-1.5 text-xs text-zinc-400 pt-2 border-t border-zinc-800/80">
+              <div class="space-y-1.5 text-xs text-zinc-600 pt-2 border-t border-zinc-200">
                 <div class="flex items-center justify-between">
-                  <span><i class="fa-solid fa-calendar text-zinc-500 mr-1.5"></i> ${concert.date}</span>
+                  <span><i class="fa-solid fa-calendar text-zinc-400 mr-1.5"></i> ${concert.date}</span>
                 </div>
-                <div class="flex items-center justify-between">
-                  <span><i class="fa-solid fa-users text-zinc-500 mr-1.5"></i> Capacity:</span>
-                  <span class="font-mono font-semibold text-zinc-200">${venue.capacity.toLocaleString()} seats</span>
+                <div class="flex items-center">
+                  <span><i class="fa-solid fa-users text-zinc-400 mr-1.5"></i> Capacity: ${venue.capacity.toLocaleString()} seats</span>
                 </div>
               </div>
             </div>
@@ -1053,9 +1130,9 @@
           <div class="p-5 pt-0 flex items-center justify-between gap-3">
             <div>
               <span class="text-[10px] text-zinc-500 block uppercase">From</span>
-              <span class="text-lg font-extrabold text-white">$${concert.priceFrom}</span>
+              <span class="text-lg font-extrabold text-zinc-950">$${concert.priceFrom}</span>
             </div>
-            <button ${soldOut ? 'disabled' : `onclick="openTicketModal('${concert.id}')"`} class="px-5 py-2.5 ${soldOut ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-zinc-100 hover:bg-white text-zinc-950'} font-bold text-xs rounded-md transition-all shadow-md">
+            <button ${soldOut ? 'disabled' : `onclick="openTicketModal('${concert.id}')"`} class="px-5 py-2.5 ${soldOut ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed' : 'bg-indigo-700 hover:bg-indigo-600 text-white'} font-bold text-xs rounded-md transition-all shadow-md">
               ${soldOut ? 'Sold Out' : 'See Tickets'}
             </button>
           </div>
@@ -1067,9 +1144,9 @@
     function filterGenre(genre, clickedButton) {
       state.activeFilter = genre;
       document.querySelectorAll('.genre-pill').forEach(btn => {
-        btn.className = "genre-pill px-4 py-1.5 rounded-lg text-xs font-medium border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white transition-all";
+        btn.className = "genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all";
       });
-      clickedButton.className = "genre-pill active px-4 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 transition-all";
+      clickedButton.className = "genre-pill active px-4 py-1.5 rounded-full text-xs font-semibold border border-indigo-700 bg-indigo-700 text-white transition-all";
       renderConcerts();
     }
 
@@ -1318,12 +1395,13 @@
       const concert = state.selectedConcert;
       const venue = VENUES[concert.venueId];
       const fees = Math.round(state.pendingCheckout.totalPaid * 0.12);
-      const discount = Math.round(state.pendingCheckout.totalPaid * (state.discountPct / 100));
+      const pctDiscount = Math.round(state.pendingCheckout.totalPaid * (state.discountPct / 100));
+      const discount = Math.min(state.pendingCheckout.totalPaid + fees, Math.max(pctDiscount, state.discountFlat));
       const finalTotal = state.pendingCheckout.totalPaid + fees - discount;
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
-          <img src="${concert.image}" alt="${concert.artist}" class="w-24 h-24 rounded-xl object-cover border border-zinc-800">
+          <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-24 h-24 rounded-xl object-cover border border-zinc-800">
           <div class="flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">${concert.genre}</span>
             <h3 class="text-xl font-bold text-white">${concert.artist}</h3>
@@ -1461,6 +1539,7 @@
       state.pendingCheckout = null;
       stopTicketUrgency();
       launchConfetti();
+      persistTickets();
       updateTicketBadge();
       updateWalletUI();
 
@@ -1487,6 +1566,7 @@
         const concert = CONCERTS.find(c => c.id === t.concertId);
         return concert && !concert.isEnded;
       });
+      persistTickets();
       updateTicketBadge();
     }
 
@@ -1514,7 +1594,7 @@
 
         card.innerHTML = `
           <div class="flex items-center space-x-4">
-            <img src="${concert.image}" alt="${concert.artist}" class="w-16 h-16 rounded-xl object-cover border border-zinc-800">
+            <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-16 h-16 rounded-xl object-cover border border-zinc-800">
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-emerald-400 font-mono">PASS ${t.ticketId}</span>
@@ -1562,6 +1642,7 @@
       const t = state.userTickets.find(item => item.ticketId === ticketId);
       if (t) {
         t.doorsOpen = true;
+        persistTickets();
         renderTicketsView();
         showToast('Doors unlocked! You can now enter the live stage.', 'info');
       }
@@ -1683,12 +1764,12 @@
       if (!state.queueStarted) {
         state.queueStarted = true;
         state.queueTimer = setInterval(() => {
-          state.queueCharge = Math.max(0, state.queueCharge - 10);
+          state.queueCharge = Math.max(0, state.queueCharge - 1.25);
           updateQueueUI();
-        }, 220);
+        }, 350);
       }
 
-      state.queueCharge = Math.min(100, state.queueCharge + 7);
+      state.queueCharge = Math.min(100, state.queueCharge + 5);
       updateQueueUI();
 
       if (state.queueCharge >= 100) {
@@ -1709,7 +1790,7 @@
         : `<i class="fa-solid fa-bag-shopping"></i> Buy & Return to Concert`;
       document.getElementById('merchTotalPanel').classList.toggle('hidden', state.merchPreviewOnly);
 
-      state.merchCart = {};
+      state.merchCart = { ...(state.merchCarts[state.activeMerchConcert.id] || {}) };
       renderMerchItems();
     }
 
@@ -1749,6 +1830,7 @@
       if (next === 0) delete state.merchCart[itemId];
       else state.merchCart[itemId] = next;
 
+      persistActiveMerchCart();
       renderMerchItems();
     }
 
@@ -1775,6 +1857,8 @@
       }
 
       closeMerchModal();
+      state.merchCart = {};
+      persistActiveMerchCart();
       showToast(`Merch order placed! Navigating back to show...`, 'success');
       
       // Navigate back to concert / live stage view automatically
@@ -1898,13 +1982,14 @@
     function updateWalletUI() {
       localStorage.setItem('dopamineWallet', state.walletBalance.toFixed(0));
       localStorage.setItem('dopamineDiscount', state.discountPct.toString());
+      localStorage.setItem('dopamineDiscountFlat', state.discountFlat.toString());
       localStorage.setItem('dopamineLastSpin', state.lastSpinDate);
       localStorage.setItem('dopamineDealLabel', state.activeDealLabel);
       const walletText = `$${state.walletBalance.toFixed(0)}`;
       document.getElementById('walletBalanceText').innerText = walletText;
       const modalBalance = document.getElementById('walletModalBalance');
       if (modalBalance) modalBalance.innerText = walletText;
-      document.getElementById('discountNavText').innerText = state.discountPct > 0 ? `${state.discountPct}%` : 'Spin';
+      document.getElementById('discountNavText').innerText = state.activeDealLabel ? 'Deal' : 'Spin';
       const discountText = document.getElementById('discountText');
       if (discountText) discountText.innerText = state.activeDealLabel || 'No discount active';
     }
@@ -1967,20 +2052,27 @@
       const deals = [
         { label: '5% off checkout', discount: 5, wallet: 0 },
         { label: '10% off checkout', discount: 10, wallet: 0 },
-        { label: '15% off checkout', discount: 15, wallet: 0 },
-        { label: '20% off checkout', discount: 20, wallet: 0 },
-        { label: '$15 wallet bonus', discount: 0, wallet: 15 },
-        { label: '$30 wallet bonus', discount: 0, wallet: 30 },
+        { label: '$15 off checkout', discount: 0, flat: 15, wallet: 0 },
+        { label: 'Free merch credit', discount: 0, flat: 0, wallet: 45 },
+        { label: '$30 off checkout', discount: 0, flat: 30, wallet: 0 },
+        { label: 'Free ticket deal', discount: 100, wallet: 0 },
         { label: 'Free-fee checkout', discount: 12, wallet: 0 },
         { label: '25% off one order', discount: 25, wallet: 0 }
       ];
-      const deal = deals[Math.floor(Math.random() * deals.length)];
+      const dealIndex = Math.floor(Math.random() * deals.length);
+      const deal = deals[dealIndex];
       state.discountPct = deal.discount;
+      state.discountFlat = deal.flat || 0;
       state.activeDealLabel = deal.label;
       if (deal.wallet) state.walletBalance += deal.wallet;
       state.lastSpinDate = today;
       const wheel = document.getElementById('discountWheel');
-      wheel.style.transform = `rotate(${900 + deals.indexOf(deal) * 47}deg)`;
+      const targetAngle = dealIndex * 45 + 22.5;
+      const currentAngle = state.wheelRotation % 360;
+      const desiredAngle = 360 - targetAngle + (Math.random() * 16 - 8);
+      const extraTurns = 1440 + ((desiredAngle - currentAngle + 360) % 360);
+      state.wheelRotation += extraTurns;
+      wheel.style.transform = `rotate(${state.wheelRotation}deg)`;
       updateWalletUI();
       showToast(`Daily wheel unlocked ${deal.label}.`, 'success');
     }
