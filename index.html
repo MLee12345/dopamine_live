@@ -80,9 +80,9 @@
       filter: brightness(1.25);
     }
     .seat-section.selected {
-      stroke: #ffffff;
+      stroke: #111827;
       stroke-width: 4px;
-      filter: drop-shadow(0 0 7px rgba(244, 244, 245, 0.38)) brightness(1.22);
+      filter: drop-shadow(0 0 7px rgba(79, 70, 229, 0.32)) brightness(1.08);
       opacity: 1 !important;
     }
     .section-label {
@@ -114,12 +114,12 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 72px;
-      margin-left: -36px;
+      width: 82px;
+      margin-left: -41px;
       margin-top: -8px;
-      transform-origin: 36px 8px;
+      transform-origin: 41px 8px;
       color: #fff;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 800;
       line-height: 1.05;
       text-align: center;
@@ -134,15 +134,27 @@
     }
     .confetti-piece {
       position: fixed;
-      top: -12px;
+      top: 50vh;
+      left: 50vw;
       width: 7px;
       height: 12px;
       z-index: 80;
       pointer-events: none;
-      animation: confettiFall 1.6s ease-out forwards;
+      animation: confettiBurst 1.25s ease-out forwards;
     }
-    @keyframes confettiFall {
-      to { transform: translateY(100vh) rotate(640deg); opacity: 0; }
+    @keyframes confettiBurst {
+      to { transform: translate(var(--x), var(--y)) rotate(720deg); opacity: 0; }
+    }
+    .seat-view-photo {
+      background-size: cover;
+      background-position: center;
+      min-height: 210px;
+    }
+    .seat-view-photo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.55));
     }
     .spend-pop {
       animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -203,12 +215,62 @@
           <i class="fa-solid fa-ticket mr-1.5"></i> My Tickets
           <span id="ticketBadgeCount" class="hidden absolute -top-1 -right-1 bg-emerald-500 text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
         </button>
+        <button onclick="navigateTo('profile')" id="nav-profile" class="px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors">
+          <i class="fa-solid fa-user mr-1.5"></i> Profile
+        </button>
+        <button onclick="logoutAccount()" id="nav-logout" class="hidden px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors">
+          <i class="fa-solid fa-right-from-bracket mr-1.5"></i> Log out
+        </button>
       </nav>
     </div>
   </header>
 
   <!-- MAIN CONTAINER -->
   <main id="appContainer" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- PAGE 0: ACCOUNT START -->
+    <section id="page-account" class="hidden min-h-[68vh] grid place-items-center">
+      <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <div class="bg-indigo-700 text-white rounded-lg p-8 flex flex-col justify-between shadow-xl shadow-indigo-950/10">
+          <div>
+            <div class="w-11 h-11 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center mb-6">
+              <i class="fa-solid fa-ticket text-xl"></i>
+            </div>
+            <h1 class="text-4xl font-extrabold tracking-tight">Start your ticket wallet.</h1>
+            <p class="text-indigo-100 mt-3 text-sm max-w-md">Create a local DopamineLive profile to keep tickets, merch history, daily deals, and checkout progress on this device.</p>
+          </div>
+          <div class="grid grid-cols-3 gap-3 text-xs text-indigo-100 mt-8">
+            <div class="border border-white/20 rounded-lg p-3">Saved carts</div>
+            <div class="border border-white/20 rounded-lg p-3">Seat views</div>
+            <div class="border border-white/20 rounded-lg p-3">Past shows</div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-zinc-200 rounded-lg p-6 shadow-sm">
+          <div class="mb-5">
+            <h2 class="text-2xl font-bold text-zinc-950">Create account</h2>
+            <p class="text-sm text-zinc-500">Usernames must be unique on this device.</p>
+          </div>
+          <div class="space-y-3">
+            <label class="block">
+              <span class="text-xs font-semibold text-zinc-600">Username</span>
+              <input id="accountUsername" class="mt-1 w-full bg-white border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-950 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="yourname">
+            </label>
+            <label class="block">
+              <span class="text-xs font-semibold text-zinc-600">Password</span>
+              <input id="accountPassword" type="password" class="mt-1 w-full bg-white border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-950 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="Create a password">
+            </label>
+            <button onclick="createAccount()" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-bold">Create profile</button>
+          </div>
+          <div class="mt-5 pt-5 border-t border-zinc-200">
+            <button onclick="skipAccount()" class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-lg py-2.5 text-sm font-bold">
+              Skip to DopamineLive
+            </button>
+            <p class="text-[11px] text-zinc-500 mt-2 text-center">Skipping keeps a guest session on this device until you log out.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- PAGE 1: DISCOVER / CONCERT CATALOGUE -->
     <section id="page-discover" class="space-y-8">
@@ -229,14 +291,27 @@
         </div>
       </div>
 
-      <!-- Category Filter Pills -->
-      <div class="flex items-center justify-between border-b border-zinc-200 pb-4">
-        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
-          <button onclick="filterGenre('ALL', this)" class="genre-pill active px-4 py-1.5 rounded-full text-xs font-semibold border border-indigo-700 bg-indigo-700 text-white transition-all">All Genres</button>
-          <button onclick="filterGenre('Electronic', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Electronic / Synth</button>
-          <button onclick="filterGenre('Pop', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Pop / Arena</button>
-          <button onclick="filterGenre('Rock', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Indie / Rock</button>
-          <button onclick="filterGenre('Hip-Hop', this)" class="genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all">Hip-Hop / Bass</button>
+      <!-- Marketplace Filters -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 w-full lg:max-w-3xl">
+          <select id="locationFilter" onchange="handleFilters()" class="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-xs font-semibold text-zinc-700 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">Location</option>
+          </select>
+          <select id="dateFilter" onchange="handleFilters()" class="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-xs font-semibold text-zinc-700 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">Any date</option>
+            <option value="TODAY">Today / tomorrow</option>
+            <option value="NOV">November</option>
+            <option value="DEC">December</option>
+          </select>
+          <select id="priceFilter" onchange="handleFilters()" class="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-xs font-semibold text-zinc-700 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">Any price</option>
+            <option value="100">Under $100</option>
+            <option value="150">Under $150</option>
+            <option value="200">Under $200</option>
+          </select>
+          <button onclick="clearFilters()" class="bg-zinc-100 border border-zinc-300 rounded-lg px-3 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-200">
+            Clear filters
+          </button>
         </div>
         <div class="hidden sm:block text-xs text-zinc-500">
           Showing <span id="concertCount" class="text-zinc-900 font-semibold">60</span> Live Events
@@ -249,26 +324,48 @@
       </div>
     </section>
 
+    <!-- PAGE 2B: PROFILE -->
+    <section id="page-profile" class="hidden space-y-6">
+      <div class="bg-white border border-zinc-200 rounded-lg p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-indigo-600">Profile</div>
+          <h2 id="profileName" class="text-2xl font-extrabold text-zinc-950">Guest</h2>
+          <p class="text-sm text-zinc-500">Concerts attended, ticket history, and merch purchases.</p>
+        </div>
+        <button onclick="logoutAccount()" class="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-bold">Log out</button>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
+          <h3 class="font-bold text-zinc-950 mb-3">Concerts attended</h3>
+          <div id="profileConcerts" class="space-y-3"></div>
+        </div>
+        <div class="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
+          <h3 class="font-bold text-zinc-950 mb-3">Merch collected</h3>
+          <div id="profileMerch" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- PAGE 2: MY TICKETS WALLET (Contains "Enter Live Stage" doors) -->
     <section id="page-tickets" class="hidden space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-ticket text-emerald-400"></i> My Ticket Wallet
+          <h2 class="text-2xl font-bold text-zinc-950 flex items-center gap-2">
+            <i class="fa-solid fa-ticket text-indigo-600"></i> My Ticket Wallet
           </h2>
-          <p class="text-zinc-400 text-xs sm:text-sm">Manage your passes, check door status, and enter live virtual stages.</p>
+          <p class="text-zinc-500 text-xs sm:text-sm">Manage your passes, check door status, and enter live virtual stages.</p>
         </div>
-        <span class="text-xs bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-1.5 rounded-lg" id="ticketSummaryBadge">0 Passes Total</span>
+        <span class="text-xs bg-white border border-zinc-200 text-zinc-600 px-3 py-1.5 rounded-lg" id="ticketSummaryBadge">0 Passes Total</span>
       </div>
 
       <!-- Empty State -->
-      <div id="ticketsEmptyState" class="hidden text-center py-16 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500 text-2xl">
+      <div id="ticketsEmptyState" class="hidden text-center py-16 bg-white border border-zinc-200 rounded-lg shadow-sm">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-2xl">
           <i class="fa-solid fa-ticket-simple"></i>
         </div>
-        <h3 class="text-lg font-semibold text-white">No active tickets yet</h3>
-        <p class="text-zinc-400 text-sm max-w-sm mx-auto mt-1 mb-6">Explore upcoming shows on the homepage to reserve your seats.</p>
-        <button onclick="navigateTo('discover')" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+        <h3 class="text-lg font-semibold text-zinc-950">No active tickets yet</h3>
+        <p class="text-zinc-500 text-sm max-w-sm mx-auto mt-1 mb-6">Explore upcoming shows on the homepage to reserve your seats.</p>
+        <button onclick="navigateTo('discover')" class="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-sm rounded-lg transition-all">
           Browse Live Shows
         </button>
       </div>
@@ -283,19 +380,19 @@
     <section id="page-ticket-select" class="hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <button onclick="navigateTo('discover')" class="text-zinc-400 hover:text-white text-xs flex items-center gap-1 mb-3">
+          <button onclick="navigateTo('discover')" class="text-zinc-500 hover:text-indigo-700 text-xs flex items-center gap-1 mb-3">
             <i class="fa-solid fa-arrow-left"></i> Back to Discover
           </button>
-          <h2 id="modalArtistTitle" class="text-2xl font-bold text-white">Select Tickets</h2>
-          <p id="modalVenueInfo" class="text-sm text-zinc-400">Venue • City • Capacity</p>
+          <h2 id="modalArtistTitle" class="text-2xl font-bold text-zinc-950">Select Tickets</h2>
+          <p id="modalVenueInfo" class="text-sm text-zinc-500">Venue • City • Capacity</p>
         </div>
-        <div class="text-xs bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-2 rounded-xl">
-          <i class="fa-solid fa-shield-halved text-emerald-400 mr-1.5"></i> Verified venue map
+        <div id="reservationTimerBadge" class="hidden text-xs bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg font-bold">
+          <i class="fa-solid fa-clock mr-1.5"></i> Checkout hold: <span id="reservationTimerText">5:00</span>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-7 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col items-center justify-center min-h-[420px]">
+        <div class="lg:col-span-7 bg-white border border-zinc-200 rounded-lg p-5 flex flex-col items-center justify-center min-h-[420px] shadow-sm">
           <div class="w-full flex items-center justify-between mb-4">
             <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-layer-group"></i> Venue Diagram
@@ -307,15 +404,27 @@
             <!-- Dynamic SVG Venue Map Injected Here -->
           </div>
 
-          <div id="sectionLegend" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-zinc-400 mt-5 pt-4 border-t border-zinc-900">
+          <div id="sectionLegend" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-zinc-600 mt-5 pt-4 border-t border-zinc-200">
             <!-- Dynamic legend inserted via JS -->
           </div>
         </div>
 
         <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
-          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Music Preview</label>
+              <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">View From This Section</label>
+              <span id="seatViewLabel" class="text-[11px] text-zinc-500">Selected section</span>
+            </div>
+            <div id="seatViewPhoto" class="seat-view-photo relative rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100">
+              <div class="absolute z-10 bottom-3 left-3 right-3">
+                <div id="seatViewCaption" class="text-white text-sm font-bold drop-shadow">Choose a section to preview the view.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Music Preview</label>
               <span id="previewArtistLabel" class="text-[11px] text-zinc-500">Artist playlist</span>
             </div>
             <div id="ticketPreviewTracks" class="space-y-2">
@@ -323,29 +432,29 @@
             </div>
           </div>
 
-          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
-            <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Choose Seating Section</label>
+          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-4 shadow-sm">
+            <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Choose Seating Section</label>
             <div id="sectionList" class="space-y-2 max-h-80 overflow-y-auto pr-1">
               <!-- Tier Options inserted via JS -->
             </div>
           </div>
 
-          <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl space-y-4">
-            <div class="flex items-center justify-between text-xs text-zinc-400">
+          <div class="bg-white border border-zinc-200 p-5 rounded-lg space-y-4 shadow-sm">
+            <div class="flex items-center justify-between text-xs text-zinc-600">
               <span>Ticket Quantity</span>
-              <div class="flex items-center space-x-2 bg-zinc-950 border border-zinc-800 rounded-lg p-1">
-                <button onclick="updateQty(-1)" class="w-7 h-7 rounded bg-zinc-800 text-white flex items-center justify-center font-bold hover:bg-zinc-700">-</button>
-                <span id="ticketQtyText" class="w-8 text-center font-bold text-white text-xs">1</span>
-                <button onclick="updateQty(1)" class="w-7 h-7 rounded bg-zinc-800 text-white flex items-center justify-center font-bold hover:bg-zinc-700">+</button>
+              <div class="flex items-center space-x-2 bg-zinc-100 border border-zinc-300 rounded-lg p-1">
+                <button onclick="updateQty(-1)" class="w-7 h-7 rounded bg-white text-zinc-800 flex items-center justify-center font-bold hover:bg-zinc-200">-</button>
+                <span id="ticketQtyText" class="w-8 text-center font-bold text-zinc-950 text-xs">1</span>
+                <button onclick="updateQty(1)" class="w-7 h-7 rounded bg-white text-zinc-800 flex items-center justify-center font-bold hover:bg-zinc-200">+</button>
               </div>
             </div>
 
-            <div class="flex items-center justify-between pt-3 border-t border-zinc-800">
-              <span class="text-xs text-zinc-400">Reservation Total</span>
-              <span id="ticketTotalPrice" class="text-2xl font-extrabold text-emerald-400">$0</span>
+            <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
+              <span class="text-xs text-zinc-500">Reservation Total</span>
+              <span id="ticketTotalPrice" class="text-2xl font-extrabold text-indigo-700">$0</span>
             </div>
 
-            <button onclick="confirmTicketPurchase()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+            <button onclick="confirmTicketPurchase()" class="w-full py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-check"></i> Confirm Tickets
             </button>
           </div>
@@ -356,34 +465,37 @@
     <!-- PAGE 4: TICKET CHECKOUT -->
     <section id="page-checkout" class="hidden space-y-6">
       <div>
-        <button onclick="navigateTo('ticket-select')" class="text-zinc-400 hover:text-white text-xs flex items-center gap-1 mb-3">
+        <button onclick="navigateTo('ticket-select')" class="text-zinc-500 hover:text-indigo-700 text-xs flex items-center gap-1 mb-3">
           <i class="fa-solid fa-arrow-left"></i> Back to Seat Map
         </button>
-        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-credit-card text-emerald-400"></i> Checkout
+        <h2 class="text-2xl font-bold text-zinc-950 flex items-center gap-2">
+          <i class="fa-solid fa-credit-card text-indigo-600"></i> Checkout
         </h2>
-        <p class="text-zinc-400 text-sm">Review your ticket reservation and complete purchase.</p>
+        <p class="text-zinc-500 text-sm">Review your ticket reservation and complete purchase.</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div id="checkoutSummary" class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+        <div id="checkoutSummary" class="lg:col-span-7 bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
           <!-- Checkout summary rendered here -->
         </div>
 
-        <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+        <div class="lg:col-span-5 bg-white border border-zinc-200 rounded-lg p-5 space-y-4 shadow-sm">
+          <div class="bg-rose-50 border border-rose-200 rounded-lg p-3 text-sm font-bold text-rose-700">
+            <i class="fa-solid fa-clock mr-1.5"></i> Seat hold expires in <span id="checkoutTimerText">5:00</span>
+          </div>
           <div class="space-y-3">
-            <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Payment</label>
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 flex items-center justify-between">
-              <span><i class="fa-brands fa-cc-visa text-emerald-400 mr-2"></i> Visa ending 4242</span>
+            <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Payment</label>
+            <div class="bg-zinc-50 border border-zinc-200 rounded-lg p-3 text-sm text-zinc-700 flex items-center justify-between">
+              <span><i class="fa-brands fa-cc-visa text-indigo-600 mr-2"></i> Visa ending 4242</span>
               <span class="text-[11px] text-zinc-500">Default</span>
             </div>
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 flex items-center justify-between">
-              <span><i class="fa-solid fa-user-shield text-emerald-400 mr-2"></i> Verified fan checkout</span>
-              <span class="text-[11px] text-emerald-400">Ready</span>
+            <div class="bg-zinc-50 border border-zinc-200 rounded-lg p-3 text-sm text-zinc-700 flex items-center justify-between">
+              <span><i class="fa-solid fa-user-shield text-indigo-600 mr-2"></i> Verified fan checkout</span>
+              <span class="text-[11px] text-indigo-600">Ready</span>
             </div>
           </div>
 
-          <button id="holdBuyButton" onpointerdown="startHoldToBuy(event)" onpointerup="cancelHoldToBuy()" onpointerleave="cancelHoldToBuy()" onpointercancel="cancelHoldToBuy()" class="relative overflow-hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <button id="holdBuyButton" onpointerdown="startHoldToBuy(event)" onpointerup="cancelHoldToBuy()" onpointerleave="cancelHoldToBuy()" onpointercancel="cancelHoldToBuy()" class="relative overflow-hidden w-full py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2">
             <span id="holdBuyFill" class="hold-fill absolute left-0 top-0 h-full w-0 bg-white/35"></span>
             <span class="relative z-10 flex items-center gap-2"><i class="fa-solid fa-lock"></i> Press and Hold to Buy</span>
           </button>
@@ -589,26 +701,12 @@
             <div class="wheel-pointer absolute left-1/2 -top-2 -translate-x-1/2 z-20 text-zinc-100">
               <i class="fa-solid fa-caret-down text-3xl"></i>
             </div>
-            <button onclick="spinDiscountWheel()" class="relative w-56 h-56 rounded-full border-4 border-white wheel-face wheel-spin flex items-center justify-center text-white text-lg font-black overflow-hidden" id="discountWheel">
-              <span class="wheel-label" style="transform: rotate(22.5deg) translateY(-84px) rotate(-22.5deg);">5% OFF</span>
-              <span class="wheel-label" style="transform: rotate(67.5deg) translateY(-84px) rotate(-67.5deg);">10% OFF</span>
-              <span class="wheel-label" style="transform: rotate(112.5deg) translateY(-84px) rotate(-112.5deg);">$15 OFF</span>
-              <span class="wheel-label" style="transform: rotate(157.5deg) translateY(-84px) rotate(-157.5deg);">FREE MERCH</span>
-              <span class="wheel-label" style="transform: rotate(202.5deg) translateY(-84px) rotate(-202.5deg);">$30 OFF</span>
-              <span class="wheel-label" style="transform: rotate(247.5deg) translateY(-84px) rotate(-247.5deg);">FREE TICKET</span>
-              <span class="wheel-label" style="transform: rotate(292.5deg) translateY(-84px) rotate(-292.5deg);">FREE FEES</span>
-              <span class="wheel-label" style="transform: rotate(337.5deg) translateY(-84px) rotate(-337.5deg);">25% OFF</span>
+            <button onclick="spinDiscountWheel()" class="relative w-72 h-72 rounded-full border-4 border-white wheel-face wheel-spin flex items-center justify-center text-white text-lg font-black overflow-hidden" id="discountWheel">
               <span class="relative z-10 bg-zinc-950/95 border border-white/30 rounded-full w-20 h-20 flex items-center justify-center shadow-xl">SPIN</span>
             </button>
           </div>
         </div>
         <div id="discountText" class="text-center text-xl font-bold text-white">No discount active</div>
-        <div id="wheelDealList" class="grid grid-cols-2 gap-2 text-xs text-zinc-400">
-          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">5% off checkout</div>
-          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">10% off checkout</div>
-          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">$15 off checkout</div>
-          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">Free merch credit</div>
-        </div>
       </div>
     </div>
   </div>
@@ -916,6 +1014,29 @@
       'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000&auto=format&fit=crop'
     ];
 
+    const SEAT_VIEW_IMAGES = [
+      'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1521334726092-b509a19597c6?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1507901747481-84a4f64fda6d?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000&auto=format&fit=crop'
+    ];
+
+    const WHEEL_DEAL_LIBRARY = [
+      { label: '5% off', fullLabel: '5% off checkout', discount: 5, flat: 0, wallet: 0 },
+      { label: '15% off', fullLabel: '15% off checkout', discount: 15, flat: 0, wallet: 0 },
+      { label: '$20 off', fullLabel: '$20 off checkout', discount: 0, flat: 20, wallet: 0 },
+      { label: 'Free merch', fullLabel: 'Free merch credit', discount: 0, flat: 0, wallet: 45 },
+      { label: '$35 off', fullLabel: '$35 off checkout', discount: 0, flat: 35, wallet: 0 },
+      { label: 'Free ticket', fullLabel: 'Free ticket deal', discount: 100, flat: 0, wallet: 0 },
+      { label: 'Free fees', fullLabel: 'Free-fee checkout', discount: 12, flat: 0, wallet: 0 },
+      { label: '25% off', fullLabel: '25% off one order', discount: 25, flat: 0, wallet: 0 },
+      { label: '$10 wallet', fullLabel: '$10 wallet bonus', discount: 0, flat: 0, wallet: 10 },
+      { label: 'VIP save', fullLabel: 'VIP section discount', discount: 18, flat: 0, wallet: 0 },
+      { label: '$50 merch', fullLabel: '$50 merch credit', discount: 0, flat: 0, wallet: 50 },
+      { label: 'Half fees', fullLabel: 'Half-off service fees', discount: 6, flat: 0, wallet: 0 }
+    ];
+
     EXTRA_ARTISTS.forEach(([artist, tour, genre], idx) => {
       const venueIds = Object.keys(VENUES);
       const venueId = venueIds[idx % venueIds.length];
@@ -978,10 +1099,23 @@
       localStorage.setItem('dopamineMerchCarts', JSON.stringify(state.merchCarts));
     }
 
+    function persistAccountState() {
+      localStorage.setItem('dopamineAccount', JSON.stringify(state.account));
+      localStorage.setItem('dopamineUsers', JSON.stringify(state.users));
+      localStorage.setItem('dopamineProfileHistory', JSON.stringify(state.profileHistory));
+    }
+
+    function todayKey() {
+      return new Date().toLocaleDateString();
+    }
+
     const state = {
       activeTab: 'discover',
-      activeFilter: 'ALL',
       searchTerm: '',
+      filters: { location: 'ALL', date: 'ALL', price: 'ALL' },
+      users: readJsonStorage('dopamineUsers', []),
+      account: readJsonStorage('dopamineAccount', null),
+      profileHistory: readJsonStorage('dopamineProfileHistory', { concerts: [], merch: [] }),
       userTickets: loadStoredTickets(),
       selectedConcert: null,
       selectedSection: null,
@@ -1000,39 +1134,61 @@
       stageCam: 'Main Stage',
       stageTrackIndex: 0,
       ticketUrgencyTimer: null,
+      ticketInventoryTimer: null,
+      reservationTimer: null,
+      reservationExpiresAt: 0,
+      inventoryAlerted: {},
       walletBalance: Number(localStorage.getItem('dopamineWallet') || 25),
       discountPct: Number(localStorage.getItem('dopamineDiscount') || 0),
       discountFlat: Number(localStorage.getItem('dopamineDiscountFlat') || 0),
       lastSpinDate: localStorage.getItem('dopamineLastSpin') || '',
-      activeDealLabel: localStorage.getItem('dopamineDealLabel') || '',
+      activeDealLabel: localStorage.getItem('dopamineDealLabel') === '10% off checkout' ? '' : (localStorage.getItem('dopamineDealLabel') || ''),
       wheelRotation: 0,
+      wheelDeals: [],
       siteSeconds: 0,
       holdTimer: null,
       holdProgress: 0,
       audioCtx: null,
       previewOscillator: null
     };
+    if (localStorage.getItem('dopamineDealLabel') === '10% off checkout') {
+      state.discountPct = 0;
+      state.discountFlat = 0;
+      localStorage.removeItem('dopamineDealLabel');
+      localStorage.removeItem('dopamineDiscount');
+      localStorage.removeItem('dopamineDiscountFlat');
+    }
 
     /* ==========================================================================
        3. INITIALIZATION & NAVIGATION
        ========================================================================== */
     window.onload = function() {
       pruneEndedTickets();
+      initFilters();
+      renderDailyWheel();
       renderConcerts();
       updateTicketBadge();
       updateWalletUI();
       startWalletRewards();
       initStageVisualizer();
       startSpendingPopups();
+      updateAccountUI();
+      navigateTo(state.account ? 'discover' : 'account');
     };
 
     function navigateTo(tabName) {
+      if (!state.account && tabName !== 'account') tabName = 'account';
       state.activeTab = tabName;
-      if (!['ticket-select', 'checkout'].includes(tabName)) stopTicketUrgency();
+      if (!['ticket-select', 'checkout'].includes(tabName)) {
+        stopTicketUrgency();
+        stopReservationTimer();
+      }
       
       // Hide all pages
+      document.getElementById('page-account').classList.add('hidden');
       document.getElementById('page-discover').classList.add('hidden');
       document.getElementById('page-tickets').classList.add('hidden');
+      document.getElementById('page-profile').classList.add('hidden');
       document.getElementById('page-ticket-select').classList.add('hidden');
       document.getElementById('page-checkout').classList.add('hidden');
       document.getElementById('page-stage').classList.add('hidden');
@@ -1040,8 +1196,11 @@
       // Unhighlight nav buttons
       document.getElementById('nav-discover').className = "px-3 py-2 rounded-full text-sm font-semibold transition-colors text-zinc-600 hover:text-indigo-700";
       document.getElementById('nav-tickets').className = "px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors relative";
+      document.getElementById('nav-profile').className = "px-3 py-2 rounded-full text-sm font-semibold text-zinc-600 hover:text-indigo-700 transition-colors";
 
-      if (tabName === 'discover') {
+      if (tabName === 'account') {
+        document.getElementById('page-account').classList.remove('hidden');
+      } else if (tabName === 'discover') {
         document.getElementById('page-discover').classList.remove('hidden');
         document.getElementById('nav-discover').className = "px-3 py-2 rounded-full text-sm font-semibold transition-colors text-white bg-indigo-700 border border-indigo-700";
       } else if (tabName === 'tickets') {
@@ -1049,11 +1208,16 @@
         document.getElementById('page-tickets').classList.remove('hidden');
         document.getElementById('nav-tickets').className = "px-3 py-2 rounded-full text-sm font-semibold text-white bg-indigo-700 border border-indigo-700 relative";
         renderTicketsView();
+      } else if (tabName === 'profile') {
+        document.getElementById('page-profile').classList.remove('hidden');
+        document.getElementById('nav-profile').className = "px-3 py-2 rounded-full text-sm font-semibold text-white bg-indigo-700 border border-indigo-700";
+        renderProfilePage();
       } else if (tabName === 'ticket-select') {
         document.getElementById('page-ticket-select').classList.remove('hidden');
       } else if (tabName === 'checkout') {
         document.getElementById('page-checkout').classList.remove('hidden');
         renderCheckoutPage();
+        updateReservationTimerUI();
       } else if (tabName === 'stage') {
         document.getElementById('page-stage').classList.remove('hidden');
         requestAnimationFrame(resizeStageCanvas);
@@ -1063,17 +1227,74 @@
     /* ==========================================================================
        4. CONCERT DISCOVERY & CARDS (Simple, Clean, Sleek)
        ========================================================================== */
+    function createAccount() {
+      const usernameInput = document.getElementById('accountUsername');
+      const passwordInput = document.getElementById('accountPassword');
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      if (username.length < 3) {
+        showToast('Username needs at least 3 characters.', 'info');
+        return;
+      }
+      if (password.length < 4) {
+        showToast('Password needs at least 4 characters.', 'info');
+        return;
+      }
+      if (state.users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
+        showToast('That username is already taken on this device.', 'info');
+        return;
+      }
+      state.users.push({ username, password });
+      state.account = { username, guest: false };
+      persistAccountState();
+      updateAccountUI();
+      showToast(`Welcome, ${username}.`, 'success');
+      navigateTo('discover');
+    }
+
+    function skipAccount() {
+      state.account = { username: 'Guest', guest: true };
+      persistAccountState();
+      updateAccountUI();
+      navigateTo('discover');
+    }
+
+    function logoutAccount() {
+      state.account = null;
+      localStorage.removeItem('dopamineAccount');
+      updateAccountUI();
+      navigateTo('account');
+    }
+
+    function updateAccountUI() {
+      document.getElementById('nav-logout').classList.toggle('hidden', !state.account);
+      const profileName = document.getElementById('profileName');
+      if (profileName) profileName.innerText = state.account ? state.account.username : 'Guest';
+    }
+
+    function initFilters() {
+      const locationFilter = document.getElementById('locationFilter');
+      if (!locationFilter) return;
+      const cities = [...new Set(Object.values(VENUES).map(venue => venue.city))].sort();
+      locationFilter.innerHTML = `<option value="ALL">Location</option>` + cities.map(city => `<option value="${city}">${city}</option>`).join('');
+    }
+
     function renderConcerts() {
       const grid = document.getElementById('concertGrid');
       grid.innerHTML = '';
 
       const filtered = CONCERTS.filter(c => {
-        const matchesGenre = state.activeFilter === 'ALL' || c.genre === state.activeFilter;
+        const venue = VENUES[c.venueId];
+        const matchesLocation = state.filters.location === 'ALL' || venue.city === state.filters.location;
+        const matchesDate = state.filters.date === 'ALL' ||
+          (state.filters.date === 'TODAY' && (c.date.includes('TONIGHT') || c.date.includes('TOMORROW'))) ||
+          c.date.includes(state.filters.date);
+        const matchesPrice = state.filters.price === 'ALL' || c.priceFrom <= Number(state.filters.price);
         const matchesSearch = c.artist.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
                               c.tour.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                              VENUES[c.venueId].name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                              VENUES[c.venueId].city.toLowerCase().includes(state.searchTerm.toLowerCase());
-        return matchesGenre && matchesSearch;
+                              venue.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                              venue.city.toLowerCase().includes(state.searchTerm.toLowerCase());
+        return matchesLocation && matchesDate && matchesPrice && matchesSearch;
       });
 
       document.getElementById('concertCount').innerText = filtered.length;
@@ -1099,10 +1320,6 @@
               ${soldOut ? `
                 <div class="absolute top-3 right-3 bg-zinc-950/90 border border-zinc-500/60 text-zinc-200 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-lg">
                   SOLD OUT
-                </div>
-              ` : concert.isLiveNow ? `
-                <div class="absolute top-3 right-3 bg-teal-50 border border-teal-200 text-teal-700 text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-lg">
-                  <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping"></span> TONIGHT
                 </div>
               ` : ''}
             </div>
@@ -1141,12 +1358,18 @@
       });
     }
 
-    function filterGenre(genre, clickedButton) {
-      state.activeFilter = genre;
-      document.querySelectorAll('.genre-pill').forEach(btn => {
-        btn.className = "genre-pill px-4 py-1.5 rounded-full text-xs font-semibold border border-zinc-300 bg-white text-zinc-600 hover:text-indigo-700 hover:border-indigo-400 transition-all";
-      });
-      clickedButton.className = "genre-pill active px-4 py-1.5 rounded-full text-xs font-semibold border border-indigo-700 bg-indigo-700 text-white transition-all";
+    function handleFilters() {
+      state.filters.location = document.getElementById('locationFilter').value;
+      state.filters.date = document.getElementById('dateFilter').value;
+      state.filters.price = document.getElementById('priceFilter').value;
+      renderConcerts();
+    }
+
+    function clearFilters() {
+      state.filters = { location: 'ALL', date: 'ALL', price: 'ALL' };
+      document.getElementById('locationFilter').value = 'ALL';
+      document.getElementById('dateFilter').value = 'ALL';
+      document.getElementById('priceFilter').value = 'ALL';
       renderConcerts();
     }
 
@@ -1158,7 +1381,7 @@
     /* ==========================================================================
        5. ACCURATE VENUE SEATING MAPS & TICKET RESERVATION PAGE
        ========================================================================== */
-    const SECTION_COLORS = ['#8b8b8f', '#8b8b8f', '#8b8b8f'];
+    const SECTION_COLORS = ['#4f46e5', '#0f766e', '#64748b'];
 
     function openTicketModal(concertId) {
       state.selectedConcert = CONCERTS.find(c => c.id === concertId);
@@ -1179,6 +1402,8 @@
       renderSectionList(venue);
       renderTicketPreviewTracks();
       updateModalTotals();
+      updateSeatViewPreview();
+      startReservationTimer();
       startTicketUrgency();
 
       navigateTo('ticket-select');
@@ -1186,6 +1411,23 @@
 
     function closeTicketModal() {
       navigateTo('discover');
+    }
+
+    function getSeatViewImage(venue, secId) {
+      const venueIds = Object.keys(VENUES);
+      const venueIndex = Math.max(0, venueIds.indexOf(venue.id));
+      const sectionIndex = Math.max(0, venue.sections.findIndex(sec => sec.id === secId));
+      return SEAT_VIEW_IMAGES[(venueIndex + sectionIndex) % SEAT_VIEW_IMAGES.length];
+    }
+
+    function updateSeatViewPreview() {
+      if (!state.selectedConcert || !state.selectedSection) return;
+      const venue = VENUES[state.selectedConcert.venueId];
+      const photo = document.getElementById('seatViewPhoto');
+      if (!photo) return;
+      photo.style.backgroundImage = `url('${getSeatViewImage(venue, state.selectedSection.id)}')`;
+      document.getElementById('seatViewLabel').innerText = state.selectedSection.name;
+      document.getElementById('seatViewCaption').innerText = `${state.selectedSection.name} view at ${venue.name}`;
     }
 
     function getArtistPlaylist(concert) {
@@ -1201,8 +1443,8 @@
       document.getElementById('previewArtistLabel').innerText = state.selectedConcert.artist;
       const container = document.getElementById('ticketPreviewTracks');
       container.innerHTML = getArtistPlaylist(state.selectedConcert).map((track, idx) => `
-        <button onclick="previewTicketTrack(${idx})" class="w-full flex items-center justify-between bg-zinc-950 border border-zinc-800 hover:border-zinc-700 rounded-lg px-3 py-2 text-left">
-          <span class="text-xs text-zinc-200 truncate">${track}</span>
+        <button onclick="previewTicketTrack(${idx})" class="w-full flex items-center justify-between bg-zinc-50 border border-zinc-200 hover:border-indigo-300 rounded-lg px-3 py-2 text-left">
+          <span class="text-xs text-zinc-700 truncate">${track}</span>
           <span class="text-[10px] text-zinc-500"><i class="fa-solid fa-play mr-1"></i>${idx === 0 ? '0:30' : '0:45'}</span>
         </button>
       `).join('');
@@ -1261,12 +1503,12 @@
       const [front, middle, back] = venue.sections;
       const svgHtml = `
         <svg viewBox="0 0 300 200" class="w-full h-full">
-          <rect x="108" y="154" width="84" height="24" rx="4" fill="#18181b" stroke="#71717a"/>
-          <text x="150" y="170" fill="#e4e4e7" font-size="9" font-weight="700" text-anchor="middle">STAGE</text>
+          <rect x="108" y="154" width="84" height="24" rx="4" fill="#f4f4f5" stroke="#a1a1aa"/>
+          <text x="150" y="170" fill="#18181b" font-size="9" font-weight="700" text-anchor="middle">STAGE</text>
 
-          <rect id="svg-${front.id}" onclick="selectSectionById('${front.id}')" class="seat-section" x="95" y="116" width="110" height="26" rx="6" fill="#8b8b8f" opacity="0.86"/>
-          <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="#8b8b8f" opacity="0.86"/>
-          <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="#8b8b8f" opacity="0.86"/>
+          <rect id="svg-${front.id}" onclick="selectSectionById('${front.id}')" class="seat-section" x="95" y="116" width="110" height="26" rx="6" fill="${getSectionColor(venue, front.id)}" opacity="0.86"/>
+          <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="${getSectionColor(venue, middle.id)}" opacity="0.86"/>
+          <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="${getSectionColor(venue, back.id)}" opacity="0.86"/>
 
           <text class="section-label" x="150" y="134" text-anchor="middle">${front.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
           <text class="section-label" x="150" y="95" text-anchor="middle">${middle.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
@@ -1282,8 +1524,8 @@
     function renderSectionLegend(venue) {
       const legend = document.getElementById('sectionLegend');
       legend.innerHTML = venue.sections.map(sec => `
-        <button onclick="selectSectionById('${sec.id}')" class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-left hover:border-zinc-700 transition-colors">
-          <span class="w-4 h-4 rounded-sm border border-white/20" style="background:${getSectionColor(venue, sec.id)}"></span>
+        <button onclick="selectSectionById('${sec.id}')" class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-left hover:border-indigo-300 transition-colors">
+          <span class="w-4 h-4 rounded-sm border border-white/40" style="background:${getSectionColor(venue, sec.id)}"></span>
           <span class="truncate">${sec.name}</span>
         </button>
       `).join('');
@@ -1299,21 +1541,21 @@
         const isSoldOut = sec.seatsAvailable <= 0;
         item.className = `p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
           isSelected 
-            ? 'bg-emerald-950/50 border-emerald-500 text-white' 
-            : isSoldOut ? 'bg-zinc-950 border-zinc-900 text-zinc-600 opacity-60' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+            ? 'bg-indigo-50 border-indigo-500 text-zinc-950'
+            : isSoldOut ? 'bg-zinc-50 border-zinc-200 text-zinc-400 opacity-60' : 'bg-white border-zinc-200 text-zinc-600 hover:border-indigo-300'
         }`;
         item.onclick = () => isSoldOut ? showToast('That section is sold out.', 'info') : selectSection(sec);
 
         item.innerHTML = `
           <div class="flex items-start gap-3">
-            <span class="w-4 h-4 rounded-sm mt-1 border border-white/20" style="background:${getSectionColor(venue, sec.id)}"></span>
+            <span class="w-4 h-4 rounded-sm mt-1 border border-white/40" style="background:${getSectionColor(venue, sec.id)}"></span>
             <div>
-            <div class="text-xs font-bold text-white">${sec.name}</div>
+            <div class="text-xs font-bold text-zinc-950">${sec.name}</div>
             <div class="text-[11px] text-zinc-500">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
             </div>
           </div>
           <div class="text-right">
-            <div class="text-sm font-extrabold text-emerald-400">$${sec.price}</div>
+            <div class="text-sm font-extrabold text-indigo-700">$${sec.price}</div>
             <div class="text-[10px] text-zinc-500">per pass</div>
           </div>
         `;
@@ -1330,6 +1572,7 @@
       const venue = VENUES[state.selectedConcert.venueId];
       renderSectionList(venue);
       highlightSvgSection(sec.id);
+      updateSeatViewPreview();
       updateModalTotals();
     }
 
@@ -1356,6 +1599,11 @@
     }
 
     function updateModalTotals() {
+      if (state.selectedSection && state.selectedQty > state.selectedSection.seatsAvailable) {
+        state.selectedQty = Math.max(1, Math.min(8, state.selectedSection.seatsAvailable));
+        const qtyText = document.getElementById('ticketQtyText');
+        if (qtyText) qtyText.innerText = state.selectedQty;
+      }
       const total = state.selectedSection.price * state.selectedQty;
       document.getElementById('ticketTotalPrice').innerText = `$${total}`;
     }
@@ -1363,6 +1611,11 @@
     function confirmTicketPurchase() {
       if (state.selectedSection.seatsAvailable <= 0) {
         showToast('That section just sold out.', 'info');
+        return;
+      }
+      if (state.reservationExpiresAt && Date.now() > state.reservationExpiresAt) {
+        showToast('Your seat hold expired. Please choose seats again.', 'info');
+        navigateTo('discover');
         return;
       }
       state.pendingCheckout = {
@@ -1374,6 +1627,46 @@
       };
 
       navigateTo('checkout');
+    }
+
+    function startReservationTimer() {
+      stopReservationTimer(false);
+      state.reservationExpiresAt = Date.now() + 5 * 60 * 1000;
+      state.holdWarningShown = false;
+      document.getElementById('reservationTimerBadge').classList.remove('hidden');
+      state.reservationTimer = setInterval(updateReservationTimerUI, 1000);
+      updateReservationTimerUI();
+    }
+
+    function stopReservationTimer(reset = true) {
+      if (state.reservationTimer) clearInterval(state.reservationTimer);
+      state.reservationTimer = null;
+      if (reset) state.reservationExpiresAt = 0;
+      const badge = document.getElementById('reservationTimerBadge');
+      if (badge) badge.classList.add('hidden');
+    }
+
+    function updateReservationTimerUI() {
+      if (!state.reservationExpiresAt) return;
+      const remaining = Math.max(0, state.reservationExpiresAt - Date.now());
+      const mins = Math.floor(remaining / 60000);
+      const secs = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+      const label = `${mins}:${secs}`;
+      const timerText = document.getElementById('reservationTimerText');
+      const checkoutTimerText = document.getElementById('checkoutTimerText');
+      if (timerText) timerText.innerText = label;
+      if (checkoutTimerText) checkoutTimerText.innerText = label;
+      if (remaining <= 30000 && remaining > 0 && !state.holdWarningShown) {
+        state.holdWarningShown = true;
+        showToast('Only 30 seconds left on this seat hold.', 'info');
+      }
+      if (remaining <= 0) {
+        stopReservationTimer();
+        state.pendingCheckout = null;
+        showToast('Seat hold expired. Your seats were released.', 'info');
+        navigateTo('discover');
+        renderConcerts();
+      }
     }
 
     function renderCheckoutPage() {
@@ -1401,39 +1694,39 @@
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
-          <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-24 h-24 rounded-xl object-cover border border-zinc-800">
+          <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
           <div class="flex-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">${concert.genre}</span>
-            <h3 class="text-xl font-bold text-white">${concert.artist}</h3>
-            <p class="text-sm text-zinc-400">${concert.tour}</p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">${concert.genre}</span>
+            <h3 class="text-xl font-bold text-zinc-950">${concert.artist}</h3>
+            <p class="text-sm text-zinc-500">${concert.tour}</p>
             <p class="text-xs text-zinc-500 mt-1">${venue.name} • ${venue.city} • ${concert.date}</p>
           </div>
         </div>
 
         <div class="mt-6 space-y-3 text-sm">
-          <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <span class="text-zinc-400">${state.pendingCheckout.sectionName}</span>
-            <span class="text-white font-semibold">${state.pendingCheckout.qty} x $${state.pendingCheckout.priceEach}</span>
+          <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+            <span class="text-zinc-600">${state.pendingCheckout.sectionName}</span>
+            <span class="text-zinc-950 font-semibold">${state.pendingCheckout.qty} x $${state.pendingCheckout.priceEach}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-400">Tickets</span>
-            <span class="text-zinc-200">$${state.pendingCheckout.totalPaid}</span>
+            <span class="text-zinc-600">Tickets</span>
+            <span class="text-zinc-800">$${state.pendingCheckout.totalPaid}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-400">Service and venue fees</span>
-            <span class="text-zinc-200">$${fees}</span>
+            <span class="text-zinc-600">Service and venue fees</span>
+            <span class="text-zinc-800">$${fees}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-400">Daily wheel discount</span>
-            <span class="text-emerald-300">-${discount}</span>
+            <span class="text-zinc-600">Daily wheel deal</span>
+            <span class="text-teal-700">-${discount}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-400">Wallet balance</span>
-            <span class="text-zinc-200">$${state.walletBalance.toFixed(0)}</span>
+            <span class="text-zinc-600">Wallet balance</span>
+            <span class="text-zinc-800">$${state.walletBalance.toFixed(0)}</span>
           </div>
-          <div class="flex items-center justify-between pt-3 border-t border-zinc-800">
-            <span class="text-white font-bold">Total</span>
-            <span class="text-2xl font-extrabold text-emerald-400">$${finalTotal}</span>
+          <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
+            <span class="text-zinc-950 font-bold">Total</span>
+            <span class="text-2xl font-extrabold text-indigo-700">$${finalTotal}</span>
           </div>
         </div>
       `;
@@ -1466,31 +1759,42 @@
 
     function startTicketUrgency() {
       stopTicketUrgency();
-      state.ticketUrgencyTimer = setInterval(() => {
+      const tick = () => {
         if (!state.selectedConcert || !['ticket-select', 'checkout'].includes(state.activeTab)) return;
 
         const venue = VENUES[state.selectedConcert.venueId];
         const hotSection = venue.sections[Math.floor(Math.random() * venue.sections.length)];
-        const selloutBurst = Math.random() < 0.12;
-        const bought = selloutBurst ? hotSection.seatsAvailable : Math.min(hotSection.seatsAvailable, Math.floor(Math.random() * 9) + 2);
+        const selloutBurst = Math.random() < 0.08 && hotSection.seatsAvailable < 90;
+        const velocity = Math.floor(Math.random() * 22) + 3;
+        const bought = selloutBurst ? hotSection.seatsAvailable : Math.min(hotSection.seatsAvailable, velocity);
         if (bought <= 0) return;
 
         hotSection.seatsAvailable -= bought;
         state.selectedConcert.soldOut = venue.sections.every(sec => sec.seatsAvailable <= 0);
         renderSectionList(venue);
         if (state.activeTab === 'ticket-select') renderSectionLegend(venue);
+        updateModalTotals();
         showToast(selloutBurst ? `${hotSection.name} just sold out.` : `${bought} ${hotSection.name} ticket${bought > 1 ? 's were' : ' was'} just bought.`, 'info');
+        const alertKey = `${state.selectedConcert.id}-${hotSection.id}`;
+        const scarce = hotSection.seatsAvailable > 0 && hotSection.seatsAvailable <= Math.max(24, Math.floor(venue.capacity * 0.004));
+        if (scarce && !state.inventoryAlerted[alertKey]) {
+          state.inventoryAlerted[alertKey] = true;
+          showToast(`${hotSection.name} is almost sold out: ${hotSection.seatsAvailable} left.`, 'info');
+        }
         if (state.selectedConcert.soldOut) {
           showToast(`${state.selectedConcert.artist} is sold out.`, 'info');
           navigateTo('discover');
           renderConcerts();
+          return;
         }
-      }, 6500);
+        state.ticketUrgencyTimer = setTimeout(tick, 2500 + Math.random() * 5200);
+      };
+      state.ticketUrgencyTimer = setTimeout(tick, 2200 + Math.random() * 3000);
     }
 
     function stopTicketUrgency() {
       if (state.ticketUrgencyTimer) {
-        clearInterval(state.ticketUrgencyTimer);
+        clearTimeout(state.ticketUrgencyTimer);
         state.ticketUrgencyTimer = null;
       }
     }
@@ -1538,6 +1842,8 @@
 
       state.pendingCheckout = null;
       stopTicketUrgency();
+      stopReservationTimer();
+      recordConcertHistory(newTicket);
       launchConfetti();
       persistTickets();
       updateTicketBadge();
@@ -1590,46 +1896,46 @@
         const venue = VENUES[concert.venueId];
 
         const card = document.createElement('div');
-        card.className = "bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-xl";
+        card.className = "bg-white border border-zinc-200 rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-sm";
 
         card.innerHTML = `
           <div class="flex items-center space-x-4">
-            <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-16 h-16 rounded-xl object-cover border border-zinc-800">
+            <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${EVENT_IMAGE_POOL[0]}'" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
             <div>
               <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-emerald-400 font-mono">PASS ${t.ticketId}</span>
+                <span class="text-xs font-bold text-indigo-600 font-mono">PASS ${t.ticketId}</span>
                 <span class="text-[11px] text-zinc-500">• ${t.purchaseDate}</span>
               </div>
-              <h3 class="text-lg font-bold text-white">${concert.artist}</h3>
-              <p class="text-xs text-zinc-400">${venue.name} • ${t.sectionName} (${t.qty}x)</p>
+              <h3 class="text-lg font-bold text-zinc-950">${concert.artist}</h3>
+              <p class="text-xs text-zinc-500">${venue.name} • ${t.sectionName} (${t.qty}x)</p>
             </div>
           </div>
 
           <!-- Door Status & Enter Stage Action -->
-          <div class="w-full md:w-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 border-t md:border-t-0 border-zinc-800 pt-3 md:pt-0">
+          <div class="w-full md:w-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 border-t md:border-t-0 border-zinc-200 pt-3 md:pt-0">
             
             ${t.doorsOpen ? `
               <div class="flex items-center gap-2">
-                <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Doors Open
+                <span class="text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> Doors Open
                 </span>
-                <button onclick="enterLiveStage('${concert.id}')" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-zinc-950 font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                <button onclick="enterLiveStage('${concert.id}')" class="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-lg transition-all flex items-center gap-2">
                   <i class="fa-solid fa-play"></i> Enter Live Stage
                 </button>
               </div>
             ` : `
               <div class="flex items-center gap-3">
-                <span class="text-xs text-zinc-500 bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-xl">
+                <span class="text-xs text-zinc-500 bg-zinc-50 border border-zinc-200 px-3 py-1.5 rounded-lg">
                   <i class="fa-solid fa-lock mr-1 text-zinc-600"></i> Doors open ${concert.date}
                 </span>
-                <button onclick="toggleDoorStatus('${t.ticketId}')" class="text-[11px] text-zinc-400 hover:text-emerald-400 underline">
+                <button onclick="toggleDoorStatus('${t.ticketId}')" class="text-[11px] text-zinc-500 hover:text-indigo-600 underline">
                   Simulate Doors Open
                 </button>
               </div>
             `}
 
-            <button onclick="openMerchQueueModal('${concert.id}', true)" class="px-3 py-2 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all">
-              <i class="fa-solid fa-shirt text-emerald-400"></i> Preview Merch
+            <button onclick="openMerchQueueModal('${concert.id}', true)" class="px-3 py-2 bg-zinc-50 border border-zinc-200 hover:border-indigo-300 text-zinc-700 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all">
+              <i class="fa-solid fa-shirt text-indigo-600"></i> Preview Merch
             </button>
           </div>
         `;
@@ -1646,6 +1952,59 @@
         renderTicketsView();
         showToast('Doors unlocked! You can now enter the live stage.', 'info');
       }
+    }
+
+    function recordConcertHistory(ticket) {
+      const concert = CONCERTS.find(c => c.id === ticket.concertId);
+      if (!concert) return;
+      const venue = VENUES[concert.venueId];
+      state.profileHistory.concerts.unshift({
+        id: `${ticket.ticketId}-${Date.now()}`,
+        concertId: concert.id,
+        artist: concert.artist,
+        tour: concert.tour,
+        venue: venue.name,
+        section: ticket.sectionName,
+        qty: ticket.qty,
+        date: ticket.purchaseDate
+      });
+      state.profileHistory.concerts = state.profileHistory.concerts.slice(0, 20);
+      persistAccountState();
+    }
+
+    function recordMerchHistory(items, concert) {
+      items.forEach(entry => {
+        state.profileHistory.merch.unshift({
+          id: `${entry.id}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: entry.name,
+          qty: entry.qty,
+          total: entry.price * entry.qty,
+          concert: concert.artist
+        });
+      });
+      state.profileHistory.merch = state.profileHistory.merch.slice(0, 30);
+      persistAccountState();
+    }
+
+    function renderProfilePage() {
+      updateAccountUI();
+      const concerts = document.getElementById('profileConcerts');
+      const merch = document.getElementById('profileMerch');
+      concerts.innerHTML = state.profileHistory.concerts.length ? state.profileHistory.concerts.map(item => `
+        <div class="border border-zinc-200 rounded-lg p-3">
+          <div class="font-bold text-zinc-950">${item.artist}</div>
+          <div class="text-xs text-zinc-500">${item.venue} • ${item.section} • ${item.qty} ticket${item.qty > 1 ? 's' : ''}</div>
+        </div>
+      `).join('') : `<div class="text-sm text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg p-4">No concerts attended yet.</div>`;
+      merch.innerHTML = state.profileHistory.merch.length ? state.profileHistory.merch.map(item => `
+        <div class="border border-zinc-200 rounded-lg p-3 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-zinc-950">${item.name}</div>
+            <div class="text-xs text-zinc-500">${item.concert} • ${item.qty} item${item.qty > 1 ? 's' : ''}</div>
+          </div>
+          <div class="text-sm font-extrabold text-indigo-700">$${item.total}</div>
+        </div>
+      `).join('') : `<div class="text-sm text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg p-4">No merch purchases yet.</div>`;
     }
 
     function enterLiveStage(concertId) {
@@ -1856,6 +2215,11 @@
         return;
       }
 
+      const purchasedItems = Object.keys(state.merchCart).map(id => {
+        const item = state.activeMerchConcert.merch.find(m => m.id === id);
+        return item ? { ...item, qty: state.merchCart[id] } : null;
+      }).filter(Boolean);
+      recordMerchHistory(purchasedItems, state.activeMerchConcert);
       closeMerchModal();
       state.merchCart = {};
       persistActiveMerchCart();
@@ -2021,6 +2385,7 @@
     }
 
     function openWheelModal() {
+      renderDailyWheel();
       updateWalletUI();
       document.getElementById('wheelModal').classList.remove('hidden');
     }
@@ -2042,28 +2407,60 @@
       }, 1000);
     }
 
+    function seededRandom(seed) {
+      let hash = 2166136261;
+      for (let i = 0; i < seed.length; i++) {
+        hash ^= seed.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return () => {
+        hash += hash << 13; hash ^= hash >>> 7;
+        hash += hash << 3; hash ^= hash >>> 17;
+        hash += hash << 5;
+        return ((hash >>> 0) % 10000) / 10000;
+      };
+    }
+
+    function getDailyWheelDeals() {
+      const storedDate = localStorage.getItem('dopamineWheelDealDate');
+      const storedDeals = readJsonStorage('dopamineWheelDeals', null);
+      if (storedDate === todayKey() && Array.isArray(storedDeals) && storedDeals.length === 8) return storedDeals;
+      const rand = seededRandom(todayKey());
+      const pool = [...WHEEL_DEAL_LIBRARY].sort(() => rand() - 0.5);
+      const deals = pool.slice(0, 8);
+      localStorage.setItem('dopamineWheelDealDate', todayKey());
+      localStorage.setItem('dopamineWheelDeals', JSON.stringify(deals));
+      return deals;
+    }
+
+    function renderDailyWheel() {
+      state.wheelDeals = getDailyWheelDeals();
+      const wheel = document.getElementById('discountWheel');
+      if (!wheel) return;
+      wheel.querySelectorAll('.wheel-label').forEach(label => label.remove());
+      state.wheelDeals.forEach((deal, idx) => {
+        const angle = idx * 45 + 22.5;
+        const label = document.createElement('span');
+        label.className = 'wheel-label';
+        label.style.transform = `rotate(${angle}deg) translateY(-112px) rotate(-${angle}deg)`;
+        label.innerText = deal.label.toUpperCase();
+        wheel.insertBefore(label, wheel.firstElementChild);
+      });
+    }
+
     function spinDiscountWheel() {
-      const today = new Date().toLocaleDateString();
+      const today = todayKey();
       if (state.lastSpinDate === today) {
         showToast('Daily spin already used. Come back tomorrow.', 'info');
         return;
       }
 
-      const deals = [
-        { label: '5% off checkout', discount: 5, wallet: 0 },
-        { label: '10% off checkout', discount: 10, wallet: 0 },
-        { label: '$15 off checkout', discount: 0, flat: 15, wallet: 0 },
-        { label: 'Free merch credit', discount: 0, flat: 0, wallet: 45 },
-        { label: '$30 off checkout', discount: 0, flat: 30, wallet: 0 },
-        { label: 'Free ticket deal', discount: 100, wallet: 0 },
-        { label: 'Free-fee checkout', discount: 12, wallet: 0 },
-        { label: '25% off one order', discount: 25, wallet: 0 }
-      ];
+      const deals = state.wheelDeals.length ? state.wheelDeals : getDailyWheelDeals();
       const dealIndex = Math.floor(Math.random() * deals.length);
       const deal = deals[dealIndex];
       state.discountPct = deal.discount;
       state.discountFlat = deal.flat || 0;
-      state.activeDealLabel = deal.label;
+      state.activeDealLabel = deal.fullLabel || deal.label;
       if (deal.wallet) state.walletBalance += deal.wallet;
       state.lastSpinDate = today;
       const wheel = document.getElementById('discountWheel');
@@ -2073,21 +2470,48 @@
       const extraTurns = 1440 + ((desiredAngle - currentAngle + 360) % 360);
       state.wheelRotation += extraTurns;
       wheel.style.transform = `rotate(${state.wheelRotation}deg)`;
-      updateWalletUI();
-      showToast(`Daily wheel unlocked ${deal.label}.`, 'success');
+      setTimeout(() => {
+        updateWalletUI();
+        launchConfetti();
+        playWinSound();
+        showToast(`You won ${state.activeDealLabel}!`, 'success');
+      }, 3800);
     }
 
     function launchConfetti() {
       const colors = ['#22c55e', '#e4e4e7', '#facc15', '#38bdf8'];
-      for (let i = 0; i < 42; i++) {
+      for (let i = 0; i < 72; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
-        piece.style.left = `${Math.random() * 100}vw`;
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 90 + Math.random() * 320;
+        piece.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+        piece.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
         piece.style.background = colors[i % colors.length];
-        piece.style.animationDelay = `${Math.random() * 0.35}s`;
+        piece.style.animationDelay = `${Math.random() * 0.12}s`;
         document.body.appendChild(piece);
-        setTimeout(() => piece.remove(), 2200);
+        setTimeout(() => piece.remove(), 1600);
       }
+    }
+
+    async function playWinSound() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!state.audioCtx) state.audioCtx = new AudioContextClass();
+      if (state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+      [523, 659, 784, 1046].forEach((freq, idx) => {
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+        const now = state.audioCtx.currentTime + idx * 0.08;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.18, now + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+        osc.connect(gain).connect(state.audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.24);
+      });
     }
 
     function startSpendingPopups() {
