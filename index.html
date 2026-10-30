@@ -96,7 +96,7 @@
     }
     .section-label {
       fill: #312e81;
-      font-size: 8px;
+      font-size: 9px;
       font-weight: 800;
       pointer-events: none;
       dominant-baseline: middle;
@@ -307,43 +307,36 @@
               Member access
             </div>
             <div>
-              <h1 class="text-3xl font-black text-white leading-tight">Build your live-music vault.</h1>
-              <p class="mt-2 text-sm text-indigo-100">New here? Create an account to keep your tickets, merch, and saved carts together on this device.</p>
+              <h1 class="text-3xl font-black text-white leading-tight">Start your vault.</h1>
             </div>
             <div class="grid grid-cols-3 gap-2">
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
                 <div class="text-lg font-black"><i class="fa-solid fa-ticket"></i></div>
-                <div class="text-[10px] text-indigo-100">saved passes</div>
               </div>
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
                 <div class="text-lg font-black"><i class="fa-solid fa-bag-shopping"></i></div>
-                <div class="text-[10px] text-indigo-100">merch vault</div>
               </div>
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
                 <div class="text-lg font-black"><i class="fa-solid fa-user-shield"></i></div>
-                <div class="text-[10px] text-indigo-100">device profile</div>
               </div>
             </div>
           </div>
         <div id="accountChoiceView" class="space-y-3">
           <button onclick="showAccountForm('signup')" class="w-full bg-emerald-400 hover:bg-emerald-300 text-zinc-950 rounded-2xl py-3.5 text-sm font-black shadow-lg shadow-emerald-500/20">
-            <span class="block">Create account</span>
-            <span class="block text-[10px] font-bold opacity-70">First time here? Start here.</span>
+            Create account
           </button>
           <button onclick="showAccountForm('login')" class="w-full bg-white hover:bg-indigo-50 border border-white text-indigo-900 rounded-2xl py-3.5 text-sm font-black">
-            <span class="block">Log in</span>
-            <span class="block text-[10px] font-bold text-indigo-700/70">Already made a username</span>
+            Log in
           </button>
           <div class="pt-2 border-t border-white/10">
             <button onclick="skipAccount()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-2xl py-3.5 text-sm font-black">Skip to DopamineLive</button>
-            <p class="text-[11px] text-indigo-100 mt-2 text-center">Skipping keeps a guest session on this device until you log out.</p>
+            <p class="text-[11px] text-indigo-100 mt-2 text-center">Guest mode stays on this device.</p>
           </div>
         </div>
         <div id="accountFormView" class="hidden">
           <button onclick="showAccountChoices()" class="text-xs font-semibold text-indigo-100 hover:text-white mb-5"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>
           <div class="mb-5">
             <h2 id="accountFormTitle" class="text-2xl font-black text-white">Sign up</h2>
-            <p id="accountFormHelper" class="mt-1 text-xs text-indigo-100">Pick a username and password to start saving your vault.</p>
           </div>
           <div class="space-y-3">
             <label class="block">
@@ -479,24 +472,24 @@
           <button onclick="navigateTo('discover')" class="text-zinc-500 hover:text-indigo-700 text-xs flex items-center gap-1 mb-2">
             <i class="fa-solid fa-arrow-left"></i> Back to Discover
           </button>
-          <h2 id="modalArtistTitle" class="text-xl font-bold text-zinc-950">Select Tickets</h2>
-          <p id="modalVenueInfo" class="text-sm text-zinc-500">Venue • City • Capacity</p>
+          <h2 id="modalArtistTitle" class="text-2xl font-bold text-zinc-950">Select Tickets</h2>
+          <p id="modalVenueInfo" class="text-base text-zinc-500">Venue • City • Capacity</p>
         </div>
-        <div id="reservationTimerBadge" class="hidden text-xs bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg font-bold">
+        <div id="reservationTimerBadge" class="hidden text-sm bg-rose-50 border border-rose-200 text-rose-700 px-4 py-2 rounded-lg font-bold">
           <i class="fa-solid fa-clock mr-1.5"></i> Checkout hold: <span id="reservationTimerText">0:20</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        <div class="lg:col-span-7 bg-white border border-zinc-200 rounded-lg p-5 flex flex-col items-center justify-start h-auto lg:h-[430px] shadow-sm">
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.45fr)_minmax(410px,0.9fr)] gap-5 items-stretch lg:min-h-[560px]">
+        <div class="bg-white border border-zinc-200 rounded-lg p-5 flex flex-col items-center justify-start h-auto lg:h-[560px] shadow-sm">
           <div class="w-full flex items-center justify-between mb-3">
-            <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+            <div class="text-sm font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-layer-group"></i> Venue Diagram
             </div>
-            <div class="text-[11px] text-zinc-500">Tap a section to choose seats</div>
+            <div class="text-sm text-zinc-500">Tap a section to choose seats</div>
           </div>
 
-          <div id="venueSvgContainer" class="w-full h-64 flex items-center justify-center">
+          <div id="venueSvgContainer" class="w-full flex-1 min-h-0 flex items-center justify-center">
             <!-- Dynamic SVG Venue Map Injected Here -->
           </div>
 
@@ -504,10 +497,10 @@
             <!-- Dynamic legend inserted via JS -->
           </div>
 
-          <div class="w-full mt-3 bg-zinc-50 border border-zinc-200 rounded-lg p-3 space-y-2">
+          <div class="w-full mt-4 bg-zinc-50 border border-zinc-200 rounded-lg p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Music Preview</label>
-              <span id="previewArtistLabel" class="text-[11px] text-zinc-500">Artist playlist</span>
+              <label class="text-sm font-semibold text-zinc-500 uppercase tracking-wider block">Music Preview</label>
+              <span id="previewArtistLabel" class="text-sm text-zinc-500">Artist playlist</span>
             </div>
             <div id="ticketPreviewTracks" class="space-y-2">
               <!-- Artist tracks rendered here -->
@@ -515,7 +508,7 @@
           </div>
         </div>
 
-        <div class="lg:col-span-5 flex flex-col space-y-4">
+        <div class="flex flex-col space-y-4 h-auto lg:h-[560px]">
           <div class="hidden bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
             <div class="flex items-center justify-between">
               <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">View From This Section</label>
@@ -528,29 +521,29 @@
             </div>
           </div>
 
-          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-4 shadow-sm h-auto lg:h-[430px]">
-            <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Choose Seating Section</label>
-            <div id="sectionList" class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
+          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-4 shadow-sm flex flex-col flex-1 min-h-0">
+            <label class="text-sm font-semibold text-zinc-500 uppercase tracking-wider block">Choose Seating Section</label>
+            <div id="sectionList" class="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
               <!-- Tier Options inserted via JS -->
             </div>
           </div>
 
-          <div class="bg-white border border-zinc-200 p-4 rounded-lg space-y-3 shadow-sm">
-            <div class="flex items-center justify-between text-xs text-zinc-600">
+          <div class="bg-white border border-zinc-200 p-5 rounded-lg space-y-4 shadow-sm">
+            <div class="flex items-center justify-between text-base text-zinc-600">
               <span>Ticket Quantity</span>
               <div class="flex items-center space-x-2 bg-zinc-100 border border-zinc-300 rounded-lg p-1">
-                <button onclick="updateQty(-1)" class="w-7 h-7 rounded bg-white text-zinc-800 flex items-center justify-center font-bold hover:bg-zinc-200">-</button>
-                <span id="ticketQtyText" class="w-8 text-center font-bold text-zinc-950 text-xs">1</span>
-                <button onclick="updateQty(1)" class="w-7 h-7 rounded bg-white text-zinc-800 flex items-center justify-center font-bold hover:bg-zinc-200">+</button>
+                <button onclick="updateQty(-1)" class="w-9 h-9 rounded bg-white text-zinc-800 flex items-center justify-center font-bold hover:bg-zinc-200">-</button>
+                <span id="ticketQtyText" class="w-10 text-center font-bold text-zinc-950 text-base">1</span>
+                <button onclick="updateQty(1)" class="w-9 h-9 rounded bg-white text-zinc-800 flex items-center justify-center font-bold hover:bg-zinc-200">+</button>
               </div>
             </div>
 
             <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
-              <span class="text-xs text-zinc-500">Reservation Total</span>
-              <span id="ticketTotalPrice" class="text-2xl font-extrabold text-indigo-700">$0</span>
+              <span class="text-base text-zinc-500">Reservation Total</span>
+              <span id="ticketTotalPrice" class="text-3xl font-extrabold text-indigo-700">$0</span>
             </div>
 
-            <button onclick="confirmTicketPurchase()" class="w-full py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2">
+            <button onclick="confirmTicketPurchase()" class="w-full py-3.5 bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-base rounded-lg transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-check"></i> Confirm Tickets
             </button>
           </div>
@@ -1432,9 +1425,6 @@
       document.getElementById('accountChoiceView').classList.add('hidden');
       document.getElementById('accountFormView').classList.remove('hidden');
       document.getElementById('accountFormTitle').innerText = mode === 'login' ? 'Log in' : 'Sign up';
-      document.getElementById('accountFormHelper').innerText = mode === 'login'
-        ? 'Welcome back. Use the username and password you made on this device.'
-        : 'Pick a username and password to start saving your vault.';
       document.getElementById('accountSubmitButton').innerText = mode === 'login' ? 'Log in' : 'Create account';
       document.getElementById('accountPassword').placeholder = mode === 'login' ? 'Password' : 'Create a password';
       document.getElementById('accountUsername').focus();
@@ -1758,9 +1748,9 @@
       document.getElementById('previewArtistLabel').innerText = state.selectedConcert.artist;
       const container = document.getElementById('ticketPreviewTracks');
       container.innerHTML = getArtistPlaylist(state.selectedConcert).map((track, idx) => `
-        <button onclick="previewTicketTrack(${idx})" class="w-full flex items-center justify-between bg-zinc-50 border border-zinc-200 hover:border-indigo-300 rounded-lg px-3 py-1.5 text-left">
-          <span class="text-xs text-zinc-700 truncate">${track}</span>
-          <span class="text-[10px] text-zinc-500"><i class="fa-solid fa-play mr-1"></i>${idx === 0 ? '0:30' : '0:45'}</span>
+        <button onclick="previewTicketTrack(${idx})" class="w-full flex items-center justify-between bg-zinc-50 border border-zinc-200 hover:border-indigo-300 rounded-lg px-4 py-2 text-left">
+          <span class="text-sm font-semibold text-zinc-700 truncate">${track}</span>
+          <span class="text-xs text-zinc-500"><i class="fa-solid fa-play mr-1"></i>${idx === 0 ? '0:30' : '0:45'}</span>
         </button>
       `).join('');
     }
@@ -1905,7 +1895,7 @@
         const item = document.createElement('div');
         const isSelected = state.selectedSection.id === sec.id;
         const isSoldOut = sec.seatsAvailable < 1;
-        item.className = `p-3 rounded-xl border transition-all cursor-pointer grid grid-cols-[4rem_1fr_4rem] items-center gap-3 ${
+        item.className = `p-4 rounded-xl border transition-all cursor-pointer grid grid-cols-[5rem_1fr_5rem] items-center gap-4 ${
           isSelected 
             ? 'bg-indigo-50 border-indigo-500 text-zinc-950'
             : isSoldOut ? 'bg-zinc-50 border-zinc-200 text-zinc-400 opacity-60' : 'bg-white border-zinc-200 text-zinc-600 hover:border-indigo-300'
@@ -1913,14 +1903,14 @@
         item.onclick = () => isSoldOut ? showToast('That section is sold out.', 'info') : selectSection(sec);
 
         item.innerHTML = `
-          <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-16 h-12 rounded-lg object-cover border border-zinc-200 shrink-0">
+          <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-20 h-14 rounded-lg object-cover border border-zinc-200 shrink-0">
           <div class="text-center px-2">
-            <div class="text-xs font-bold text-zinc-950 leading-tight">${sec.name}</div>
-            <div class="text-[11px] text-zinc-500">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
+            <div class="text-base font-bold text-zinc-950 leading-tight">${sec.name}</div>
+            <div class="text-sm text-zinc-500 mt-1">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
           </div>
           <div class="text-right">
-            <div class="text-sm font-extrabold text-indigo-700">$${sec.price}</div>
-            <div class="text-[10px] text-zinc-500">per pass</div>
+            <div class="text-xl font-extrabold text-indigo-700">$${sec.price}</div>
+            <div class="text-xs text-zinc-500">per pass</div>
           </div>
         `;
         list.appendChild(item);
