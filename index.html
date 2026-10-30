@@ -99,6 +99,7 @@
       font-size: 8px;
       font-weight: 800;
       pointer-events: none;
+      dominant-baseline: middle;
     }
     .wheel-spin {
       transition: transform 4s cubic-bezier(0.08, 0.72, 0.05, 1);
@@ -300,18 +301,28 @@
     <section id="page-account" class="hidden min-h-[78vh] grid place-items-center">
       <div class="w-full max-w-lg overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
         <div class="p-6 sm:p-8 bg-[linear-gradient(135deg,_#312e81,_#111827_52%,_#09090b)]">
-          <div class="grid grid-cols-3 gap-2 mb-6">
-            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
-              <div class="text-xl font-black">24k</div>
-              <div class="text-[10px] text-indigo-100">fans live</div>
+          <div class="mb-6 space-y-4">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-200">
+              <i class="fa-solid fa-sparkles"></i>
+              Member access
             </div>
-            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
-              <div class="text-xl font-black">$5</div>
-              <div class="text-[10px] text-indigo-100">wallet drops</div>
+            <div>
+              <h1 class="text-3xl font-black text-white leading-tight">Build your live-music vault.</h1>
+              <p class="mt-2 text-sm text-indigo-100">Save carts, keep passes on this device, and collect the shows and merch you unlock.</p>
             </div>
-            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
-              <div class="text-xl font-black">8</div>
-              <div class="text-[10px] text-indigo-100">daily wins</div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
+                <div class="text-lg font-black"><i class="fa-solid fa-ticket"></i></div>
+                <div class="text-[10px] text-indigo-100">saved passes</div>
+              </div>
+              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
+                <div class="text-lg font-black"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="text-[10px] text-indigo-100">merch vault</div>
+              </div>
+              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
+                <div class="text-lg font-black"><i class="fa-solid fa-user-shield"></i></div>
+                <div class="text-[10px] text-indigo-100">device profile</div>
+              </div>
             </div>
           </div>
         <div id="accountChoiceView" class="space-y-3">
@@ -483,6 +494,16 @@
           <div id="sectionLegend" class="hidden">
             <!-- Dynamic legend inserted via JS -->
           </div>
+
+          <div class="w-full mt-5 bg-zinc-50 border border-zinc-200 rounded-lg p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Music Preview</label>
+              <span id="previewArtistLabel" class="text-[11px] text-zinc-500">Artist playlist</span>
+            </div>
+            <div id="ticketPreviewTracks" class="space-y-2">
+              <!-- Artist tracks rendered here -->
+            </div>
+          </div>
         </div>
 
         <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
@@ -495,16 +516,6 @@
               <div class="absolute z-10 bottom-3 left-3 right-3">
                 <div id="seatViewCaption" class="text-white text-sm font-bold drop-shadow">Choose a section to preview the view.</div>
               </div>
-            </div>
-          </div>
-
-          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Music Preview</label>
-              <span id="previewArtistLabel" class="text-[11px] text-zinc-500">Artist playlist</span>
-            </div>
-            <div id="ticketPreviewTracks" class="space-y-2">
-              <!-- Artist tracks rendered here -->
             </div>
           </div>
 
@@ -720,11 +731,6 @@
           <span id="merchTimerText" class="hidden font-black text-amber-300">00:20</span>
         </div>
 
-        <!-- Merch Items Scrollable Grid -->
-        <div id="merchItemsList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
-          <!-- Merch items dynamic HTML -->
-        </div>
-
         <div id="merchOptionsPanel" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="block">
             <span class="text-xs font-bold text-zinc-400">Size</span>
@@ -740,6 +746,11 @@
               <option>Black</option><option>Cream</option><option>Tour green</option><option>Washed violet</option>
             </select>
           </label>
+        </div>
+
+        <!-- Merch Items Scrollable Grid -->
+        <div id="merchItemsList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+          <!-- Merch items dynamic HTML -->
         </div>
 
         <!-- Checkout Bottom Bar -->
@@ -761,16 +772,6 @@
           <span id="merchCheckoutTimerText" class="font-black text-amber-300">00:20</span>
         </div>
         <div id="merchCheckoutSummary" class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3"></div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2">
-            <span class="block text-xs font-bold text-zinc-400">Size</span>
-            <span id="merchSizeChoice" class="text-sm font-bold text-white">-</span>
-          </div>
-          <div class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2">
-            <span class="block text-xs font-bold text-zinc-400">Color</span>
-            <span id="merchColorChoice" class="text-sm font-bold text-white">-</span>
-          </div>
-        </div>
         <button id="merchHoldButton" onpointerdown="startMerchHoldToBuy(event)" onpointerup="cancelMerchHoldToBuy()" onpointerleave="cancelMerchHoldToBuy()" onpointercancel="cancelMerchHoldToBuy()" class="relative overflow-hidden w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-sm rounded-xl transition-all flex items-center justify-center gap-2">
           <span id="merchHoldFill" class="hold-fill absolute left-0 top-0 h-full w-0 bg-white/45"></span>
           <span class="relative z-10 flex items-center gap-2"><i class="fa-solid fa-lock"></i> Press and Hold to Confirm</span>
@@ -845,7 +846,7 @@
   <div id="spendPopupContainer" class="fixed bottom-4 left-4 right-4 sm:right-auto sm:left-6 sm:w-80 z-50 space-y-2 pointer-events-none"></div>
 
   <!-- FOOTER -->
-  <footer class="border-t border-zinc-800/80 bg-zinc-950 py-6">
+  <footer id="siteFooter" class="border-t border-zinc-800/80 bg-zinc-950 py-6">
     <div class="max-w-7xl mx-auto px-4 text-center text-xs text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-3">
       <div class="flex items-center space-x-2">
         <span class="font-bold text-zinc-300">DopamineLive</span>
@@ -1297,11 +1298,15 @@
       wheelRotation: 0,
       wheelDeals: [],
       siteSeconds: 0,
+      walletRewardTimer: null,
+      spendPopupInitialTimer: null,
+      spendPopupTimer: null,
       holdTimer: null,
       holdProgress: 0,
       audioCtx: null,
       previewOscillator: null
     };
+    const TAX_RATE = 0.0875;
     if (localStorage.getItem('dopamineDealLabel') === '10% off checkout') {
       state.discountPct = 0;
       state.discountFlat = 0;
@@ -1324,11 +1329,10 @@
       renderConcerts();
       updateTicketBadge();
       updateWalletUI();
-      startWalletRewards();
       initStageVisualizer();
-      startSpendingPopups();
       updateAccountUI();
       document.addEventListener('click', handleFilterOutsideClick);
+      if (state.account) startEngagementSystems();
       navigateTo(state.account ? 'discover' : 'account');
     };
 
@@ -1336,6 +1340,8 @@
       if (!state.account && tabName !== 'account') tabName = 'account';
       state.activeTab = tabName;
       document.getElementById('siteHeader').classList.toggle('hidden', tabName === 'account');
+      const footer = document.getElementById('siteFooter');
+      if (footer) footer.classList.toggle('hidden', tabName === 'account');
       if (!['ticket-select', 'checkout'].includes(tabName)) {
         stopTicketUrgency();
         stopReservationTimer();
@@ -1406,6 +1412,7 @@
       state.account = { username, guest: false };
       persistAccountState();
       updateAccountUI();
+      startEngagementSystems();
       showToast(`Welcome, ${username}.`, 'success');
       navigateTo('discover');
     }
@@ -1437,6 +1444,7 @@
       state.account = { username: user.username, guest: false };
       persistAccountState();
       updateAccountUI();
+      startEngagementSystems();
       showToast(`Welcome back, ${user.username}.`, 'success');
       navigateTo('discover');
     }
@@ -1451,12 +1459,14 @@
       state.account = { username: 'Guest', guest: true };
       persistAccountState();
       updateAccountUI();
+      startEngagementSystems();
       navigateTo('discover');
     }
 
     function logoutAccount() {
       state.account = null;
       localStorage.removeItem('dopamineAccount');
+      stopEngagementSystems();
       updateAccountUI();
       navigateTo('account');
     }
@@ -1810,9 +1820,9 @@
           <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="${getSectionColor(venue, middle.id)}" opacity="0.86"/>
           <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="${getSectionColor(venue, back.id)}" opacity="0.86"/>
 
-          <text class="section-label" x="150" y="134" text-anchor="middle">${front.name.replace(/\([^)]*\)/g, '').trim()}</text>
-          <text class="section-label" x="150" y="95" text-anchor="middle">${middle.name.replace(/\([^)]*\)/g, '').trim()}</text>
-          <text class="section-label" x="150" y="54" text-anchor="middle">${back.name.replace(/\([^)]*\)/g, '').trim()}</text>
+          <text class="section-label" x="150" y="129" text-anchor="middle">${front.name.replace(/\([^)]*\)/g, '').trim()}</text>
+          <text class="section-label" x="150" y="90" text-anchor="middle">${middle.name.replace(/\([^)]*\)/g, '').trim()}</text>
+          <text class="section-label" x="150" y="49" text-anchor="middle">${back.name.replace(/\([^)]*\)/g, '').trim()}</text>
         </svg>
       `;
 
@@ -1839,7 +1849,7 @@
         const item = document.createElement('div');
         const isSelected = state.selectedSection.id === sec.id;
         const isSoldOut = sec.seatsAvailable < 1;
-        item.className = `p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+        item.className = `p-3 rounded-xl border transition-all cursor-pointer grid grid-cols-[4rem_1fr_4rem] items-center gap-3 ${
           isSelected 
             ? 'bg-indigo-50 border-indigo-500 text-zinc-950'
             : isSoldOut ? 'bg-zinc-50 border-zinc-200 text-zinc-400 opacity-60' : 'bg-white border-zinc-200 text-zinc-600 hover:border-indigo-300'
@@ -1847,12 +1857,10 @@
         item.onclick = () => isSoldOut ? showToast('That section is sold out.', 'info') : selectSection(sec);
 
         item.innerHTML = `
-          <div class="flex items-start gap-3">
-            <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-16 h-12 rounded-lg object-cover border border-zinc-200 shrink-0">
-            <div>
-            <div class="text-xs font-bold text-zinc-950">${sec.name}</div>
+          <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-16 h-12 rounded-lg object-cover border border-zinc-200 shrink-0">
+          <div class="text-center px-2">
+            <div class="text-xs font-bold text-zinc-950 leading-tight">${sec.name}</div>
             <div class="text-[11px] text-zinc-500">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
-            </div>
           </div>
           <div class="text-right">
             <div class="text-sm font-extrabold text-indigo-700">$${sec.price}</div>
@@ -1983,7 +1991,7 @@
 
       const concert = state.selectedConcert;
       const venue = VENUES[concert.venueId];
-      const { fees, discount, finalTotal, walletUsed, cardTotal } = calculateTicketPayment();
+      const { fees, tax, discount, cardTotal } = calculateTicketPayment();
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
@@ -2003,23 +2011,23 @@
           </div>
           <div class="flex items-center justify-between">
             <span class="text-zinc-600">Tickets</span>
-            <span class="text-zinc-800">$${state.pendingCheckout.totalPaid}</span>
+            <span class="text-zinc-800">$${state.pendingCheckout.totalPaid.toFixed(2)}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-zinc-600">Service and venue fees</span>
-            <span class="text-zinc-800">$${fees}</span>
+            <span class="text-zinc-800">$${fees.toFixed(2)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-zinc-600">Tax</span>
+            <span class="text-zinc-800">$${tax.toFixed(2)}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-zinc-600">Daily wheel deal</span>
-            <span class="text-teal-700">-${discount}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-zinc-600">Wallet applied</span>
-            <span class="text-teal-700">-$${walletUsed.toFixed(0)}</span>
+            <span class="text-teal-700">-$${discount.toFixed(2)}</span>
           </div>
           <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
-            <span class="text-zinc-950 font-bold">Pay now</span>
-            <span class="text-2xl font-extrabold text-indigo-700">$${cardTotal.toFixed(0)}</span>
+            <span class="text-zinc-950 font-bold">Total charge</span>
+            <span class="text-2xl font-extrabold text-indigo-700">$${cardTotal.toFixed(2)}</span>
           </div>
         </div>
       `;
@@ -2027,12 +2035,14 @@
 
     function calculateTicketPayment() {
       const subtotal = state.pendingCheckout ? state.pendingCheckout.totalPaid : 0;
-      const fees = Math.round(subtotal * 0.12);
-      const pctDiscount = Math.round(subtotal * (state.discountPct / 100));
+      const fees = Math.round(subtotal * 0.12 * 100) / 100;
+      const pctDiscount = Math.round(subtotal * (state.discountPct / 100) * 100) / 100;
       const discount = Math.min(subtotal + fees, Math.max(pctDiscount, state.discountFlat));
-      const finalTotal = Math.max(0, subtotal + fees - discount);
+      const taxableTotal = Math.max(0, subtotal + fees - discount);
+      const tax = Math.round(taxableTotal * TAX_RATE * 100) / 100;
+      const finalTotal = Math.max(0, taxableTotal + tax);
       const walletUsed = Math.min(state.walletBalance, finalTotal);
-      return { fees, discount, finalTotal, walletUsed, cardTotal: finalTotal - walletUsed };
+      return { fees, tax, discount, finalTotal, walletUsed, cardTotal: finalTotal - walletUsed };
     }
 
     function startHoldToBuy(event) {
@@ -2281,6 +2291,8 @@
           name: entry.name,
           qty: entry.qty,
           total: entry.price * entry.qty,
+          size: entry.size,
+          color: entry.color,
           concert: concert.artist
         });
       });
@@ -2303,7 +2315,7 @@
         <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between">
           <div>
             <div class="font-bold text-white">${item.name}</div>
-            <div class="text-xs text-zinc-400">${item.concert} • ${item.qty} item${item.qty > 1 ? 's' : ''}</div>
+            <div class="text-xs text-zinc-400">${item.concert} • ${item.size || 'Size'} / ${item.color || 'Color'} • ${item.qty} item${item.qty > 1 ? 's' : ''}</div>
           </div>
           <div class="text-sm font-extrabold text-emerald-300">$${item.total}</div>
         </div>
@@ -2515,6 +2527,7 @@
       if (preColor) preColor.value = state.merchOptions.color || '';
 
       state.merchCart = { ...(state.merchCarts[state.activeMerchConcert.id] || {}) };
+      normalizeMerchCart();
       state.activeMerchConcert.merch.forEach(item => {
         const stockKey = `${state.activeMerchConcert.id}-${item.id}`;
         if (!state.merchStock[stockKey]) state.merchStock[stockKey] = 3 + Math.floor(Math.random() * 6);
@@ -2575,22 +2588,93 @@
       state.merchInventoryTimer = null;
     }
 
+    function makeMerchCartKey(itemId, size, color) {
+      return `${itemId}__${encodeURIComponent(size)}__${encodeURIComponent(color)}`;
+    }
+
+    function getMerchCartEntries() {
+      return Object.entries(state.merchCart).map(([key, value]) => {
+        if (typeof value === 'number') {
+          return {
+            key: makeMerchCartKey(key, state.merchOptions.size || 'M', state.merchOptions.color || 'Black'),
+            itemId: key,
+            size: state.merchOptions.size || 'M',
+            color: state.merchOptions.color || 'Black',
+            qty: value
+          };
+        }
+        return {
+          key,
+          itemId: value.itemId,
+          size: value.size,
+          color: value.color,
+          qty: Number(value.qty || 0)
+        };
+      }).filter(entry => entry.itemId && entry.qty > 0);
+    }
+
+    function normalizeMerchCart() {
+      const normalized = {};
+      getMerchCartEntries().forEach(entry => {
+        const key = makeMerchCartKey(entry.itemId, entry.size, entry.color);
+        normalized[key] = { itemId: entry.itemId, size: entry.size, color: entry.color, qty: entry.qty };
+      });
+      state.merchCart = normalized;
+    }
+
+    function getMerchItemQuantity(itemId) {
+      return getMerchCartEntries()
+        .filter(entry => entry.itemId === itemId)
+        .reduce((sum, entry) => sum + entry.qty, 0);
+    }
+
+    function getSelectedMerchOptions(requireSelection = false) {
+      const size = document.getElementById('merchPreSizeSelect').value;
+      const color = document.getElementById('merchPreColorSelect').value;
+      if (requireSelection && (!size || !color)) {
+        showToast('Choose size and color before adding merch.', 'info');
+        return null;
+      }
+      return { size, color };
+    }
+
+    function calculateMerchPayment() {
+      const subtotal = getMerchCartEntries().reduce((sum, entry) => {
+        const item = state.activeMerchConcert.merch.find(m => m.id === entry.itemId);
+        return item ? sum + item.price * entry.qty : sum;
+      }, 0);
+      const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
+      const finalTotal = subtotal + tax;
+      const walletUsed = Math.min(state.walletBalance, finalTotal);
+      return { subtotal, tax, finalTotal, walletUsed, cardTotal: finalTotal - walletUsed };
+    }
+
     function renderMerchItems() {
       const container = document.getElementById('merchItemsList');
       container.innerHTML = '';
+      normalizeMerchCart();
 
       state.activeMerchConcert.merch.forEach(item => {
-        const qty = state.merchCart[item.id] || 0;
+        const itemEntries = getMerchCartEntries().filter(entry => entry.itemId === item.id);
+        const qty = itemEntries.reduce((sum, entry) => sum + entry.qty, 0);
         const stock = state.merchStock[`${state.activeMerchConcert.id}-${item.id}`] || 3;
+        const variants = itemEntries.length ? `
+          <div class="mt-2 flex flex-wrap gap-1">
+            ${itemEntries.map(entry => `
+              <span class="rounded-full bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-bold text-emerald-300">${entry.size} / ${entry.color} x${entry.qty}</span>
+            `).join('')}
+          </div>
+        ` : '';
         const row = document.createElement('div');
         row.className = "p-3 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-between gap-3";
 
         row.innerHTML = `
-          <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-3 min-w-0">
             <img src="${item.img}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover bg-zinc-800">
-            <div>
+            <div class="min-w-0">
               <div class="text-xs font-bold text-white">${item.name}</div>
               <div class="text-xs text-emerald-400 font-semibold">$${item.price}${state.merchPreviewOnly ? '' : ` <span class="ml-1 text-amber-300">Only ${stock} left</span>`}</div>
+              ${variants}
             </div>
           </div>
 
@@ -2607,29 +2691,39 @@
     }
 
     function updateMerchItemQty(itemId, delta) {
-      const current = state.merchCart[itemId] || 0;
+      normalizeMerchCart();
       const stockKey = `${state.activeMerchConcert.id}-${itemId}`;
       const stock = state.merchStock[stockKey] || 3;
-      const next = Math.max(0, Math.min(stock, current + delta));
-      if (delta > 0 && current >= stock) {
+      const itemTotal = getMerchItemQuantity(itemId);
+      if (delta > 0 && itemTotal >= stock) {
         showToast(`Only ${stock} remain — grab it before it disappears.`, 'info');
         return;
       }
-      if (next === 0) delete state.merchCart[itemId];
-      else state.merchCart[itemId] = next;
+
+      if (delta > 0) {
+        const options = getSelectedMerchOptions(true);
+        if (!options) return;
+        const key = makeMerchCartKey(itemId, options.size, options.color);
+        const current = state.merchCart[key] || { itemId, size: options.size, color: options.color, qty: 0 };
+        state.merchCart[key] = { ...current, qty: current.qty + 1 };
+      } else {
+        const options = getSelectedMerchOptions(false);
+        const preferredKey = options.size && options.color ? makeMerchCartKey(itemId, options.size, options.color) : '';
+        const fallbackEntry = getMerchCartEntries().filter(entry => entry.itemId === itemId).at(-1);
+        const key = state.merchCart[preferredKey] ? preferredKey : fallbackEntry?.key;
+        if (!key) return;
+        const current = state.merchCart[key];
+        if (current.qty <= 1) delete state.merchCart[key];
+        else state.merchCart[key] = { ...current, qty: current.qty - 1 };
+      }
 
       persistActiveMerchCart();
       renderMerchItems();
     }
 
     function updateMerchCartTotal() {
-      let total = 0;
-      Object.keys(state.merchCart).forEach(id => {
-        const item = state.activeMerchConcert.merch.find(m => m.id === id);
-        if (item) total += item.price * state.merchCart[id];
-      });
-
-      document.getElementById('merchTotalText').innerText = `$${total.toFixed(2)}`;
+      const payment = calculateMerchPayment();
+      document.getElementById('merchTotalText').innerText = `$${payment.finalTotal.toFixed(2)}`;
     }
 
     function beginMerchCheckout() {
@@ -2638,18 +2732,12 @@
         return;
       }
 
-      const totalItems = Object.values(state.merchCart).reduce((a, b) => a + b, 0);
+      normalizeMerchCart();
+      const totalItems = getMerchCartEntries().reduce((sum, entry) => sum + entry.qty, 0);
       if (totalItems === 0) {
         showToast('Please select at least one merch item.', 'info');
         return;
       }
-      const size = document.getElementById('merchPreSizeSelect').value;
-      const color = document.getElementById('merchPreColorSelect').value;
-      if (!size || !color) {
-        showToast('Choose a size and color before checkout.', 'info');
-        return;
-      }
-      state.merchOptions = { size, color };
       document.getElementById('merchShopView').classList.add('hidden');
       document.getElementById('merchCheckoutView').classList.remove('hidden');
       renderMerchCheckoutSummary();
@@ -2666,21 +2754,19 @@
 
     function renderMerchCheckoutSummary() {
       const container = document.getElementById('merchCheckoutSummary');
-      let total = 0;
-      const rows = Object.keys(state.merchCart).map(id => {
-        const item = state.activeMerchConcert.merch.find(m => m.id === id);
+      const payment = calculateMerchPayment();
+      const rows = getMerchCartEntries().map(entry => {
+        const item = state.activeMerchConcert.merch.find(m => m.id === entry.itemId);
         if (!item) return '';
-        const qty = state.merchCart[id];
-        total += item.price * qty;
-        return `<div class="flex items-center justify-between text-sm"><span class="text-zinc-300">${item.name} <span class="text-zinc-500">x${qty}</span></span><span class="font-bold text-white">$${item.price * qty}</span></div>`;
+        return `<div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300">${item.name} <span class="text-zinc-500">${entry.size} / ${entry.color} x${entry.qty}</span></span><span class="font-bold text-white">$${(item.price * entry.qty).toFixed(2)}</span></div>`;
       }).join('');
       container.innerHTML = `
         <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Merch checkout</div>
         <div class="space-y-2">${rows}</div>
-        <div class="flex items-center justify-between pt-3 border-t border-zinc-800"><span class="text-zinc-400 text-sm">Total</span><span class="text-2xl font-black text-emerald-400">$${total.toFixed(2)}</span></div>
+        <div class="flex items-center justify-between pt-3 border-t border-zinc-800"><span class="text-zinc-400 text-sm">Merch</span><span class="font-bold text-white">$${payment.subtotal.toFixed(2)}</span></div>
+        <div class="flex items-center justify-between"><span class="text-zinc-400 text-sm">Tax</span><span class="font-bold text-white">$${payment.tax.toFixed(2)}</span></div>
+        <div class="flex items-center justify-between pt-3 border-t border-zinc-800"><span class="text-zinc-300 text-sm font-bold">Total charge</span><span class="text-2xl font-black text-emerald-400">$${payment.cardTotal.toFixed(2)}</span></div>
       `;
-      document.getElementById('merchSizeChoice').innerText = state.merchOptions.size;
-      document.getElementById('merchColorChoice').innerText = state.merchOptions.color;
     }
 
     function startMerchHoldToBuy(event) {
@@ -2715,13 +2801,12 @@
         return;
       }
 
-      const purchasedItems = Object.keys(state.merchCart).map(id => {
-        const item = state.activeMerchConcert.merch.find(m => m.id === id);
-        return item ? { ...item, qty: state.merchCart[id] } : null;
+      const purchasedItems = getMerchCartEntries().map(entry => {
+        const item = state.activeMerchConcert.merch.find(m => m.id === entry.itemId);
+        return item ? { ...item, qty: entry.qty, size: entry.size, color: entry.color } : null;
       }).filter(Boolean);
-      const merchTotal = purchasedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-      const walletUsed = Math.min(state.walletBalance, merchTotal);
-      state.walletBalance = Math.max(0, state.walletBalance - walletUsed);
+      const payment = calculateMerchPayment();
+      state.walletBalance = Math.max(0, state.walletBalance - payment.walletUsed);
       updateWalletUI();
       recordMerchHistory(purchasedItems, state.activeMerchConcert);
       purchasedItems.forEach(item => {
@@ -2733,7 +2818,7 @@
       persistActiveMerchCart();
       launchConfetti();
       playWinSound();
-      showToast(`Merch acquired: ${state.merchOptions.size}, ${state.merchOptions.color}.`, 'success');
+      showToast(`Merch acquired.`, 'success');
       
       // Navigate back to concert / live stage view automatically
       if (state.activeTab === 'stage') {
@@ -2908,12 +2993,32 @@
       document.getElementById('wheelModal').classList.add('hidden');
     }
 
+    function startEngagementSystems() {
+      if (!state.account) return;
+      startWalletRewards();
+      startSpendingPopups();
+    }
+
+    function stopEngagementSystems() {
+      if (state.walletRewardTimer) clearInterval(state.walletRewardTimer);
+      if (state.spendPopupInitialTimer) clearTimeout(state.spendPopupInitialTimer);
+      if (state.spendPopupTimer) clearInterval(state.spendPopupTimer);
+      state.walletRewardTimer = null;
+      state.spendPopupInitialTimer = null;
+      state.spendPopupTimer = null;
+      document.getElementById('toastContainer')?.replaceChildren();
+      document.getElementById('spendPopupContainer')?.replaceChildren();
+    }
+
     function startWalletRewards() {
-      setInterval(() => {
+      if (state.walletRewardTimer) return;
+      state.walletRewardTimer = setInterval(() => {
+        if (!state.account || state.activeTab === 'account') return;
         state.siteSeconds += 1;
         const mins = Math.floor(state.siteSeconds / 60);
         const secs = String(state.siteSeconds % 60).padStart(2, '0');
-        document.getElementById('siteTimeText').innerText = `${mins}:${secs}`;
+        const siteTime = document.getElementById('siteTimeText');
+        if (siteTime) siteTime.innerText = `${mins}:${secs}`;
         if (state.siteSeconds % 45 === 0) {
           addWalletMoney(5, true);
           showToast('$5 site-time reward added to wallet.', 'success');
@@ -3029,11 +3134,13 @@
     }
 
     function startSpendingPopups() {
-      setTimeout(showSpendingPopup, 2500);
-      setInterval(showSpendingPopup, 11000);
+      if (state.spendPopupTimer || !state.account) return;
+      state.spendPopupInitialTimer = setTimeout(showSpendingPopup, 2500);
+      state.spendPopupTimer = setInterval(showSpendingPopup, 11000);
     }
 
     function showSpendingPopup() {
+      if (!state.account || state.activeTab === 'account') return;
       const container = document.getElementById('spendPopupContainer');
       if (!container) return;
       const event = SPEND_POPUPS[Math.floor(Math.random() * SPEND_POPUPS.length)];
@@ -3062,7 +3169,9 @@
     }
 
     function showToast(msg, type = 'info') {
+      if (state.activeTab === 'account') return;
       const container = document.getElementById('toastContainer');
+      if (!container) return;
       const toast = document.createElement('div');
 
       const bg = type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300' : 'bg-zinc-900 border-zinc-800 text-zinc-200';
