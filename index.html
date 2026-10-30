@@ -326,8 +326,14 @@
             </div>
           </div>
         <div id="accountChoiceView" class="space-y-3">
-          <button onclick="showAccountForm('signup')" class="w-full bg-emerald-400 hover:bg-emerald-300 text-zinc-950 rounded-2xl py-3.5 text-sm font-black shadow-lg shadow-emerald-500/20">Sign up</button>
-          <button onclick="showAccountForm('login')" class="w-full bg-white hover:bg-indigo-50 border border-white text-indigo-900 rounded-2xl py-3.5 text-sm font-black">Log in</button>
+          <button onclick="showAccountForm('signup')" class="w-full bg-emerald-400 hover:bg-emerald-300 text-zinc-950 rounded-2xl py-3.5 text-sm font-black shadow-lg shadow-emerald-500/20">
+            <span class="block">Create account</span>
+            <span class="block text-[10px] font-bold opacity-70">First time here? Start here.</span>
+          </button>
+          <button onclick="showAccountForm('login')" class="w-full bg-white hover:bg-indigo-50 border border-white text-indigo-900 rounded-2xl py-3.5 text-sm font-black">
+            <span class="block">Log in</span>
+            <span class="block text-[10px] font-bold text-indigo-700/70">Already made a username</span>
+          </button>
           <div class="pt-2 border-t border-white/10">
             <button onclick="skipAccount()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-2xl py-3.5 text-sm font-black">Skip to DopamineLive</button>
             <p class="text-[11px] text-indigo-100 mt-2 text-center">Skipping keeps a guest session on this device until you log out.</p>
@@ -481,16 +487,16 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div class="lg:col-span-7 bg-white border border-zinc-200 rounded-lg p-4 flex flex-col items-center justify-center min-h-[360px] shadow-sm">
-          <div class="w-full flex items-center justify-between mb-2">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div class="lg:col-span-7 bg-white border border-zinc-200 rounded-lg p-5 flex flex-col items-center justify-start h-auto lg:h-[430px] shadow-sm">
+          <div class="w-full flex items-center justify-between mb-3">
             <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-layer-group"></i> Venue Diagram
             </div>
             <div class="text-[11px] text-zinc-500">Tap a section to choose seats</div>
           </div>
 
-          <div id="venueSvgContainer" class="w-full h-60 flex items-center justify-center">
+          <div id="venueSvgContainer" class="w-full h-64 flex items-center justify-center">
             <!-- Dynamic SVG Venue Map Injected Here -->
           </div>
 
@@ -509,7 +515,7 @@
           </div>
         </div>
 
-        <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+        <div class="lg:col-span-5 flex flex-col space-y-4">
           <div class="hidden bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
             <div class="flex items-center justify-between">
               <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">View From This Section</label>
@@ -522,9 +528,9 @@
             </div>
           </div>
 
-          <div class="bg-white border border-zinc-200 rounded-lg p-4 space-y-3 shadow-sm">
+          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-4 shadow-sm h-auto lg:h-[430px]">
             <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Choose Seating Section</label>
-            <div id="sectionList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <div id="sectionList" class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
               <!-- Tier Options inserted via JS -->
             </div>
           </div>
@@ -1701,12 +1707,12 @@
       state.selectedConcert = CONCERTS.find(c => c.id === concertId);
       const venue = VENUES[state.selectedConcert.venueId];
       venue.sections.forEach(section => section.seatsAvailable = Math.max(3, section.seatsAvailable));
-      state.selectedSection = venue.sections.find(sec => sec.seatsAvailable > 0) || venue.sections[0];
+      state.selectedSection = getSortedSectionsByPrice(venue).find(sec => sec.seatsAvailable > 0) || venue.sections[0];
       state.selectedQty = 1;
       state.pendingCheckout = null;
 
       document.getElementById('modalArtistTitle').innerText = `${state.selectedConcert.artist} — ${state.selectedConcert.tour}`;
-      document.getElementById('modalVenueInfo').innerText = `${venue.name} (${venue.city}) • Real Venue Capacity: ${venue.capacity.toLocaleString()} seats`;
+      document.getElementById('modalVenueInfo').innerText = `${venue.name} (${venue.city}) • Venue Capacity: ${venue.capacity.toLocaleString()} seats`;
 
       renderVenueSvgMap(venue);
       renderSectionList(venue);
@@ -1816,6 +1822,10 @@
       return section.name.replace(/\([^)]*\)/g, '').trim();
     }
 
+    function getSortedSectionsByPrice(venue) {
+      return [...venue.sections].sort((a, b) => a.price - b.price);
+    }
+
     // Render SVG Map tailored to accurate real venue layouts
     function renderVenueSvgMap(venue) {
       const svgContainer = document.getElementById('venueSvgContainer');
@@ -1891,7 +1901,7 @@
       const list = document.getElementById('sectionList');
       list.innerHTML = '';
 
-      venue.sections.forEach(sec => {
+      getSortedSectionsByPrice(venue).forEach(sec => {
         const item = document.createElement('div');
         const isSelected = state.selectedSection.id === sec.id;
         const isSoldOut = sec.seatsAvailable < 1;
@@ -2038,6 +2048,7 @@
       const concert = state.selectedConcert;
       const venue = VENUES[concert.venueId];
       const { fees, tax, discount, finalTotal } = calculateTicketPayment();
+      const shortfall = Math.max(0, finalTotal - state.walletBalance);
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
@@ -2051,6 +2062,11 @@
         </div>
 
         <div class="mt-6 space-y-3 text-sm">
+          ${shortfall > 0 ? `
+            <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">
+              <i class="fa-solid fa-wallet mr-1.5"></i>Add $${shortfall.toFixed(2)} more to your wallet to buy these tickets.
+            </div>
+          ` : ''}
           <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
             <span class="text-zinc-600">${state.pendingCheckout.sectionName}</span>
             <span class="text-zinc-950 font-semibold">${state.pendingCheckout.qty} x $${state.pendingCheckout.priceEach}</span>
@@ -2064,11 +2080,11 @@
             <span class="text-zinc-800">$${fees.toFixed(2)}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-600">Tax</span>
+            <span class="text-zinc-600">Tax (${formatTaxRate()})</span>
             <span class="text-zinc-800">$${tax.toFixed(2)}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-600">Daily wheel deal</span>
+            <span class="text-zinc-600">Daily wheel deal (${formatAppliedDealLabel(discount)})</span>
             <span class="text-teal-700">-$${discount.toFixed(2)}</span>
           </div>
           <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
@@ -2090,10 +2106,20 @@
       return { fees, tax, discount, finalTotal, walletUsed: finalTotal, cardTotal: finalTotal };
     }
 
+    function formatTaxRate() {
+      return `${(TAX_RATE * 100).toFixed(2).replace(/\.?0+$/, '')}%`;
+    }
+
+    function formatAppliedDealLabel(discount) {
+      if (state.discountPct > 0) return `${state.discountPct}% off`;
+      if (state.discountFlat > 0) return `$${Math.min(state.discountFlat, discount).toFixed(2)} off`;
+      return 'none';
+    }
+
     function ensureWalletCanCover(total) {
       if (state.walletBalance >= total) return true;
       const shortfall = Math.max(0, total - state.walletBalance);
-      showToast(`Wallet needs $${shortfall.toFixed(2)} more to complete this purchase.`, 'info');
+      showToast(`Add $${shortfall.toFixed(2)} more to your wallet to complete this purchase.`, 'info');
       openWalletModal();
       return false;
     }
@@ -2319,9 +2345,11 @@
       const concert = CONCERTS.find(c => c.id === ticket.concertId);
       if (!concert) return;
       const venue = VENUES[concert.venueId];
+      const attendedDateKey = todayKey();
       const existing = state.profileHistory.concerts.find(item => item.concertId === concert.id);
       if (existing) {
         existing.date = attendedDate;
+        existing.attendedDateKey = attendedDateKey;
         persistAccountState();
         return;
       }
@@ -2333,10 +2361,17 @@
         venue: venue.name,
         section: ticket.sectionName,
         qty: ticket.qty,
-        date: attendedDate
+        date: attendedDate,
+        attendedDateKey
       });
       state.profileHistory.concerts = state.profileHistory.concerts.slice(0, 20);
       persistAccountState();
+    }
+
+    function getConcertHistoryDateLabel(item) {
+      if (item.date !== 'Attended just now') return item.date;
+      if (item.attendedDateKey && item.attendedDateKey !== todayKey()) return item.attendedDateKey;
+      return 'Attended just now';
     }
 
     function recordMerchHistory(items, concert) {
@@ -2363,7 +2398,7 @@
         <div class="bg-white/10 border border-white/15 rounded-xl p-3 flex gap-3 items-center">
           <div class="w-9 h-9 rounded-lg bg-teal-300 text-indigo-950 grid place-items-center font-black"><i class="fa-solid fa-ticket"></i></div>
           <div><div class="font-bold text-white">${item.artist}</div>
-          <div class="text-xs text-indigo-100">${item.venue} • ${item.section} • ${item.date || 'Attended just now'}</div></div>
+          <div class="text-xs text-indigo-100">${item.venue} • ${item.section} • ${getConcertHistoryDateLabel(item)}</div></div>
         </div>
       `).join('') : `<div class="text-sm text-indigo-100 bg-white/10 border border-white/15 rounded-xl p-4">Your first show belongs here.</div>`;
       merch.innerHTML = state.profileHistory.merch.length ? state.profileHistory.merch.map(item => `
@@ -2819,7 +2854,7 @@
         <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Merch checkout</div>
         <div class="space-y-2">${rows}</div>
         <div class="flex items-center justify-between pt-3 border-t border-zinc-800"><span class="text-zinc-400 text-sm">Merch</span><span class="font-bold text-white">$${payment.subtotal.toFixed(2)}</span></div>
-        <div class="flex items-center justify-between"><span class="text-zinc-400 text-sm">Tax</span><span class="font-bold text-white">$${payment.tax.toFixed(2)}</span></div>
+        <div class="flex items-center justify-between"><span class="text-zinc-400 text-sm">Tax (${formatTaxRate()})</span><span class="font-bold text-white">$${payment.tax.toFixed(2)}</span></div>
         <div class="flex items-center justify-between pt-3 border-t border-zinc-800"><span class="text-zinc-300 text-sm font-bold">Total charge</span><span class="text-2xl font-black text-emerald-400">$${payment.finalTotal.toFixed(2)}</span></div>
       `;
     }
@@ -3012,6 +3047,10 @@
       document.getElementById('discountNavText').innerText = state.activeDealLabel ? 'Deal' : 'Spin';
       const discountText = document.getElementById('discountText');
       if (discountText) discountText.innerText = state.activeDealLabel || 'No discount active';
+      if (state.activeTab === 'checkout' && state.pendingCheckout) renderCheckoutPage();
+      if (state.activeMerchConcert && !document.getElementById('merchModal').classList.contains('hidden') && !document.getElementById('merchCheckoutView').classList.contains('hidden')) {
+        renderMerchCheckoutSummary();
+      }
     }
 
     function addWalletMoney(amount, quiet = false) {
