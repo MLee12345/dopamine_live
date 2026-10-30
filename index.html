@@ -86,21 +86,18 @@
       stroke-linejoin: round;
     }
     .seat-section:hover {
-      filter: brightness(1.25);
+      filter: brightness(0.96);
     }
     .seat-section.selected {
-      stroke: #111827;
+      stroke: #4f46e5;
       stroke-width: 4px;
-      filter: drop-shadow(0 0 7px rgba(79, 70, 229, 0.32)) brightness(1.08);
+      filter: drop-shadow(0 0 7px rgba(79, 70, 229, 0.24));
       opacity: 1 !important;
     }
     .section-label {
-      fill: #f8fafc;
-      font-size: 9px;
+      fill: #312e81;
+      font-size: 8px;
       font-weight: 800;
-      paint-order: stroke;
-      stroke: #09090b;
-      stroke-width: 4px;
       pointer-events: none;
     }
     .wheel-spin {
@@ -466,15 +463,8 @@
           <p id="modalVenueInfo" class="text-sm text-zinc-500">Venue • City • Capacity</p>
         </div>
         <div id="reservationTimerBadge" class="hidden text-xs bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg font-bold">
-          <i class="fa-solid fa-clock mr-1.5"></i> Checkout hold: <span id="reservationTimerText">5:00</span>
+          <i class="fa-solid fa-clock mr-1.5"></i> Checkout hold: <span id="reservationTimerText">0:20</span>
         </div>
-      </div>
-
-      <div class="bg-white border border-zinc-200 rounded-lg shadow-sm px-4 py-3 flex flex-wrap items-center gap-2 text-xs font-bold text-zinc-600">
-        <span class="bg-indigo-700 text-white rounded-full px-3 py-1.5">1. Pick a section</span>
-        <span class="bg-zinc-100 text-zinc-700 rounded-full px-3 py-1.5">2. Set quantity</span>
-        <span class="bg-zinc-100 text-zinc-700 rounded-full px-3 py-1.5">3. Hold to buy</span>
-        <span class="ml-auto text-zinc-500 hidden sm:inline">Map, listings, view, and checkout stay on one path.</span>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -483,20 +473,20 @@
             <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-layer-group"></i> Venue Diagram
             </div>
-            <div class="text-[11px] text-zinc-500">Tap a gray section to choose seats</div>
+            <div class="text-[11px] text-zinc-500">Tap a section to choose seats</div>
           </div>
 
           <div id="venueSvgContainer" class="w-full h-80 flex items-center justify-center">
             <!-- Dynamic SVG Venue Map Injected Here -->
           </div>
 
-          <div id="sectionLegend" class="w-full grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-zinc-600 mt-5 pt-4 border-t border-zinc-200">
+          <div id="sectionLegend" class="hidden">
             <!-- Dynamic legend inserted via JS -->
           </div>
         </div>
 
         <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
-          <div class="bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
+          <div class="hidden bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-sm">
             <div class="flex items-center justify-between">
               <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">View From This Section</label>
               <span id="seatViewLabel" class="text-[11px] text-zinc-500">Selected section</span>
@@ -567,7 +557,7 @@
 
         <div class="lg:col-span-5 bg-white border border-zinc-200 rounded-lg p-5 space-y-4 shadow-sm">
           <div class="bg-rose-50 border border-rose-200 rounded-lg p-3 text-sm font-bold text-rose-700">
-            <i class="fa-solid fa-clock mr-1.5"></i> Seat hold expires in <span id="checkoutTimerText">5:00</span>
+            <i class="fa-solid fa-clock mr-1.5"></i> Seat hold expires in <span id="checkoutTimerText">0:20</span>
           </div>
           <div class="space-y-3">
             <label class="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">Payment</label>
@@ -700,7 +690,7 @@
 
           <!-- Progress Bar Decay -->
           <div class="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-800 p-0.5">
-            <div id="queueDecayBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full w-0 transition-all duration-500"></div>
+            <div id="queueDecayBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full w-0"></div>
           </div>
 
           <p class="text-[11px] text-zinc-400 text-center" id="queueStatusSubtext">
@@ -851,8 +841,8 @@
   </div>
 
   <!-- FLOATING TOAST CONTAINER -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
-  <div id="spendPopupContainer" class="fixed bottom-6 left-6 z-50 space-y-2 pointer-events-none max-w-xs"></div>
+  <div id="toastContainer" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-50 space-y-2 pointer-events-none"></div>
+  <div id="spendPopupContainer" class="fixed bottom-4 left-4 right-4 sm:right-auto sm:left-6 sm:w-80 z-50 space-y-2 pointer-events-none"></div>
 
   <!-- FOOTER -->
   <footer class="border-t border-zinc-800/80 bg-zinc-950 py-6">
@@ -1150,7 +1140,17 @@
       'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=1000&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1501612780327-45045538702b?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1487954152950-e0584673b7f3?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524650359799-842906ca1c06?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524650359799-842906ca1c06?q=80&w=1000&auto=format&fit=crop&sat=-20',
+      'https://images.unsplash.com/photo-1503095396549-807759245b35?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=1000&auto=format&fit=crop&sat=20',
+      'https://images.unsplash.com/photo-1509824227185-9c5a01ceba0d?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1499415479124-43c32433a620?q=80&w=1000&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000&auto=format&fit=crop&sat=-30'
     ];
 
     const SEAT_VIEW_IMAGES = [
@@ -1267,6 +1267,9 @@
       queuePosition: 0,
       queueStarted: false,
       queueCharge: 0,
+      queueDisplayCharge: 0,
+      queueLastFrame: 0,
+      queueAnimationFrame: null,
       merchPreviewOnly: false,
       queueTimer: null,
       merchCart: {},
@@ -1678,8 +1681,6 @@
     /* ==========================================================================
        5. ACCURATE VENUE SEATING MAPS & TICKET RESERVATION PAGE
        ========================================================================== */
-    const SECTION_COLORS = ['#4f46e5', '#0f766e', '#64748b'];
-
     function openTicketModal(concertId) {
       state.selectedConcert = CONCERTS.find(c => c.id === concertId);
       const venue = VENUES[state.selectedConcert.venueId];
@@ -1696,7 +1697,6 @@
       renderTicketPreviewTracks();
       updateModalTotals();
       updateSeatViewPreview();
-      startReservationTimer();
       startTicketUrgency();
 
       navigateTo('ticket-select');
@@ -1745,11 +1745,11 @@
 
     async function previewTicketTrack(idx) {
       const track = getArtistPlaylist(state.selectedConcert)[idx];
-      await playPreviewTone(idx);
+      await playPreviewMusic(idx);
       showToast(`Previewing ${track}`, 'info');
     }
 
-    async function playPreviewTone(idx = 0) {
+    async function playPreviewMusic(idx = 0) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) {
         showToast('Audio preview is not supported in this browser.', 'info');
@@ -1759,34 +1759,41 @@
       if (!state.audioCtx) state.audioCtx = new AudioContextClass();
       if (state.audioCtx.state === 'suspended') await state.audioCtx.resume();
       if (state.previewOscillator) {
-        try { state.previewOscillator.stop(); } catch (e) {}
+        state.previewOscillator.forEach(osc => { try { osc.stop(); } catch (e) {} });
         state.previewOscillator = null;
       }
 
-      const osc = state.audioCtx.createOscillator();
-      const gain = state.audioCtx.createGain();
-      const now = state.audioCtx.currentTime + 0.03;
-      const base = 220 + idx * 70 + (state.selectedConcert.artist.length % 9) * 12;
-      osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(base, now);
-      osc.frequency.exponentialRampToValueAtTime(base * 1.55, now + 0.45);
-      osc.frequency.setValueAtTime(base * 1.12, now + 0.76);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.22, now + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
-      osc.connect(gain).connect(state.audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + 1.38);
-      osc.onended = () => {
-        if (state.previewOscillator === osc) state.previewOscillator = null;
-      };
-      state.previewOscillator = osc;
+      const now = state.audioCtx.currentTime + 0.04;
+      const progressions = [
+        [261.63, 329.63, 392, 523.25, 392, 329.63, 293.66, 349.23],
+        [220, 261.63, 329.63, 392, 329.63, 261.63, 246.94, 293.66],
+        [293.66, 369.99, 440, 554.37, 440, 369.99, 329.63, 415.3]
+      ];
+      const notes = progressions[idx % progressions.length];
+      const oscillators = [];
+      notes.forEach((frequency, noteIndex) => {
+        const start = now + noteIndex * 0.22;
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+        osc.type = noteIndex % 2 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.105, start + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.34);
+        osc.connect(gain).connect(state.audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + 0.36);
+        oscillators.push(osc);
+      });
+      state.previewOscillator = oscillators;
+      setTimeout(() => {
+        if (state.previewOscillator === oscillators) state.previewOscillator = null;
+      }, 2200);
       return true;
     }
 
     function getSectionColor(venue, secId) {
-      const idx = Math.max(0, venue.sections.findIndex(sec => sec.id === secId));
-      return SECTION_COLORS[idx % SECTION_COLORS.length];
+      return '#c7d2fe';
     }
 
     // Render SVG Map tailored to accurate real venue layouts
@@ -1803,9 +1810,9 @@
           <rect id="svg-${middle.id}" onclick="selectSectionById('${middle.id}')" class="seat-section" x="68" y="76" width="164" height="28" rx="6" fill="${getSectionColor(venue, middle.id)}" opacity="0.86"/>
           <rect id="svg-${back.id}" onclick="selectSectionById('${back.id}')" class="seat-section" x="42" y="34" width="216" height="30" rx="6" fill="${getSectionColor(venue, back.id)}" opacity="0.86"/>
 
-          <text class="section-label" x="150" y="134" text-anchor="middle">${front.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
-          <text class="section-label" x="150" y="95" text-anchor="middle">${middle.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
-          <text class="section-label" x="150" y="54" text-anchor="middle">${back.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')}</text>
+          <text class="section-label" x="150" y="134" text-anchor="middle">${front.name.replace(/\([^)]*\)/g, '').trim()}</text>
+          <text class="section-label" x="150" y="95" text-anchor="middle">${middle.name.replace(/\([^)]*\)/g, '').trim()}</text>
+          <text class="section-label" x="150" y="54" text-anchor="middle">${back.name.replace(/\([^)]*\)/g, '').trim()}</text>
         </svg>
       `;
 
@@ -1841,7 +1848,7 @@
 
         item.innerHTML = `
           <div class="flex items-start gap-3">
-            <span class="w-4 h-4 rounded-sm mt-1 border border-white/40" style="background:${getSectionColor(venue, sec.id)}"></span>
+            <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-16 h-12 rounded-lg object-cover border border-zinc-200 shrink-0">
             <div>
             <div class="text-xs font-bold text-zinc-950">${sec.name}</div>
             <div class="text-[11px] text-zinc-500">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
@@ -1906,11 +1913,6 @@
         showToast('That section is temporarily unavailable.', 'info');
         return;
       }
-      if (state.reservationExpiresAt && Date.now() > state.reservationExpiresAt) {
-        showToast('Your seat hold expired. Please choose seats again.', 'info');
-        navigateTo('discover');
-        return;
-      }
       state.pendingCheckout = {
         concertId: state.selectedConcert.id,
         sectionName: state.selectedSection.name,
@@ -1919,6 +1921,7 @@
         priceEach: state.selectedSection.price
       };
 
+      startReservationTimer();
       navigateTo('checkout');
     }
 
@@ -1980,10 +1983,7 @@
 
       const concert = state.selectedConcert;
       const venue = VENUES[concert.venueId];
-      const fees = Math.round(state.pendingCheckout.totalPaid * 0.12);
-      const pctDiscount = Math.round(state.pendingCheckout.totalPaid * (state.discountPct / 100));
-      const discount = Math.min(state.pendingCheckout.totalPaid + fees, Math.max(pctDiscount, state.discountFlat));
-      const finalTotal = state.pendingCheckout.totalPaid + fees - discount;
+      const { fees, discount, finalTotal, walletUsed, cardTotal } = calculateTicketPayment();
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
@@ -2014,15 +2014,25 @@
             <span class="text-teal-700">-${discount}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-zinc-600">Wallet balance</span>
-            <span class="text-zinc-800">$${state.walletBalance.toFixed(0)}</span>
+            <span class="text-zinc-600">Wallet applied</span>
+            <span class="text-teal-700">-$${walletUsed.toFixed(0)}</span>
           </div>
           <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
-            <span class="text-zinc-950 font-bold">Total</span>
-            <span class="text-2xl font-extrabold text-indigo-700">$${finalTotal}</span>
+            <span class="text-zinc-950 font-bold">Pay now</span>
+            <span class="text-2xl font-extrabold text-indigo-700">$${cardTotal.toFixed(0)}</span>
           </div>
         </div>
       `;
+    }
+
+    function calculateTicketPayment() {
+      const subtotal = state.pendingCheckout ? state.pendingCheckout.totalPaid : 0;
+      const fees = Math.round(subtotal * 0.12);
+      const pctDiscount = Math.round(subtotal * (state.discountPct / 100));
+      const discount = Math.min(subtotal + fees, Math.max(pctDiscount, state.discountFlat));
+      const finalTotal = Math.max(0, subtotal + fees - discount);
+      const walletUsed = Math.min(state.walletBalance, finalTotal);
+      return { fees, discount, finalTotal, walletUsed, cardTotal: finalTotal - walletUsed };
     }
 
     function startHoldToBuy(event) {
@@ -2102,13 +2112,15 @@
       }
 
       if (purchasedSection) purchasedSection.seatsAvailable = Math.max(3, purchasedSection.seatsAvailable - state.pendingCheckout.qty);
+      const payment = calculateTicketPayment();
+      state.walletBalance = Math.max(0, state.walletBalance - payment.walletUsed);
       const existingTicket = state.userTickets.find(t => t.concertId === state.pendingCheckout.concertId);
       const newTicket = {
         ticketId: 't-' + Math.floor(1000 + Math.random() * 9000),
         concertId: state.pendingCheckout.concertId,
         sectionName: state.pendingCheckout.sectionName,
         qty: state.pendingCheckout.qty,
-        totalPaid: state.pendingCheckout.totalPaid,
+        totalPaid: payment.finalTotal,
         purchaseDate: 'Just now',
         doorsOpen: state.selectedConcert.isLiveNow
       };
@@ -2337,7 +2349,7 @@
       document.querySelectorAll('.playlist-btn').forEach((btn, btnIdx) => {
         btn.className = `playlist-btn px-3 py-2 rounded-lg text-xs text-left ${btnIdx === idx ? 'bg-emerald-500 text-black font-bold' : 'text-zinc-300 hover:bg-zinc-800'}`;
       });
-      playPreviewTone(idx);
+      playPreviewMusic(idx);
       showToast(`Playing ${track}`, 'info');
     }
 
@@ -2356,7 +2368,8 @@
       state.queueClicksNeeded = state.queuePopulationLevel.clicksNeeded;
       state.queueStarted = false;
       state.queueCharge = 0;
-      if (state.queueTimer) clearInterval(state.queueTimer);
+      state.queueDisplayCharge = 0;
+      stopQueueAnimation();
       stopMerchReservationTimer();
       stopMerchInventoryTimer();
       cancelMerchHoldToBuy();
@@ -2408,41 +2421,63 @@
 
     function updateQueueUI() {
       const joinBox = document.getElementById('joinQueueBox');
-      const progressPct = Math.max(0, Math.min(100, state.queueCharge));
+      const progressPct = Math.max(0, Math.min(100, state.queueDisplayCharge));
       document.getElementById('queueDecayBar').style.width = `${progressPct}%`;
 
       if (!state.queueStarted) {
         joinBox.classList.remove('border-emerald-500');
         document.getElementById('queueStatusSubtext').innerText = `${state.queueClicksNeeded} taps expected for this crowd. Pausing lets it discharge.`;
-      } else if (state.queueCharge >= 100) {
+      } else if (state.queueDisplayCharge >= 99.5) {
         joinBox.classList.add('border-emerald-500');
         document.getElementById('queueStatusSubtext').innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i> Opening booth preview...`;
       } else {
         joinBox.classList.add('border-emerald-500');
         const clicksLeft = Math.max(1, Math.ceil((100 - state.queueCharge) / (100 / state.queueClicksNeeded)));
-        document.getElementById('queueStatusSubtext').innerHTML = `<i class="fa-solid fa-bolt mr-1 text-emerald-400"></i> ${Math.round(state.queueCharge)}% charged. About ${clicksLeft} tap${clicksLeft > 1 ? 's' : ''} left.`;
+        document.getElementById('queueStatusSubtext').innerHTML = `<i class="fa-solid fa-bolt mr-1 text-emerald-400"></i> ${Math.round(state.queueDisplayCharge)}% charged. About ${clicksLeft} tap${clicksLeft > 1 ? 's' : ''} left.`;
       }
+    }
+
+    function startQueueAnimation() {
+      stopQueueAnimation();
+      state.queueLastFrame = performance.now();
+      const animate = now => {
+        const elapsed = Math.min(0.05, (now - state.queueLastFrame) / 1000);
+        state.queueLastFrame = now;
+        if (state.queueCharge < 100) {
+          const decayPerSecond = state.queuePopulationLevel.decay / 0.35;
+          state.queueCharge = Math.max(0, state.queueCharge - decayPerSecond * elapsed);
+        }
+        const smoothing = 1 - Math.exp(-12 * elapsed);
+        state.queueDisplayCharge += (state.queueCharge - state.queueDisplayCharge) * smoothing;
+        if (state.queueCharge >= 100 && state.queueDisplayCharge > 99.5) {
+          state.queueDisplayCharge = 100;
+          updateQueueUI();
+          stopQueueAnimation();
+          showMerchFrontReached();
+          return;
+        }
+        updateQueueUI();
+        state.queueAnimationFrame = requestAnimationFrame(animate);
+      };
+      state.queueAnimationFrame = requestAnimationFrame(animate);
+    }
+
+    function stopQueueAnimation() {
+      if (state.queueAnimationFrame) cancelAnimationFrame(state.queueAnimationFrame);
+      state.queueAnimationFrame = null;
+      state.queueLastFrame = 0;
     }
 
     function chargeMerchAccess() {
       if (state.merchPreviewOnly) return;
       if (!state.queueStarted) {
         state.queueStarted = true;
-        state.queueTimer = setInterval(() => {
-          state.queueCharge = Math.max(0, state.queueCharge - state.queuePopulationLevel.decay);
-          updateQueueUI();
-        }, 350);
+        startQueueAnimation();
       }
 
       const gain = 100 / state.queueClicksNeeded;
       state.queueCharge = Math.min(100, state.queueCharge + gain);
       updateQueueUI();
-
-      if (state.queueCharge >= 100) {
-        clearInterval(state.queueTimer);
-        state.queueTimer = null;
-        showMerchFrontReached();
-      }
     }
 
     function showMerchFrontReached() {
@@ -2684,6 +2719,10 @@
         const item = state.activeMerchConcert.merch.find(m => m.id === id);
         return item ? { ...item, qty: state.merchCart[id] } : null;
       }).filter(Boolean);
+      const merchTotal = purchasedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const walletUsed = Math.min(state.walletBalance, merchTotal);
+      state.walletBalance = Math.max(0, state.walletBalance - walletUsed);
+      updateWalletUI();
       recordMerchHistory(purchasedItems, state.activeMerchConcert);
       purchasedItems.forEach(item => {
         const stockKey = `${state.activeMerchConcert.id}-${item.id}`;
@@ -2706,6 +2745,7 @@
 
     function closeMerchModal() {
       if (state.queueTimer) clearInterval(state.queueTimer);
+      stopQueueAnimation();
       stopMerchInventoryTimer();
       stopMerchReservationTimer();
       cancelMerchHoldToBuy();
@@ -3028,8 +3068,8 @@
       const bg = type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300' : 'bg-zinc-900 border-zinc-800 text-zinc-200';
       const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-emerald-400';
 
-      toast.className = `toast-animate px-4 py-3 rounded-xl border ${bg} text-xs font-medium shadow-2xl flex items-center space-x-2 pointer-events-auto`;
-      toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
+      toast.className = `toast-animate w-full min-w-0 px-4 py-3 rounded-xl border ${bg} text-xs font-medium shadow-2xl flex items-center space-x-2 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid ${icon} shrink-0"></i> <span class="min-w-0 break-words">${msg}</span>`;
 
       container.appendChild(toast);
 
