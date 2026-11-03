@@ -432,26 +432,12 @@
     <section id="page-account" class="hidden min-h-[78vh] grid place-items-center">
       <div class="w-full max-w-lg translate-y-8 sm:translate-y-12 overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
         <div class="p-6 sm:p-8 bg-[linear-gradient(135deg,_#312e81,_#111827_52%,_#09090b)]">
-          <div class="mb-6 space-y-4">
-            <h1 class="text-3xl font-black text-white leading-tight">
-              <span class="block">Browse live shows.</span>
-              <span class="block">Save virtual passes.</span>
-              <span class="block">Don't risk your money.</span>
+          <div class="mb-6">
+            <h1 class="text-3xl font-black text-white leading-tight space-y-2">
+              <span class="flex items-center gap-3"><i class="fa-solid fa-ticket w-7 text-center text-emerald-300"></i>Browse live shows.</span>
+              <span class="flex items-center gap-3"><i class="fa-solid fa-bag-shopping w-7 text-center text-emerald-300"></i>Save virtual passes.</span>
+              <span class="flex items-center gap-3"><i class="fa-solid fa-user-shield w-7 text-center text-emerald-300"></i>Don't risk your money.</span>
             </h1>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
-                <div class="text-lg font-black"><i class="fa-solid fa-ticket"></i></div>
-                <div class="text-[10px] text-indigo-100">Passes</div>
-              </div>
-              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
-                <div class="text-lg font-black"><i class="fa-solid fa-bag-shopping"></i></div>
-                <div class="text-[10px] text-indigo-100">Merch</div>
-              </div>
-              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
-                <div class="text-lg font-black"><i class="fa-solid fa-user-shield"></i></div>
-                <div class="text-[10px] text-indigo-100">Deals</div>
-              </div>
-            </div>
           </div>
         <div id="accountChoiceView" class="space-y-3">
           <div class="border-t border-white/10 pt-4 space-y-3">
@@ -1561,10 +1547,6 @@
     }
 
     function getRelevantConcertImage(concert) {
-      const artistImages = getConcertArtistImages(concert);
-      if (shouldPreferArtistCardImage(concert) && artistImages.length) {
-        return artistImages[hashString(`${getConcertImageKey(concert)}-artist`) % artistImages.length];
-      }
       return getConcertFallbackImage(concert);
     }
 
@@ -1577,11 +1559,11 @@
     }
 
     function getConcertImageFocus(concert) {
-      return shouldPreferArtistCardImage(concert) && getConcertArtistImages(concert).length ? 'center 42%' : 'center center';
+      return 'center center';
     }
 
     function shouldPreferArtistCardImage(concert) {
-      return shouldUseArtistCardImage(concert);
+      return false;
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -3114,7 +3096,7 @@
     }
 
     function getPreviewThumbnailImage(track, concert) {
-      return track?.artistImageUrl || concert?.image || track?.artworkUrl || concert?.imageFallback || getConcertStageIllustration(concert);
+      return concert?.image || concert?.imageFallback || track?.artistImageUrl || track?.artworkUrl || getConcertStageIllustration(concert);
     }
 
     async function searchItunesPreviewSongs(term, attribute = '') {
