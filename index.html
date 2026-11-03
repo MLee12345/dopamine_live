@@ -11,6 +11,8 @@
   <!-- Google Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="preconnect" href="https://e-cdns-images.dzcdn.net">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
@@ -377,7 +379,7 @@
             <span class="w-0.5 h-6 rounded-full bg-white"></span>
             <span class="w-0.5 h-3 rounded-full bg-white"></span>
           </div>
-          <span class="relative text-white text-sm font-black tracking-[-0.03em] drop-shadow-sm">DL</span>
+          <span class="relative text-white text-base font-black tracking-[-0.04em] drop-shadow-sm">DL</span>
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-extrabold tracking-tight text-zinc-950 flex items-center gap-1">
@@ -554,13 +556,13 @@
         <div class="relative z-10 max-w-5xl space-y-3">
           <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 px-3 py-1 rounded-md text-indigo-50 text-xs font-semibold">
             <span class="w-2 h-2 rounded-full bg-teal-300"></span>
-            <span>Live inventory, wallet rewards, daily discounts</span>
+            <span>500 events • seat views • saved wallet</span>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Live Music. <span class="text-teal-200">Actual Seat Choices.</span>
+            Find Tickets <span class="text-teal-200">That Fit Your Night.</span>
           </h1>
           <p class="text-indigo-100 text-[clamp(0.72rem,1.35vw,1rem)] whitespace-nowrap font-normal">
-            Find the show, preview the artist, hold to checkout, and keep your ticket wallet in one place.
+            Search by city, date, and price, then preview seats and songs before checkout.
           </p>
         </div>
       </div>
@@ -1549,10 +1551,6 @@
     }
 
     function getRelevantConcertImage(concert) {
-      const uniqueArtistImages = getConcertArtistImages(concert);
-      if (shouldPreferArtistCardImage(concert) && uniqueArtistImages.length) {
-        return uniqueArtistImages[hashString(getConcertImageKey(concert)) % uniqueArtistImages.length];
-      }
       return getConcertFallbackImage(concert);
     }
 
@@ -1565,12 +1563,11 @@
     }
 
     function getConcertImageFocus(concert) {
-      return shouldPreferArtistCardImage(concert) ? 'center 18%' : 'center center';
+      return 'center center';
     }
 
     function shouldPreferArtistCardImage(concert) {
-      if (!shouldUseArtistCardImage(concert) || !getConcertArtistImages(concert).length) return false;
-      return hashString(getConcertImageKey(concert)) % 10 < 6;
+      return false;
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -1814,7 +1811,7 @@
       clearTimeout(state.artworkRefreshTimer);
       state.artworkRefreshTimer = setTimeout(() => {
         renderConcerts();
-      }, 250);
+      }, 1000);
     }
 
     /* ==========================================================================
@@ -1978,6 +1975,7 @@
       stageExpiryTimer: null,
       stageExpirySweepTimer: null,
       artworkRefreshTimer: null,
+      preloadedImages: new Set(),
       artistPreviewCache: new Map()
     };
     const TAX_RATE = 0.0875;
@@ -2637,8 +2635,12 @@
 
       document.getElementById('concertCount').innerText = visibleConcerts.length;
 
-      visibleConcerts.forEach(concert => {
+      preloadConcertImages(visibleConcerts);
+
+      visibleConcerts.forEach((concert, idx) => {
         const venue = VENUES[concert.venueId];
+        const imageLoading = idx < 12 ? 'eager' : 'lazy';
+        const imagePriority = idx < 12 ? 'high' : 'low';
         const card = document.createElement('div');
         card.className = 'concert-card bg-white border border-zinc-200 rounded-lg overflow-hidden flex flex-col justify-between shadow-sm';
 
@@ -2646,7 +2648,7 @@
           <div>
             <!-- Image & Venue Badge -->
             <div class="relative h-48 w-full overflow-hidden bg-zinc-100">
-              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" style="object-position: ${concert.imageFocus || 'center center'};" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+              <img src="${concert.image}" alt="${concert.artist}" loading="${imageLoading}" fetchpriority="${imagePriority}" decoding="async" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" style="object-position: ${concert.imageFocus || 'center center'};" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10"></div>
               
               <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md border border-white/80 text-zinc-800 text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-sm">
@@ -2756,6 +2758,27 @@
       if (!button) return;
       button.classList.toggle('hidden', !state.searchTerm);
       button.classList.toggle('flex', Boolean(state.searchTerm));
+    }
+
+    function preloadImageUrl(url) {
+      if (!url || state.preloadedImages.has(url)) return;
+      state.preloadedImages.add(url);
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+    }
+
+    function preloadConcertImages(concerts) {
+      const urls = [...new Set(concerts.flatMap(concert => [concert.image, concert.imageFallback]).filter(Boolean))];
+      let index = 0;
+      const loadBatch = () => {
+        urls.slice(index, index + 18).forEach(preloadImageUrl);
+        index += 18;
+        if (index >= urls.length) return;
+        if ('requestIdleCallback' in window) window.requestIdleCallback(loadBatch, { timeout: 1200 });
+        else setTimeout(loadBatch, 120);
+      };
+      loadBatch();
     }
 
     /* ==========================================================================
@@ -3096,7 +3119,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             ${previewTracks.map((track, idx) => `
               <button onclick="previewTicketTrack(${idx})" data-preview-button data-preview-index="${idx}" class="min-w-0 flex items-center gap-2 bg-zinc-50 border border-zinc-200 hover:border-indigo-400 rounded-lg p-2 text-left">
-                <img src="${escapeHtml(track.artistImageUrl || track.artworkUrl || concert.image)}" alt="" style="object-position: center 18%;" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
+                <img src="${escapeHtml(concert.image || track.artistImageUrl || track.artworkUrl)}" alt="" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
                 <span class="min-w-0 flex-1">
                   <span class="block text-xs font-bold text-zinc-800 truncate">${escapeHtml(track.trackName)}</span>
                   <span class="block text-[10px] text-zinc-500 truncate"><i data-preview-icon="${idx}" class="fa-solid fa-play mr-1"></i>30-sec preview</span>
