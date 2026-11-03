@@ -430,7 +430,7 @@
 
     <!-- PAGE 0: ACCOUNT START -->
     <section id="page-account" class="hidden min-h-[78vh] grid place-items-center">
-      <div class="w-full max-w-lg overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
+      <div class="w-full max-w-lg translate-y-8 sm:translate-y-12 overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
         <div class="p-6 sm:p-8 bg-[linear-gradient(135deg,_#312e81,_#111827_52%,_#09090b)]">
           <div class="mb-6 space-y-4">
             <div>
@@ -464,7 +464,7 @@
           </div>
           <div class="pt-2 border-t border-white/10">
             <div class="text-[11px] font-black uppercase tracking-wider text-indigo-100 mb-2">Guest access</div>
-            <button onclick="skipAccount()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-2xl py-3.5 text-sm font-black">Try as guest</button>
+            <button onclick="skipAccount()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-2xl py-3.5 text-sm font-black">Skip to DopamineLive</button>
           </div>
         </div>
         <div id="accountFormView" class="hidden">
@@ -1452,6 +1452,9 @@
       { label: '$50 merch', fullLabel: '$50 merch credit', discount: 0, flat: 0, wallet: 50 },
       { label: 'Half fees', fullLabel: 'Half-off service fees', discount: 6, flat: 0, wallet: 0 }
     ];
+
+    const MIN_CONCERT_PREVIEW_TRACKS = 12;
+    const MAX_CONCERT_PREVIEW_TRACKS = 24;
 
     const WORLD_CITY_OPTIONS = [
       'Abidjan', 'Abu Dhabi', 'Accra', 'Addis Ababa', 'Adelaide', 'Ahmedabad', 'Algiers', 'Amsterdam', 'Anchorage', 'Ankara',
@@ -3018,7 +3021,12 @@
       const artistQuery = getPrimaryArtistName(concert);
       const searches = [
         () => searchItunesPreviewSongs(artistQuery, 'artistTerm'),
-        () => searchItunesPreviewSongs(`${artistQuery} ${concert.tour}`)
+        () => searchItunesPreviewSongs(artistQuery),
+        () => searchItunesPreviewSongs(`${artistQuery} top songs`),
+        () => searchItunesPreviewSongs(`${artistQuery} hits`),
+        () => searchItunesPreviewSongs(`${artistQuery} live`),
+        () => searchItunesPreviewSongs(`${artistQuery} ${concert.tour}`),
+        () => searchItunesPreviewSongs(`${artistQuery} ${concert.genre}`)
       ];
 
       for (const runSearch of searches) {
@@ -3044,7 +3052,7 @@
 
     async function fetchArtistPreviewTracks(concert) {
       if (!concert || concert.rotating) return [];
-      if (concert.previewTracks?.length >= 3) return concert.previewTracks;
+      if (concert.previewTracks?.length >= MIN_CONCERT_PREVIEW_TRACKS) return concert.previewTracks;
       const cacheKey = normalizeArtistName(concert.artist);
       if (state.artistPreviewCache.has(cacheKey)) {
         const cachedTracks = await state.artistPreviewCache.get(cacheKey);
@@ -3057,7 +3065,7 @@
         try {
           const artistQuery = getPrimaryArtistName(concert);
           const requestedArtist = normalizeArtistName(artistQuery);
-          const maxPreviewTracks = 24;
+          const maxPreviewTracks = MAX_CONCERT_PREVIEW_TRACKS;
           const artistSearch = await requestDeezerJsonp(`https://api.deezer.com/search/artist?q=${encodeURIComponent(artistQuery)}&limit=8`);
           const artistMatches = artistSearch.data || [];
           const matchedArtist = artistMatches.find(result => normalizeArtistName(result.name) === requestedArtist) || artistMatches[0];
@@ -3082,7 +3090,7 @@
               }, maxPreviewTracks);
             });
           }
-          if (uniqueTracks.length < maxPreviewTracks) {
+          if (uniqueTracks.length < MIN_CONCERT_PREVIEW_TRACKS) {
             await backfillItunesPreviewTracks(concert, uniqueTracks, seen, artistImageUrl, maxPreviewTracks);
           }
           concert.previewAvailable = uniqueTracks.length >= 3;
@@ -3131,6 +3139,10 @@
         };
         document.head.appendChild(script);
       });
+    }
+
+    function getPreviewThumbnailImage(track, concert) {
+      return track?.artistImageUrl || concert?.image || track?.artworkUrl || concert?.imageFallback || getConcertStageIllustration(concert);
     }
 
     async function searchItunesPreviewSongs(term, attribute = '') {
@@ -3191,7 +3203,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             ${previewTracks.map((track, idx) => `
               <button onclick="previewTicketTrack(${idx})" data-preview-button data-preview-index="${idx}" class="min-w-0 flex items-center gap-2 bg-zinc-50 border border-zinc-200 hover:border-indigo-400 rounded-lg p-2 text-left">
-                <img src="${escapeHtml(concert.image || track.artistImageUrl || track.artworkUrl)}" alt="" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
+                <img src="${escapeHtml(getPreviewThumbnailImage(track, concert))}" alt="" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
                 <span class="min-w-0 flex-1">
                   <span class="block text-xs font-bold text-zinc-800 truncate">${escapeHtml(track.trackName)}</span>
                   <span class="block text-[10px] text-zinc-500 truncate"><i data-preview-icon="${idx}" class="fa-solid fa-play mr-1"></i>30-sec preview</span>
