@@ -1568,9 +1568,13 @@
     }
 
     function getRelevantConcertImage(concert) {
-      return shouldPreferArtistCardImage(concert)
-        ? getArtistPerformanceImage(concert)
-        : getConcertFallbackImage(concert);
+      const imageMode = getConcertImageMode(concert);
+      const artistImages = getConcertArtistImages(concert);
+      if (imageMode === 'artist' && artistImages.length) {
+        return artistImages[hashString(`${getConcertImageKey(concert)}-artist`) % artistImages.length];
+      }
+      if (imageMode === 'performance') return getArtistPerformanceImage(concert);
+      return getConcertFallbackImage(concert);
     }
 
     function getConcertArtistImages(concert) {
@@ -1582,18 +1586,25 @@
     }
 
     function getConcertImageFocus(concert) {
-      return 'center center';
+      return getConcertImageMode(concert) === 'artist' ? 'center 30%' : 'center center';
     }
 
     function shouldPreferArtistCardImage(concert) {
-      if (!shouldUseArtistCardImage(concert)) return false;
-      return hashString(getConcertImageKey(concert)) % 10 < 6;
+      return getConcertImageMode(concert) !== 'crowd';
+    }
+
+    function getConcertImageMode(concert) {
+      if (!shouldUseArtistCardImage(concert)) return 'crowd';
+      const roll = hashString(getConcertImageKey(concert)) % 10;
+      if (roll < 2 && getConcertArtistImages(concert).length) return 'artist';
+      if (roll < 7) return 'performance';
+      return 'crowd';
     }
 
     function getArtistPerformanceImage(concert) {
       const artistSlug = normalizeArtistName(concert?.artist || 'live concert').replace(/\s+/g, ',');
-      const lock = 3200 + (hashString(normalizeArtistName(concert?.artist || concert?.id)) % 60000);
-      return `https://loremflickr.com/1000/700/${artistSlug},concert,stage,performance?lock=${lock}`;
+      const lock = 3200 + (hashString(getConcertImageKey(concert)) % 900000);
+      return `https://loremflickr.com/1000/700/${artistSlug},concert,stage,performance,live?lock=${lock}`;
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -1791,7 +1802,7 @@
       concert.image = getRelevantConcertImage(concert);
       concert.imageFallback = getConcertFallbackImage(concert);
       concert.imageTextFallback = getConcertTextPlaceholder(concert);
-      concert.imageFocus = 'center center';
+      concert.imageFocus = getConcertImageFocus(concert);
       concert.merch.forEach((item, itemIdx) => {
         const merchSeed = `${concert.id}-${item.id}-${itemIdx}`;
         item.img = getUniqueMerchImage(merchSeed, item.name);
@@ -2002,8 +2013,8 @@
       stageExpirySweepTimer: null,
       artworkRefreshTimer: null,
       heroFansTimer: null,
-      heroFansCount: 18000,
-      heroFansTarget: 18000,
+      heroFansCount: 17650 + Math.floor(Math.random() * 760),
+      heroFansTarget: 0,
       heroFansPauseTicks: 0,
       preloadedImages: new Set(),
       artistPreviewCache: new Map()
@@ -2798,6 +2809,7 @@
     }
 
     function startHeroFansTicker() {
+      if (!state.heroFansTarget) state.heroFansTarget = state.heroFansCount;
       updateHeroFansText();
       if (state.heroFansTimer) return;
       state.heroFansTimer = setInterval(() => {
@@ -2806,16 +2818,17 @@
           return;
         }
         if (Math.round(state.heroFansCount) === Math.round(state.heroFansTarget)) {
-          state.heroFansPauseTicks = 8 + Math.floor(Math.random() * 28);
-          const driftMagnitude = 1 + Math.floor(Math.random() * 2);
+          state.heroFansPauseTicks = 4 + Math.floor(Math.random() * 16);
+          const driftMagnitude = 1 + Math.floor(Math.random() * 8);
           const drift = Math.random() > 0.5 ? driftMagnitude : -driftMagnitude;
           state.heroFansTarget = Math.max(12800, Math.min(28400, state.heroFansCount + drift));
           return;
         }
         const direction = state.heroFansTarget > state.heroFansCount ? 1 : -1;
-        state.heroFansCount += direction;
+        const step = Math.random() > 0.72 ? 2 : 1;
+        state.heroFansCount += direction * Math.min(step, Math.abs(state.heroFansTarget - state.heroFansCount));
         updateHeroFansText();
-      }, 180);
+      }, 150);
     }
 
     function preloadImageUrl(url) {
