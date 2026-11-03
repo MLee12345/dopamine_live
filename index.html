@@ -368,8 +368,15 @@
       
       <!-- Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('discover')">
-        <div class="w-9 h-9 rounded-lg bg-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/15">
-          <i class="fa-solid font-bold text-white text-lg">D</i>
+        <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-700 via-violet-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden">
+          <div class="absolute inset-x-1.5 bottom-1.5 h-3 rounded-full bg-white/15"></div>
+          <div class="relative flex items-end gap-0.5">
+            <span class="w-1 h-3 rounded-full bg-white"></span>
+            <span class="w-1 h-5 rounded-full bg-white"></span>
+            <span class="w-1 h-2.5 rounded-full bg-white"></span>
+            <span class="w-1 h-4 rounded-full bg-white"></span>
+          </div>
+          <span class="absolute -right-1 -top-1 w-4 h-4 rounded-full bg-white/90 text-[9px] font-black text-indigo-700 grid place-items-center">D</span>
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-extrabold tracking-tight text-zinc-950 flex items-center gap-1">
@@ -541,6 +548,22 @@
     <!-- PAGE 1: DISCOVER / CONCERT CATALOGUE -->
     <section id="page-discover" class="space-y-8">
       
+      <!-- Clean Hero Banner -->
+      <div class="relative overflow-hidden rounded-lg bg-indigo-700 border border-indigo-700 p-6 sm:p-8 shadow-xl shadow-indigo-950/10">
+        <div class="relative z-10 max-w-5xl space-y-3">
+          <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 px-3 py-1 rounded-md text-indigo-50 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-teal-300"></span>
+            <span>Live inventory, wallet rewards, daily discounts</span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Live Music. <span class="text-teal-200">Actual Seat Choices.</span>
+          </h1>
+          <p class="text-indigo-100 text-[clamp(0.72rem,1.35vw,1rem)] whitespace-nowrap font-normal">
+            Find the show, preview the artist, hold to checkout, and keep your ticket wallet in one place.
+          </p>
+        </div>
+      </div>
+
       <!-- Marketplace Filters -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.05fr_1.06fr_1.28fr_10.75rem_0.55fr] gap-2 w-full lg:max-w-6xl items-stretch">
@@ -1477,10 +1500,6 @@
     }
 
     function getConcertTextPlaceholder(concert) {
-      const artist = escapeSvgText(concert?.artist || 'Dopamine Live');
-      const tour = escapeSvgText(concert?.tour || 'Live Event');
-      const genre = escapeSvgText(concert?.genre || 'Concert');
-      const venue = concert?.venueId && VENUES[concert.venueId] ? escapeSvgText(VENUES[concert.venueId].city) : 'Live';
       const seed = hashString(getConcertImageKey(concert));
       const hue = seed % 360;
       const accentHue = (hue + 135) % 360;
@@ -1497,10 +1516,9 @@
         <path d="M170 582c135-65 525-65 660 0" fill="none" stroke="rgba(15,16,33,.38)" stroke-width="24" stroke-linecap="round"/>
         <circle cx="230" cy="205" r="58" fill="rgba(255,255,255,.18)"/><circle cx="770" cy="205" r="58" fill="rgba(255,255,255,.18)"/>
         <rect x="105" y="88" width="790" height="84" rx="42" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.28)"/>
-        <text x="500" y="143" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="#ecfeff">${genre.toUpperCase()} • ${venue.toUpperCase()}</text>
-        <text x="500" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="78" font-weight="900" fill="#fff">${artist}</text>
-        <text x="500" y="407" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#dffcff">${tour}</text>
-        <text x="500" y="486" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" font-weight="900" fill="#0f1021">OFFICIAL EVENT CARD</text>
+        <circle cx="500" cy="355" r="95" fill="rgba(255,255,255,.16)"/>
+        <path d="M450 420h100l38 88H412z" fill="rgba(255,255,255,.2)"/>
+        <path d="M315 495c75-55 295-55 370 0" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="18" stroke-linecap="round"/>
       </svg>`;
       return `data:image/svg+xml,${encodeURIComponent(svg)}`;
     }
@@ -1614,7 +1632,7 @@
 
     function getUniqueConcertImage(idx, genre = 'concert') {
       const key = getConcertImageKey(idx, genre);
-      if (typeof idx === 'object' && idx) return getConcertTextPlaceholder(idx);
+      if (typeof idx === 'object' && idx) return getConcertFallbackImage(idx);
       return `https://picsum.photos/seed/${encodeURIComponent(`dopamine-live-${key}`)}/1000/700`;
     }
 
@@ -1747,15 +1765,23 @@
             concert.artistImageUrl = tracks.find(track => track.artistImageUrl)?.artistImageUrl || concert.artistImageUrl || '';
             if (tracks.length) applyRelevantConcertArtwork(concert);
           });
+          if (tracks.length) scheduleConcertArtworkRefresh();
         }
       };
       const workerCount = Math.min(4, artistGroups.length);
       Promise.all(Array.from({ length: workerCount }, hydrateNextArtist)).finally(() => {
         if (state.activeTab === 'discover') {
-          initFilters();
           renderConcerts();
         }
       });
+    }
+
+    function scheduleConcertArtworkRefresh() {
+      if (typeof state === 'undefined' || state.activeTab !== 'discover') return;
+      clearTimeout(state.artworkRefreshTimer);
+      state.artworkRefreshTimer = setTimeout(() => {
+        renderConcerts();
+      }, 250);
     }
 
     /* ==========================================================================
@@ -1918,6 +1944,7 @@
       stageSessionTimer: null,
       stageExpiryTimer: null,
       stageExpirySweepTimer: null,
+      artworkRefreshTimer: null,
       artistPreviewCache: new Map()
     };
     const TAX_RATE = 0.0875;
@@ -1941,6 +1968,7 @@
       initFilters();
       renderDailyWheel();
       renderConcerts();
+      hydratePreviewCatalog();
       updateTicketBadge();
       updateWalletUI();
       initStageVisualizer();
