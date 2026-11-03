@@ -556,7 +556,7 @@
         <div class="relative z-10 max-w-5xl space-y-3">
           <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 px-3 py-1 rounded-md text-indigo-50 text-xs font-semibold">
             <span class="w-2 h-2 rounded-full bg-teal-300"></span>
-            <span id="heroFansText">18,000 ppl browsing right now</span>
+            <span id="heroFansText">18,000 fans browsing right now</span>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
             Find Tickets That Fit Your Night.
@@ -1568,6 +1568,10 @@
     }
 
     function getRelevantConcertImage(concert) {
+      const uniqueArtistImages = getConcertArtistImages(concert);
+      if (shouldPreferArtistCardImage(concert) && uniqueArtistImages.length) {
+        return uniqueArtistImages[hashString(getConcertImageKey(concert)) % uniqueArtistImages.length];
+      }
       return getConcertFallbackImage(concert);
     }
 
@@ -1580,11 +1584,12 @@
     }
 
     function getConcertImageFocus(concert) {
-      return 'center center';
+      return shouldPreferArtistCardImage(concert) ? 'center 18%' : 'center center';
     }
 
     function shouldPreferArtistCardImage(concert) {
-      return false;
+      if (!shouldUseArtistCardImage(concert) || !getConcertArtistImages(concert).length) return false;
+      return hashString(getConcertImageKey(concert)) % 10 < 6;
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -1994,6 +1999,7 @@
       artworkRefreshTimer: null,
       heroFansTimer: null,
       heroFansCount: 18000,
+      heroFansTarget: 18000,
       preloadedImages: new Set(),
       artistPreviewCache: new Map()
     };
@@ -2783,17 +2789,21 @@
     function updateHeroFansText() {
       const label = document.getElementById('heroFansText');
       if (!label) return;
-      label.innerText = `${Math.round(state.heroFansCount).toLocaleString()} ppl browsing right now`;
+      label.innerText = `${Math.round(state.heroFansCount).toLocaleString()} fans browsing right now`;
     }
 
     function startHeroFansTicker() {
       updateHeroFansText();
       if (state.heroFansTimer) return;
       state.heroFansTimer = setInterval(() => {
-        const drift = Math.floor(Math.random() * 321) - 145;
-        state.heroFansCount = Math.max(12800, Math.min(28400, state.heroFansCount + drift));
+        if (Math.round(state.heroFansCount) === Math.round(state.heroFansTarget)) {
+          const drift = Math.floor(Math.random() * 121) - 55;
+          state.heroFansTarget = Math.max(12800, Math.min(28400, state.heroFansCount + drift));
+        }
+        const direction = state.heroFansTarget > state.heroFansCount ? 1 : -1;
+        state.heroFansCount += direction;
         updateHeroFansText();
-      }, 3600);
+      }, 95);
     }
 
     function preloadImageUrl(url) {
