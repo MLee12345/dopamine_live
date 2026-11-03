@@ -433,10 +433,7 @@
       <div class="w-full max-w-lg translate-y-8 sm:translate-y-12 overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
         <div class="p-6 sm:p-8 bg-[linear-gradient(135deg,_#312e81,_#111827_52%,_#09090b)]">
           <div class="mb-6 space-y-4">
-            <div>
-              <h1 class="text-3xl font-black text-white leading-tight">Claim dream concert tickets without real checkout stress.</h1>
-              <p class="mt-2 text-sm leading-relaxed text-indigo-100">Browse live shows, save virtual passes, and try merch without risking real money.</p>
-            </div>
+            <h1 class="text-3xl font-black text-white leading-tight">Browse live shows, save virtual passes, and try merch without risking real money.</h1>
             <div class="grid grid-cols-3 gap-2">
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
                 <div class="text-lg font-black"><i class="fa-solid fa-ticket"></i></div>
@@ -3034,7 +3031,7 @@
         const payload = await runSearch();
         (payload.results || []).forEach(result => {
           if (target.length >= maxPreviewTracks) return;
-          if (!isTrackByConcertArtist(concert, result.artistName) || result.trackExplicitness === 'explicit') return;
+          if (!isTrackByConcertArtist(concert, result.artistName)) return;
           addPreviewTrack(target, seen, {
             trackName: result.trackName,
             artistName: result.artistName || concert.artist,
@@ -3075,7 +3072,6 @@
           if (matchedArtist?.id) {
             const trackSearch = await requestDeezerJsonp(`https://api.deezer.com/artist/${matchedArtist.id}/top?limit=${maxPreviewTracks}`);
             (trackSearch.data || []).forEach(result => {
-              if (result.explicit_lyrics) return;
               if (!isTrackByConcertArtist(concert, result.artist?.name || matchedArtist.name || concert.artist)) return;
               addPreviewTrack(uniqueTracks, seen, {
                 trackName: result.title,
