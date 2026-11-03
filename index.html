@@ -1371,6 +1371,54 @@
       'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000&auto=format&fit=crop&sat=-30'
     ];
 
+    const MERCH_IMAGE_POOLS = {
+      hoodie: [
+        'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=300&auto=format&fit=crop'
+      ],
+      shirt: [
+        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1562157873-818bc0726f68?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1571945153237-4929e783af4a?q=80&w=300&auto=format&fit=crop'
+      ],
+      hat: [
+        'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1521369909029-2afed882baee?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1560774358-d727658f457c?q=80&w=300&auto=format&fit=crop'
+      ],
+      vinyl: [
+        'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1526394931762-90052e97b376?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=300&auto=format&fit=crop'
+      ],
+      poster: [
+        'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1580136579312-94651dfd596d?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=300&auto=format&fit=crop'
+      ],
+      bag: [
+        'https://images.unsplash.com/photo-1591375372226-3531cf2eb6eb?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1622560480654-d96214fdc887?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?q=80&w=300&auto=format&fit=crop'
+      ],
+      jacket: [
+        'https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1520975954732-35dd22299614?q=80&w=300&auto=format&fit=crop'
+      ],
+      default: [
+        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=300&auto=format&fit=crop'
+      ]
+    };
+
+    const INLINE_CONCERT_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17122f"/><stop offset="1" stop-color="#16c784"/></linearGradient></defs><rect width="1000" height="700" fill="url(#g)"/><circle cx="500" cy="330" r="140" fill="rgba(255,255,255,.12)"/><path d="M180 520c120-110 520-110 640 0" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="26" stroke-linecap="round"/><text x="500" y="368" text-anchor="middle" font-family="Arial" font-size="58" font-weight="800" fill="white">Dopamine Live</text></svg>')}`;
+    const INLINE_MERCH_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><rect width="300" height="300" rx="28" fill="#111827"/><path d="M93 88h114l23 45-30 18v88H100v-88l-30-18 23-45z" fill="#16c784"/><path d="M118 88c8 18 56 18 64 0" fill="none" stroke="#ecfeff" stroke-width="10" stroke-linecap="round"/><text x="150" y="263" text-anchor="middle" font-family="Arial" font-size="24" font-weight="800" fill="#ecfeff">MERCH</text></svg>')}`;
+
     const SEAT_VIEW_IMAGES = [
       'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?q=80&w=1000&auto=format&fit=crop',
@@ -1409,8 +1457,31 @@
       'Vancouver', 'Vienna', 'Warsaw', 'Washington, DC', 'Wellington', 'Zurich'
     ];
 
-    function getConcertFallbackImage(idx) {
-      return EVENT_IMAGE_POOL[idx % EVENT_IMAGE_POOL.length];
+    function hashString(value) {
+      let hash = 2166136261;
+      String(value).split('').forEach(char => {
+        hash ^= char.charCodeAt(0);
+        hash = Math.imul(hash, 16777619);
+      });
+      return Math.abs(hash >>> 0);
+    }
+
+    function getConcertImageKey(concertOrKey, genre = 'concert') {
+      if (typeof concertOrKey === 'object' && concertOrKey) {
+        return [
+          concertOrKey.artist,
+          concertOrKey.tour,
+          concertOrKey.venueId,
+          concertOrKey.dateKey || concertOrKey.date,
+          concertOrKey.id
+        ].filter(Boolean).join('|');
+      }
+      return `${genre}|${concertOrKey}`;
+    }
+
+    function getConcertFallbackImage(concertOrKey) {
+      const key = getConcertImageKey(concertOrKey);
+      return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
 
     function getMerchImageKeyword(type = 'tour merch') {
@@ -1426,16 +1497,42 @@
       return 'concert,merch';
     }
 
-    function getMerchFallbackImage(type = 'tour merch') {
+    function getMerchCategory(type = 'tour merch') {
       const keyword = getMerchImageKeyword(type);
-      if (keyword.includes('hoodie')) return 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=300&auto=format&fit=crop';
-      if (keyword.includes('tshirt')) return 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=300&auto=format&fit=crop';
-      if (keyword.includes('hat')) return 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=300&auto=format&fit=crop';
-      if (keyword.includes('vinyl')) return 'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=300&auto=format&fit=crop';
-      if (keyword.includes('poster')) return 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=300&auto=format&fit=crop';
-      if (keyword.includes('bag')) return 'https://images.unsplash.com/photo-1591375372226-3531cf2eb6eb?q=80&w=300&auto=format&fit=crop';
-      if (keyword.includes('jacket')) return 'https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=300&auto=format&fit=crop';
-      return 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=300&auto=format&fit=crop';
+      if (keyword.includes('hoodie')) return 'hoodie';
+      if (keyword.includes('tshirt')) return 'shirt';
+      if (keyword.includes('hat')) return 'hat';
+      if (keyword.includes('vinyl')) return 'vinyl';
+      if (keyword.includes('poster') || keyword.includes('magazine')) return 'poster';
+      if (keyword.includes('bag')) return 'bag';
+      if (keyword.includes('jacket')) return 'jacket';
+      return 'default';
+    }
+
+    function getMerchFallbackImage(type = 'tour merch', seed = '') {
+      const category = getMerchCategory(type);
+      const pool = MERCH_IMAGE_POOLS[category] || MERCH_IMAGE_POOLS.default;
+      return pool[hashString(`${type}|${seed}`) % pool.length] || INLINE_MERCH_PLACEHOLDER;
+    }
+
+    function handleConcertImageError(img, fallback) {
+      if (img.dataset.fallbackApplied) {
+        img.onerror = null;
+        img.src = INLINE_CONCERT_PLACEHOLDER;
+        return;
+      }
+      img.dataset.fallbackApplied = 'true';
+      img.src = fallback || INLINE_CONCERT_PLACEHOLDER;
+    }
+
+    function handleMerchImageError(img, fallback) {
+      if (img.dataset.fallbackApplied) {
+        img.onerror = null;
+        img.src = INLINE_MERCH_PLACEHOLDER;
+        return;
+      }
+      img.dataset.fallbackApplied = 'true';
+      img.src = fallback || INLINE_MERCH_PLACEHOLDER;
     }
 
     EXTRA_ARTISTS.forEach(([artist, tour, genre], idx) => {
@@ -1470,12 +1567,12 @@
     });
 
     function getUniqueConcertImage(idx, genre = 'concert') {
-      const genreSlug = String(genre).toLowerCase().replace(/[^a-z0-9]+/g, '');
-      return `https://loremflickr.com/1000/700/concert,stage,${genreSlug}?lock=${1200 + idx}`;
+      const key = getConcertImageKey(idx, genre);
+      return `https://picsum.photos/seed/${encodeURIComponent(`dopamine-live-${key}`)}/1000/700`;
     }
 
     function getUniqueMerchImage(idx, type = 'tour-merch') {
-      return `https://loremflickr.com/300/300/${getMerchImageKeyword(type)}?lock=${2400 + idx}`;
+      return getMerchFallbackImage(type, idx);
     }
 
     function formatRotatingDate(offset, hour = 8) {
@@ -1571,11 +1668,12 @@
     applyCentsToCatalog();
 
     CONCERTS.forEach((concert, idx) => {
-      concert.image = getUniqueConcertImage(idx, concert.genre);
-      concert.imageFallback = getConcertFallbackImage(idx);
+      concert.image = getUniqueConcertImage(concert, concert.genre);
+      concert.imageFallback = getConcertFallbackImage(concert);
       concert.merch.forEach((item, itemIdx) => {
-        item.img = getUniqueMerchImage(idx * 10 + itemIdx, item.name);
-        item.imgFallback = getMerchFallbackImage(item.name);
+        const merchSeed = `${concert.id}-${item.id}-${itemIdx}`;
+        item.img = getUniqueMerchImage(merchSeed, item.name);
+        item.imgFallback = getMerchFallbackImage(item.name, merchSeed);
       });
     });
 
@@ -2437,7 +2535,7 @@
           <div>
             <!-- Image & Venue Badge -->
             <div class="relative h-48 w-full overflow-hidden bg-zinc-100">
-              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${concert.imageFallback || getConcertFallbackImage(CONCERTS.indexOf(concert))}'" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10"></div>
               
               <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md border border-white/80 text-zinc-800 text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-sm">
@@ -3207,7 +3305,7 @@
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
-          <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${concert.imageFallback || getConcertFallbackImage(CONCERTS.indexOf(concert))}'" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
+          <img src="${concert.image}" alt="${concert.artist}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
           <div class="flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">${concert.genre}</span>
             <h3 class="text-xl font-bold text-zinc-950">${concert.artist}</h3>
@@ -3506,7 +3604,7 @@
 
         card.innerHTML = `
           <div class="flex items-center space-x-4">
-            <img src="${concert.image}" alt="${concert.artist}" onerror="this.onerror=null;this.src='${concert.imageFallback || getConcertFallbackImage(CONCERTS.indexOf(concert))}'" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
+            <img src="${concert.image}" alt="${concert.artist}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-indigo-600 font-mono">PASS ${t.ticketId}</span>
@@ -3670,7 +3768,7 @@
       `).join('') : `<div class="text-sm text-indigo-100 bg-white/10 border border-white/15 rounded-xl p-4">Your first show belongs here.</div>`;
       merch.innerHTML = state.profileHistory.merch.length ? state.profileHistory.merch.map(item => `
         <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3">
-          <img src="${item.img || item.imgFallback || getMerchFallbackImage(item.name)}" alt="${item.name}" onerror="this.onerror=null;this.src='${item.imgFallback || getMerchFallbackImage(item.name)}'" class="w-12 h-12 rounded-lg object-cover border border-white/10 bg-zinc-800">
+          <img src="${item.img || item.imgFallback || getMerchFallbackImage(item.name)}" alt="${item.name}" onerror="handleMerchImageError(this, '${item.imgFallback || getMerchFallbackImage(item.name)}')" class="w-12 h-12 rounded-lg object-cover border border-white/10 bg-zinc-800">
           <div class="flex-1 min-w-0">
             <div class="font-bold text-white">${item.name}${item.qty > 1 ? ` <span class="text-zinc-400 text-xs">x${item.qty}</span>` : ''}</div>
             <div class="text-xs text-zinc-400">${item.concert} • ${item.size || 'Size'} / ${item.color || 'Color'}</div>
@@ -4309,7 +4407,7 @@
           row.className = "p-3 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-between gap-3";
           row.innerHTML = `
           <div class="flex items-center space-x-3 min-w-0">
-            <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src='${item.imgFallback || getMerchFallbackImage(item.name)}'" class="w-12 h-12 rounded-lg object-cover bg-zinc-800">
+            <img src="${item.img}" alt="${item.name}" onerror="handleMerchImageError(this, '${item.imgFallback || getMerchFallbackImage(item.name)}')" class="w-12 h-12 rounded-lg object-cover bg-zinc-800">
             <div class="min-w-0" data-merch-copy></div>
           </div>
 
