@@ -10,7 +10,7 @@
 ## 1. User Persona & Strategic Intent
 
 * **Target User:** Live music fans seeking the thrill of discovering real artists, securing ticket drops, and purchasing tour merchandise.
-* **Core Intent:** Deliver a desktop-first, zero-risk, high-satisfaction "dopamine simulator" that recreates the emotional highs of concert drops, ticket purchases, and merch queues without any real-world financial cost, ticketing anxiety, or physical wait times.
+* **Core Intent:** Deliver a desktop-first, zero-risk, high-satisfaction "dopamine simulator" that recreates the emotional highs of concert drops, ticket purchases, and merch queues with virtual money, simulated fees, and no real-world financial transaction.
 
 ---
 
@@ -18,9 +18,9 @@
 
 | Real-World Pain Point | Dopamine Simulator Solution |
 | :--- | :--- |
-| **Ticketing Anxiety & Scalper Bots:** Dynamic surge pricing, instant sell-outs, and checkout errors. | **Simulated Price Drops & Guaranteed Access:** Simulated ticket price drops, clear AI seat value ratings, and instant $0 ticket claiming. |
+| **Ticketing Anxiety & Scalper Bots:** Dynamic surge pricing, instant sell-outs, and checkout errors. | **Simulated Checkout & Guaranteed Access:** Simulated ticket prices, visible virtual fees and tax, timed seat holds, and ticket claiming through the virtual wallet. |
 | **Merch Queue Friction:** Long physical lines at venue merch booths where desired sizes and limited items sell out quickly. | **Gamified Tap Queue:** Low-friction crowd-navigation tap game engineered with high win rates so users consistently reach the table. |
-| **Financial Stress:** High financial barrier to entry for tickets, fees, and apparel. | **Simulated Economy:** Default unlimited virtual wallet with optional user-configured spending limits for custom budgeting. |
+| **Financial Stress:** High financial barrier to entry for tickets, fees, and apparel. | **Simulated Economy:** Seeded virtual wallet, preset top-ups, custom top-ups, site-time rewards, and daily deal spins with no real payment processing. |
 
 ---
 
@@ -29,7 +29,7 @@
 ### 3.1 Ticket Intelligence Engine
 * **Dynamic Price Drop Alerts:** Simulates real-time price fluctuations across secondary and venue ticket markets, triggering visual price-drop badges.
 * **Presale & Drop Tracker:** Interactive calendar counters and notifications alerting users to upcoming fictional tour presales and venue drops.
-* **AI Seat Value Analysis:** Algorithmic valuation tags highlighting optimal seat selections based on price, visual viewpoint, and section location.
+* **Seat Selection Support:** Venue diagrams, section availability, preview images, and clear per-section pricing help users choose seats before checkout.
 
 ### 3.2 Concert & Merch Experience Hub
 * **Event-Day Activation Mode:** Dedicated top-level interface mode that activates on show day or when triggered manually by the user.
@@ -43,8 +43,8 @@
 
 * **Embedded Artist & Audio Database:** An extensive, self-contained local database containing authentic artist metadata, track titles, album artwork, and audio clips—eliminating external API dependencies.
 * **Procedural Concert Generator:** System engine that pre-populates fictional tour dates, virtual venue seat maps, simulated pricing models, and virtual merch catalogs.
-* **User Preference Mapping:** User artist follows selected manually during browsing to customize the home dashboard and concert schedule.
-* **Simulated Wallet Engine:** Tracks virtual funds, initialized to unlimited by default with user options for custom spending boundaries.
+* **User Preference Mapping:** Guest and member profiles store local ticket, merch, wallet, and profile history separately.
+* **Simulated Wallet Engine:** Tracks virtual funds, starts with a small seeded balance, and supports preset top-ups, custom top-ups, site-time rewards, and deal-wheel bonuses.
 
 ---
 
@@ -53,16 +53,16 @@
 ### Flow 1: Setup & Customization
 1. User opens the desktop app and browses the pre-loaded artist database.
 2. User selects favorite artists to populate their custom tour schedule.
-3. User optionally configures virtual wallet limits (defaults to unlimited).
+3. User can add virtual wallet funds through preset amounts, custom amounts, site-time rewards, or the daily deal wheel.
 
 ### Flow 2: Ticket Procurement
 1. User monitors upcoming show drops and evaluates real-time price-drop indicators.
-2. User selects seats using AI seat-value tags.
-3. User completes an instant $0 purchase and receives a digital ticket stub.
+2. User selects seats using the venue map, section availability, preview images, and prices.
+3. User completes a simulated paid checkout with virtual wallet funds and receives a digital ticket stub.
 
 ### Flow 3: Concert & Merch Experience (The Dopamine Loop)
-1. User observes the show countdown timer or activates the **Speed Up Time** button to fast-forward to showtime immediately.
-2. At showtime, the system pauses in a **"Waiting for You"** state until the user clicks **"Enter Concert"**.
+1. User observes the locked door state or activates the **Speed Up Time** button to fast-forward to showtime immediately.
+2. At showtime, the ticket switches to a ready state until the user clicks **"Enter Concert"**.
 3. Upon entering Concert Mode, audio playback begins automatically with real artist tracks.
 4. User plays a low-friction crowd-navigation tap game with guaranteed high success rates to reach the merch booth.
 5. User selects apparel, chooses sizes, completes instant checkout, and adds items to their persistent digital collection.
@@ -80,17 +80,17 @@
 
 ## 7. Interface Requirements & Visual Theme
 
-* **Low-Eyestrain Dark Theme:** Background palette centered around soft charcoal (`#121212`) and dark grays, paired with high-legibility light typography to prevent eyestrain during extended use.
-* **Muted Music Accents:** Subdued color highlights and subtle audio visualizer animations, avoiding harsh neon flashing.
-* **Top Header Navigation:** Global header displaying artist search, wallet balance / spending limit controls, digital ticket wallet, and merch collection.
-* **Dashboard & Concert Hub:** Grid-based event layouts, dedicated audio playback controls, "Speed Up Time" trigger, and "Enter Concert" action cards.
+* **Clean Ticket Marketplace Theme:** Light marketplace pages for browsing and checkout, with darker high-energy surfaces for account entry, concert mode, wallet, deals, and merch moments.
+* **Muted Music Accents:** Indigo, emerald, and violet highlights with subtle audio visualizer animations, avoiding harsh neon flashing.
+* **Top Header Navigation:** Global header displaying artist search on larger screens, deal wheel access, wallet balance, digital ticket wallet, and profile access.
+* **Dashboard & Concert Hub:** Grid-based event layouts, dedicated audio playback controls, **Speed Up Time** trigger, **Enter Concert** action cards, and merch access from saved tickets or the stage.
 
 ---
 
 ## 8. Technical Constraints & State Persistence
 
 ### 8.1 Auto-Save & Full Persistence Across Reloads
-All user state—including custom wallet limits, remaining balance, favorited artists, secured tickets, purchased merch collection, and active concert countdown timers—is continuously persisted in browser storage (`localStorage` / `IndexedDB`). Page reloads or session restarts restore exact user progress seamlessly.
+All user state—including remaining wallet balance, guest/member account data, secured tickets, purchased merch collection, daily deal state, and active concert door state—is continuously persisted in browser storage (`localStorage` / `IndexedDB`). Page reloads or session restarts restore exact user progress seamlessly.
 
 ### 8.2 Technical Architecture
 * **Single Page Application (SPA):** Built as a client-side web application operating without backend dependencies.
@@ -101,9 +101,9 @@ All user state—including custom wallet limits, remaining balance, favorited ar
 ```json
 {
   "userWallet": {
-    "isUnlimited": true,
-    "customLimit": null,
-    "balanceSpent": 0.00
+    "isUnlimited": false,
+    "balance": 25.00,
+    "lastSiteTimeRewardAt": "2026-11-03T12:00:00.000Z"
   },
   "followedArtists": ["Artist_101", "Artist_204"],
   "acquiredTickets": [
