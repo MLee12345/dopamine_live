@@ -369,13 +369,15 @@
       <!-- Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('discover')">
         <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-700 via-violet-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden">
-          <div class="absolute inset-x-1.5 bottom-1.5 h-3 rounded-full bg-white/15"></div>
-          <div class="relative flex items-end gap-0.5">
-            <span class="w-1 h-3 rounded-full bg-white"></span>
-            <span class="w-1 h-5 rounded-full bg-white"></span>
-            <span class="w-1 h-2.5 rounded-full bg-white"></span>
-            <span class="w-1 h-4 rounded-full bg-white"></span>
+          <div class="absolute inset-x-1.5 top-1/2 -translate-y-1/2 flex items-center justify-center gap-0.5 opacity-45">
+            <span class="w-0.5 h-3 rounded-full bg-white"></span>
+            <span class="w-0.5 h-5 rounded-full bg-white"></span>
+            <span class="w-0.5 h-7 rounded-full bg-white"></span>
+            <span class="w-0.5 h-4 rounded-full bg-white"></span>
+            <span class="w-0.5 h-6 rounded-full bg-white"></span>
+            <span class="w-0.5 h-3 rounded-full bg-white"></span>
           </div>
+          <span class="relative text-white text-sm font-black tracking-[-0.03em] drop-shadow-sm">DL</span>
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-extrabold tracking-tight text-zinc-950 flex items-center gap-1">
@@ -1547,21 +1549,35 @@
     }
 
     function getRelevantConcertImage(concert) {
+      const uniqueArtistImages = getConcertArtistImages(concert);
+      if (shouldPreferArtistCardImage(concert) && uniqueArtistImages.length) {
+        return uniqueArtistImages[hashString(getConcertImageKey(concert)) % uniqueArtistImages.length];
+      }
+      return getConcertFallbackImage(concert);
+    }
+
+    function getConcertArtistImages(concert) {
       const artistImages = (concert?.previewTracks || [])
         .map(track => upgradeArtworkUrl(track.artistImageUrl))
         .filter(Boolean);
       if (concert?.artistImageUrl) artistImages.push(upgradeArtworkUrl(concert.artistImageUrl));
-      const uniqueArtistImages = [...new Set(artistImages)];
-      if (shouldUseArtistCardImage(concert) && uniqueArtistImages.length) {
-        return uniqueArtistImages[hashString(getConcertImageKey(concert)) % uniqueArtistImages.length];
-      }
-      return getConcertFallbackImage(concert);
+      return [...new Set(artistImages)];
+    }
+
+    function getConcertImageFocus(concert) {
+      return shouldPreferArtistCardImage(concert) ? 'center 18%' : 'center center';
+    }
+
+    function shouldPreferArtistCardImage(concert) {
+      if (!shouldUseArtistCardImage(concert) || !getConcertArtistImages(concert).length) return false;
+      return hashString(getConcertImageKey(concert)) % 10 < 6;
     }
 
     function applyRelevantConcertArtwork(concert) {
       concert.image = getRelevantConcertImage(concert);
       concert.imageFallback = getConcertFallbackImage(concert);
       concert.imageTextFallback = getConcertTextPlaceholder(concert);
+      concert.imageFocus = getConcertImageFocus(concert);
     }
 
     function getMerchImageKeyword(type = 'tour merch') {
@@ -1752,6 +1768,7 @@
       concert.image = getUniqueConcertImage(concert, concert.genre);
       concert.imageFallback = getConcertFallbackImage(concert);
       concert.imageTextFallback = getConcertTextPlaceholder(concert);
+      concert.imageFocus = 'center center';
       concert.merch.forEach((item, itemIdx) => {
         const merchSeed = `${concert.id}-${item.id}-${itemIdx}`;
         item.img = getUniqueMerchImage(merchSeed, item.name);
@@ -2629,7 +2646,7 @@
           <div>
             <!-- Image & Venue Badge -->
             <div class="relative h-48 w-full overflow-hidden bg-zinc-100">
-              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" style="object-position: ${concert.imageFocus || 'center center'};" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10"></div>
               
               <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md border border-white/80 text-zinc-800 text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-sm">
@@ -3079,7 +3096,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             ${previewTracks.map((track, idx) => `
               <button onclick="previewTicketTrack(${idx})" data-preview-button data-preview-index="${idx}" class="min-w-0 flex items-center gap-2 bg-zinc-50 border border-zinc-200 hover:border-indigo-400 rounded-lg p-2 text-left">
-                <img src="${escapeHtml(track.artistImageUrl || track.artworkUrl || concert.image)}" alt="" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
+                <img src="${escapeHtml(track.artistImageUrl || track.artworkUrl || concert.image)}" alt="" style="object-position: center 18%;" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
                 <span class="min-w-0 flex-1">
                   <span class="block text-xs font-bold text-zinc-800 truncate">${escapeHtml(track.trackName)}</span>
                   <span class="block text-[10px] text-zinc-500 truncate"><i data-preview-icon="${idx}" class="fa-solid fa-play mr-1"></i>30-sec preview</span>
@@ -3458,7 +3475,7 @@
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
-          <img src="${concert.image}" alt="${concert.artist}" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
+          <img src="${concert.image}" alt="${concert.artist}" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" style="object-position: ${concert.imageFocus || 'center center'};" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
           <div class="flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">${concert.genre}</span>
             <h3 class="text-xl font-bold text-zinc-950">${concert.artist}</h3>
@@ -3757,7 +3774,7 @@
 
         card.innerHTML = `
           <div class="flex items-center space-x-4">
-            <img src="${concert.image}" alt="${concert.artist}" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
+            <img src="${concert.image}" alt="${concert.artist}" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" style="object-position: ${concert.imageFocus || 'center center'};" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-indigo-600 font-mono">PASS ${t.ticketId}</span>
