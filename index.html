@@ -433,7 +433,11 @@
       <div class="w-full max-w-lg translate-y-8 sm:translate-y-12 overflow-hidden bg-zinc-950 border border-indigo-300/20 rounded-3xl shadow-2xl shadow-indigo-950/30">
         <div class="p-6 sm:p-8 bg-[linear-gradient(135deg,_#312e81,_#111827_52%,_#09090b)]">
           <div class="mb-6 space-y-4">
-            <h1 class="text-3xl font-black text-white leading-tight">Browse live shows. Save virtual passes. Don't risk your money.</h1>
+            <h1 class="text-3xl font-black text-white leading-tight">
+              <span class="block">Browse live shows.</span>
+              <span class="block">Save virtual passes.</span>
+              <span class="block">Don't risk your money.</span>
+            </h1>
             <div class="grid grid-cols-3 gap-2">
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-white">
                 <div class="text-lg font-black"><i class="fa-solid fa-ticket"></i></div>
@@ -1491,26 +1495,13 @@
     }
 
     function getConcertFallbackImage(concertOrKey) {
-      if (typeof concertOrKey === 'object' && concertOrKey) return getUniqueConcertPhoto(concertOrKey, 'crowd');
       const key = getConcertImageKey(concertOrKey);
-      return `https://picsum.photos/seed/${encodeURIComponent(`dopamine-live-${key}`)}/1000/700`;
+      return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
 
     function shouldUseArtistCardImage(concert) {
       const artist = normalizeArtistName(concert?.artist);
-      const saferFallbackArtists = new Set([
-        '21 savage',
-        'asap rocky',
-        'bad bunny',
-        'doja cat',
-        'drake',
-        'ice spice',
-        'megan thee stallion',
-        'nicki minaj',
-        'travis scott',
-        'tyler the creator'
-      ]);
-      return artist && !saferFallbackArtists.has(artist);
+      return Boolean(artist);
     }
 
     function escapeSvgText(value) {
@@ -1570,12 +1561,10 @@
     }
 
     function getRelevantConcertImage(concert) {
-      const imageMode = getConcertImageMode(concert);
       const artistImages = getConcertArtistImages(concert);
-      if (imageMode === 'artist' && artistImages.length && !concert.generated) {
+      if (shouldPreferArtistCardImage(concert) && artistImages.length) {
         return artistImages[hashString(`${getConcertImageKey(concert)}-artist`) % artistImages.length];
       }
-      if (imageMode === 'performance') return getArtistPerformanceImage(concert);
       return getConcertFallbackImage(concert);
     }
 
@@ -1588,34 +1577,11 @@
     }
 
     function getConcertImageFocus(concert) {
-      return getConcertImageMode(concert) === 'artist' ? 'center 30%' : 'center center';
+      return shouldPreferArtistCardImage(concert) && getConcertArtistImages(concert).length ? 'center 42%' : 'center center';
     }
 
     function shouldPreferArtistCardImage(concert) {
-      return getConcertImageMode(concert) !== 'crowd';
-    }
-
-    function getConcertImageMode(concert) {
-      if (!shouldUseArtistCardImage(concert)) return 'crowd';
-      const roll = hashString(getConcertImageKey(concert)) % 10;
-      if (roll < 2 && getConcertArtistImages(concert).length) return 'artist';
-      if (roll < 7) return 'performance';
-      return 'crowd';
-    }
-
-    function getArtistPerformanceImage(concert) {
-      return getUniqueConcertPhoto(concert, 'performance');
-    }
-
-    function getUniqueConcertPhoto(concert, mode = 'performance') {
-      const artistSlug = normalizeArtistName(concert?.artist || 'live concert').replace(/\s+/g, ',');
-      const venueSlug = normalizeArtistName(VENUES[concert?.venueId]?.name || 'venue').replace(/\s+/g, ',');
-      const dateSlug = normalizeArtistName(concert?.dateKey || concert?.date || 'show').replace(/\s+/g, ',');
-      const lock = 3200 + (hashString(`${getConcertImageKey(concert)}-${mode}`) % 900000);
-      const terms = mode === 'crowd'
-        ? `${venueSlug},concert,crowd,stage,lights`
-        : `${artistSlug},${venueSlug},${dateSlug},concert,stage,performance,live`;
-      return `https://loremflickr.com/1000/700/${terms}?lock=${lock}`;
+      return shouldUseArtistCardImage(concert);
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -1710,7 +1676,7 @@
     function getUniqueConcertImage(idx, genre = 'concert') {
       const key = getConcertImageKey(idx, genre);
       if (typeof idx === 'object' && idx) return getRelevantConcertImage(idx);
-      return `https://picsum.photos/seed/${encodeURIComponent(`dopamine-live-${key}`)}/1000/700`;
+      return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
 
     function getUniqueMerchImage(idx, type = 'tour-merch') {
