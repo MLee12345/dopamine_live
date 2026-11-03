@@ -1484,6 +1484,61 @@
       return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
 
+    function escapeSvgText(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function getConcertTextPlaceholder(concert) {
+      const artist = escapeSvgText(concert?.artist || 'Dopamine Live');
+      const tour = escapeSvgText(concert?.tour || 'Live Event');
+      const genre = escapeSvgText(concert?.genre || 'Concert');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#0f1021"/><stop offset=".52" stop-color="#3f37c9"/><stop offset="1" stop-color="#16c784"/>
+          </linearGradient>
+          <radialGradient id="spot" cx=".5" cy=".2" r=".7"><stop stop-color="rgba(255,255,255,.28)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        </defs>
+        <rect width="1000" height="700" fill="url(#bg)"/>
+        <rect width="1000" height="700" fill="url(#spot)"/>
+        <path d="M90 530c170-120 650-120 820 0" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="30" stroke-linecap="round"/>
+        <circle cx="265" cy="220" r="58" fill="rgba(255,255,255,.18)"/><circle cx="735" cy="220" r="58" fill="rgba(255,255,255,.18)"/>
+        <text x="500" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="72" font-weight="900" fill="#fff">${artist}</text>
+        <text x="500" y="382" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="800" fill="#dffcff">${tour}</text>
+        <text x="500" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="900" fill="#0f1021">${genre.toUpperCase()} NIGHT</text>
+      </svg>`;
+      return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    }
+
+    function upgradeArtworkUrl(url, size = 1000) {
+      if (!url) return '';
+      return String(url)
+        .replace(/\/\d+x\d+-000000-80-0-0\.(jpg|png|webp)$/i, `/${size}x${size}-000000-80-0-0.$1`)
+        .replace(/\/cover_(small|medium|big|xl)\./i, '/cover_xl.');
+    }
+
+    function getRelevantConcertImage(concert) {
+      const artworks = (concert?.previewTracks || [])
+        .map(track => upgradeArtworkUrl(track.artworkUrl || track.artistImageUrl))
+        .filter(Boolean);
+      if (concert?.artistImageUrl) artworks.push(upgradeArtworkUrl(concert.artistImageUrl));
+      const uniqueArtworks = [...new Set(artworks)];
+      if (uniqueArtworks.length) {
+        return uniqueArtworks[hashString(getConcertImageKey(concert)) % uniqueArtworks.length];
+      }
+      return concert?.image || getUniqueConcertImage(concert, concert?.genre || 'concert');
+    }
+
+    function applyRelevantConcertArtwork(concert) {
+      concert.image = getRelevantConcertImage(concert);
+      concert.imageFallback = getConcertFallbackImage(concert);
+      concert.imageTextFallback = getConcertTextPlaceholder(concert);
+    }
+
     function getMerchImageKeyword(type = 'tour merch') {
       const lower = type.toLowerCase();
       if (lower.includes('hoodie') || lower.includes('crewneck') || lower.includes('sweatshirt')) return 'hoodie,clothing';
@@ -1518,7 +1573,7 @@
     function handleConcertImageError(img, fallback) {
       if (img.dataset.fallbackApplied) {
         img.onerror = null;
-        img.src = INLINE_CONCERT_PLACEHOLDER;
+        img.src = img.dataset.textFallback || INLINE_CONCERT_PLACEHOLDER;
         return;
       }
       img.dataset.fallbackApplied = 'true';
@@ -1670,6 +1725,7 @@
     CONCERTS.forEach((concert, idx) => {
       concert.image = getUniqueConcertImage(concert, concert.genre);
       concert.imageFallback = getConcertFallbackImage(concert);
+      concert.imageTextFallback = getConcertTextPlaceholder(concert);
       concert.merch.forEach((item, itemIdx) => {
         const merchSeed = `${concert.id}-${item.id}-${itemIdx}`;
         item.img = getUniqueMerchImage(merchSeed, item.name);
@@ -1696,6 +1752,8 @@
           group.forEach(concert => {
             concert.previewTracks = tracks;
             concert.previewAvailable = tracks.length >= 3;
+            concert.artistImageUrl = tracks.find(track => track.artistImageUrl)?.artistImageUrl || concert.artistImageUrl || '';
+            if (tracks.length) applyRelevantConcertArtwork(concert);
           });
         }
       };
@@ -2535,7 +2593,7 @@
           <div>
             <!-- Image & Venue Badge -->
             <div class="relative h-48 w-full overflow-hidden bg-zinc-100">
-              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+              <img src="${concert.image}" alt="${concert.artist}" loading="lazy" decoding="async" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10"></div>
               
               <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md border border-white/80 text-zinc-800 text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-sm">
@@ -2804,6 +2862,7 @@
           const artistMatches = artistSearch.data || [];
           const matchedArtist = artistMatches.find(result => normalizeArtistName(result.name) === requestedArtist) || artistMatches[0];
           if (!matchedArtist?.id) return [];
+          const artistImageUrl = matchedArtist.picture_xl || matchedArtist.picture_big || matchedArtist.picture_medium || matchedArtist.picture_small || '';
           const trackSearch = await requestDeezerJsonp(`https://api.deezer.com/artist/${matchedArtist.id}/top?limit=${maxPreviewTracks}`);
           const uniqueTracks = [];
           const seen = new Set();
@@ -2818,12 +2877,15 @@
               previewUrl: result.preview || '',
               streamUrl: result.preview || '',
               trackViewUrl: result.link || matchedArtist.link || '',
-              artworkUrl: result.album?.cover_medium || result.album?.cover_small || matchedArtist.picture_medium || '',
+              artworkUrl: upgradeArtworkUrl(result.album?.cover_xl || result.album?.cover_big || result.album?.cover_medium || result.album?.cover_small || artistImageUrl),
+              artistImageUrl: upgradeArtworkUrl(artistImageUrl),
               duration: Number(result.duration) || 30
             });
           });
           concert.previewAvailable = uniqueTracks.length >= 3;
           concert.previewTracks = uniqueTracks;
+          concert.artistImageUrl = upgradeArtworkUrl(artistImageUrl);
+          if (uniqueTracks.length) applyRelevantConcertArtwork(concert);
           return concert.previewTracks;
         } catch (error) {
           console.warn('Official artist preview unavailable', error);
@@ -3305,7 +3367,7 @@
 
       container.innerHTML = `
         <div class="flex items-start gap-4">
-          <img src="${concert.image}" alt="${concert.artist}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
+          <img src="${concert.image}" alt="${concert.artist}" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-24 h-24 rounded-lg object-cover border border-zinc-200">
           <div class="flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">${concert.genre}</span>
             <h3 class="text-xl font-bold text-zinc-950">${concert.artist}</h3>
@@ -3604,7 +3666,7 @@
 
         card.innerHTML = `
           <div class="flex items-center space-x-4">
-            <img src="${concert.image}" alt="${concert.artist}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
+            <img src="${concert.image}" alt="${concert.artist}" data-text-fallback="${concert.imageTextFallback || getConcertTextPlaceholder(concert)}" onerror="handleConcertImageError(this, '${concert.imageFallback || getConcertFallbackImage(concert)}')" class="w-16 h-16 rounded-lg object-cover border border-zinc-200">
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-indigo-600 font-mono">PASS ${t.ticketId}</span>
