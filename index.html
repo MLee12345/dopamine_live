@@ -157,11 +157,6 @@
       border-radius: 999px;
       background: linear-gradient(90deg, hsl(0, 88%, 56%), hsl(60, 88%, 56%), hsl(120, 88%, 46%), hsl(180, 88%, 48%), hsl(240, 88%, 58%), hsl(300, 88%, 58%), hsl(360, 88%, 56%));
     }
-    @media (min-width: 1024px) {
-      .ticket-workspace {
-        height: clamp(520px, calc(100vh - 205px), 590px);
-      }
-    }
 
     /* Standard sleek hover without infinite pulsing */
     .concert-card {
@@ -665,7 +660,7 @@
     </section>
 
     <!-- PAGE 3: FULL TICKET SELECTION PAGE -->
-    <section id="page-ticket-select" class="hidden space-y-2">
+    <section id="page-ticket-select" class="hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <button onclick="navigateTo('discover')" class="text-zinc-500 hover:text-indigo-700 text-xs flex items-center gap-1 mb-2">
@@ -679,9 +674,9 @@
         </div>
       </div>
 
-      <div class="ticket-workspace grid grid-cols-1 lg:grid-cols-[minmax(0,1.5fr)_minmax(430px,0.9fr)] gap-4 items-stretch">
-        <div class="bg-white border border-zinc-200 rounded-lg p-4 flex flex-col items-center justify-start h-auto lg:h-full shadow-sm">
-          <div class="w-full flex items-center justify-between mb-2">
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.45fr)_minmax(410px,0.9fr)] gap-4 items-stretch lg:min-h-[535px]">
+        <div class="bg-white border border-zinc-200 rounded-lg p-4 flex flex-col items-center justify-start h-auto lg:h-[535px] shadow-sm">
+          <div class="w-full flex items-center justify-between mb-3">
             <div class="text-sm font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-layer-group"></i> Venue Diagram
             </div>
@@ -707,8 +702,8 @@
           </div>
         </div>
 
-        <div class="flex flex-col space-y-3 h-auto lg:h-full">
-          <div class="bg-white border border-zinc-200 rounded-lg p-4 space-y-2.5 shadow-sm flex flex-col flex-1 min-h-0">
+        <div class="flex flex-col space-y-3 h-auto lg:h-[535px]">
+          <div class="bg-white border border-zinc-200 rounded-lg p-4 space-y-3 shadow-sm flex flex-col flex-1 min-h-0">
             <label class="text-sm font-semibold text-zinc-500 uppercase tracking-wider block">Choose Seating Section</label>
             <div id="sectionList" class="space-y-2 flex-1 min-h-0">
               <!-- Tier Options inserted via JS -->
@@ -1317,6 +1312,17 @@
       ['Steve Lacy', 'Gemini Rights Live', 'Rock'], ['Vampire Weekend', 'Only God Was Above Us', 'Rock'],
       ['Disclosure', 'Alchemy Nights', 'Electronic'], ['Jamie xx', 'In Waves Live', 'Electronic'],
       ['Beyoncé', 'Renaissance Revisited', 'Pop'], ['Bruno Mars', 'Moonshine Residency', 'Pop'],
+      ['Miley Cyrus', 'Endless Summer Vacation Live', 'Pop'], ['Shakira', 'Las Mujeres Ya No Lloran Tour', 'Pop'],
+      ['Rihanna', 'Diamonds Live', 'Pop'], ['Dua Lipa', 'Radical Optimism Live', 'Pop'],
+      ['Lady Gaga', 'Mayhem Ball', 'Pop'], ['Harry Styles', 'Love On Tour Encore', 'Pop'],
+      ['The Weeknd', 'After Hours Til Dawn', 'Pop'], ['Adele', 'Weekends Live', 'Pop'],
+      ['Justin Bieber', 'Justice Live', 'Pop'], ['Selena Gomez', 'Rare Night', 'Pop'],
+      ['Katy Perry', 'Lifetimes Tour', 'Pop'], ['Ed Sheeran', 'Mathematics Tour', 'Pop'],
+      ['Sam Smith', 'Gloria Live', 'Pop'], ['Usher', 'Past Present Future', 'R&B'],
+      ['Maroon 5', 'Sugar Nights', 'Pop'], ['Coldplay', 'Music Of The Spheres', 'Rock'],
+      ['Alicia Keys', 'Keys To The Summer', 'R&B'], ['SZA & Friends', 'Garden Party Live', 'R&B'],
+      ['J Balvin', 'Jose Live', 'Pop'], ['Maluma', 'Don Juan World Tour', 'Pop'],
+      ['Anitta', 'Funk Generation Live', 'Pop'], ['BLACKPINK', 'Born Pink Encore', 'Pop'],
       ['Metro Boomin', 'Heroes & Villains Live', 'Hip-Hop'], ['21 Savage', 'American Dream Tour', 'Hip-Hop'],
       ['Clairo', 'Charm Live', 'Rock'], ['Boygenius', 'The Record Encore', 'Rock'],
       ['ODESZA', 'Last Goodbye Finale', 'Electronic'], ['Calvin Harris', 'Summer Frequency', 'Electronic'],
@@ -3029,7 +3035,7 @@
         `
       };
       const curvedMapClass = ['msg', 'o2', 'hollywoodbowl'].includes(venue.id) ? 'venue-map-curved' : '';
-      const svgHtml = `<svg viewBox="0 0 300 200" class="w-full h-full max-w-[720px] ${curvedMapClass}">${layouts[venue.id] || layouts.sphere}</svg>`;
+      const svgHtml = `<svg viewBox="0 0 300 200" class="w-full h-full max-w-[620px] ${curvedMapClass}">${layouts[venue.id] || layouts.sphere}</svg>`;
 
       svgContainer.innerHTML = svgHtml;
       renderSectionLegend(venue);
@@ -3054,7 +3060,7 @@
         const item = document.createElement('div');
         const isSelected = state.selectedSection.id === sec.id;
         const isSoldOut = sec.seatsAvailable < 1;
-        item.className = `p-3 rounded-xl border transition-all cursor-pointer grid grid-cols-[4.25rem_1fr_4.75rem] items-center gap-3 ${
+        item.className = `p-2.5 rounded-xl border transition-all cursor-pointer grid grid-cols-[4rem_1fr_4.5rem] items-center gap-3 ${
           isSelected 
             ? 'bg-indigo-50 border-indigo-500 text-zinc-950'
             : isSoldOut ? 'bg-zinc-50 border-zinc-200 text-zinc-400 opacity-60' : 'bg-white border-zinc-200 text-zinc-600 hover:border-indigo-300'
@@ -3062,9 +3068,9 @@
         item.onclick = () => isSoldOut ? showToast('That section is sold out.', 'info') : selectSection(sec);
 
         item.innerHTML = `
-          <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-[4.25rem] h-12 rounded-lg object-cover border border-zinc-200 shrink-0">
+          <img src="${getSeatViewImage(venue, sec.id)}" alt="View from ${sec.name}" class="w-16 h-12 rounded-lg object-cover border border-zinc-200 shrink-0">
           <div class="text-center px-1">
-            <div class="text-[15px] font-bold text-zinc-950 leading-tight">${sec.name}</div>
+            <div class="text-sm font-bold text-zinc-950 leading-tight">${sec.name}</div>
             <div class="text-xs text-zinc-500 mt-0.5">${isSoldOut ? 'Sold out' : `${sec.seatsAvailable} passes available`}</div>
           </div>
           <div class="text-right">
