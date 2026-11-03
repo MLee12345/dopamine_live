@@ -1568,11 +1568,9 @@
     }
 
     function getRelevantConcertImage(concert) {
-      const uniqueArtistImages = getConcertArtistImages(concert);
-      if (shouldPreferArtistCardImage(concert) && uniqueArtistImages.length) {
-        return uniqueArtistImages[hashString(getConcertImageKey(concert)) % uniqueArtistImages.length];
-      }
-      return getConcertFallbackImage(concert);
+      return shouldPreferArtistCardImage(concert)
+        ? getArtistPerformanceImage(concert)
+        : getConcertFallbackImage(concert);
     }
 
     function getConcertArtistImages(concert) {
@@ -1584,12 +1582,18 @@
     }
 
     function getConcertImageFocus(concert) {
-      return shouldPreferArtistCardImage(concert) ? 'center 18%' : 'center center';
+      return 'center center';
     }
 
     function shouldPreferArtistCardImage(concert) {
-      if (!shouldUseArtistCardImage(concert) || !getConcertArtistImages(concert).length) return false;
+      if (!shouldUseArtistCardImage(concert)) return false;
       return hashString(getConcertImageKey(concert)) % 10 < 6;
+    }
+
+    function getArtistPerformanceImage(concert) {
+      const artistSlug = normalizeArtistName(concert?.artist || 'live concert').replace(/\s+/g, ',');
+      const lock = 3200 + (hashString(normalizeArtistName(concert?.artist || concert?.id)) % 60000);
+      return `https://loremflickr.com/1000/700/${artistSlug},concert,stage,performance?lock=${lock}`;
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -1784,7 +1788,7 @@
     applyCentsToCatalog();
 
     CONCERTS.forEach((concert, idx) => {
-      concert.image = getUniqueConcertImage(concert, concert.genre);
+      concert.image = getRelevantConcertImage(concert);
       concert.imageFallback = getConcertFallbackImage(concert);
       concert.imageTextFallback = getConcertTextPlaceholder(concert);
       concert.imageFocus = 'center center';
@@ -2000,6 +2004,7 @@
       heroFansTimer: null,
       heroFansCount: 18000,
       heroFansTarget: 18000,
+      heroFansPauseTicks: 0,
       preloadedImages: new Set(),
       artistPreviewCache: new Map()
     };
@@ -2796,14 +2801,21 @@
       updateHeroFansText();
       if (state.heroFansTimer) return;
       state.heroFansTimer = setInterval(() => {
+        if (state.heroFansPauseTicks > 0) {
+          state.heroFansPauseTicks -= 1;
+          return;
+        }
         if (Math.round(state.heroFansCount) === Math.round(state.heroFansTarget)) {
-          const drift = Math.floor(Math.random() * 121) - 55;
+          state.heroFansPauseTicks = 8 + Math.floor(Math.random() * 28);
+          const driftMagnitude = 1 + Math.floor(Math.random() * 2);
+          const drift = Math.random() > 0.5 ? driftMagnitude : -driftMagnitude;
           state.heroFansTarget = Math.max(12800, Math.min(28400, state.heroFansCount + drift));
+          return;
         }
         const direction = state.heroFansTarget > state.heroFansCount ? 1 : -1;
         state.heroFansCount += direction;
         updateHeroFansText();
-      }, 95);
+      }, 180);
     }
 
     function preloadImageUrl(url) {
