@@ -556,7 +556,7 @@
         <div class="relative z-10 max-w-5xl space-y-3">
           <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 px-3 py-1 rounded-md text-indigo-50 text-xs font-semibold">
             <span class="w-2 h-2 rounded-full bg-teal-300"></span>
-            <span>18,000 fans browsing right now</span>
+            <span id="heroFansText">18,000 ppl browsing right now</span>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
             Find Tickets That Fit Your Night.
@@ -1490,7 +1490,6 @@
     }
 
     function getConcertFallbackImage(concertOrKey) {
-      if (typeof concertOrKey === 'object' && concertOrKey) return getConcertStageIllustration(concertOrKey);
       const key = getConcertImageKey(concertOrKey);
       return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
@@ -1993,6 +1992,8 @@
       stageExpiryTimer: null,
       stageExpirySweepTimer: null,
       artworkRefreshTimer: null,
+      heroFansTimer: null,
+      heroFansCount: 18000,
       preloadedImages: new Set(),
       artistPreviewCache: new Map()
     };
@@ -2022,6 +2023,7 @@
       updateWalletUI();
       initStageVisualizer();
       startStageExpirySweep();
+      startHeroFansTicker();
       updateAccountUI();
       document.addEventListener('click', handleFilterOutsideClick);
       document.addEventListener('click', handleMerchDropdownOutsideClick);
@@ -2776,6 +2778,22 @@
       if (!button) return;
       button.classList.toggle('hidden', !state.searchTerm);
       button.classList.toggle('flex', Boolean(state.searchTerm));
+    }
+
+    function updateHeroFansText() {
+      const label = document.getElementById('heroFansText');
+      if (!label) return;
+      label.innerText = `${Math.round(state.heroFansCount).toLocaleString()} ppl browsing right now`;
+    }
+
+    function startHeroFansTicker() {
+      updateHeroFansText();
+      if (state.heroFansTimer) return;
+      state.heroFansTimer = setInterval(() => {
+        const drift = Math.floor(Math.random() * 321) - 145;
+        state.heroFansCount = Math.max(12800, Math.min(28400, state.heroFansCount + drift));
+        updateHeroFansText();
+      }, 3600);
     }
 
     function preloadImageUrl(url) {
