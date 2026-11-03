@@ -376,7 +376,6 @@
             <span class="w-1 h-2.5 rounded-full bg-white"></span>
             <span class="w-1 h-4 rounded-full bg-white"></span>
           </div>
-          <span class="absolute -right-1 -top-1 w-4 h-4 rounded-full bg-white/90 text-[9px] font-black text-indigo-700 grid place-items-center">D</span>
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-extrabold tracking-tight text-zinc-950 flex items-center gap-1">
@@ -1491,6 +1490,23 @@
       return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
 
+    function shouldUseArtistCardImage(concert) {
+      const artist = normalizeArtistName(concert?.artist);
+      const saferFallbackArtists = new Set([
+        '21 savage',
+        'asap rocky',
+        'bad bunny',
+        'doja cat',
+        'drake',
+        'ice spice',
+        'megan thee stallion',
+        'nicki minaj',
+        'travis scott',
+        'tyler the creator'
+      ]);
+      return artist && !saferFallbackArtists.has(artist);
+    }
+
     function escapeSvgText(value) {
       return String(value || '')
         .replace(/&/g, '&amp;')
@@ -1531,15 +1547,15 @@
     }
 
     function getRelevantConcertImage(concert) {
-      const artworks = (concert?.previewTracks || [])
-        .map(track => upgradeArtworkUrl(track.artworkUrl || track.artistImageUrl))
+      const artistImages = (concert?.previewTracks || [])
+        .map(track => upgradeArtworkUrl(track.artistImageUrl))
         .filter(Boolean);
-      if (concert?.artistImageUrl) artworks.push(upgradeArtworkUrl(concert.artistImageUrl));
-      const uniqueArtworks = [...new Set(artworks)];
-      if (uniqueArtworks.length) {
-        return uniqueArtworks[hashString(getConcertImageKey(concert)) % uniqueArtworks.length];
+      if (concert?.artistImageUrl) artistImages.push(upgradeArtworkUrl(concert.artistImageUrl));
+      const uniqueArtistImages = [...new Set(artistImages)];
+      if (shouldUseArtistCardImage(concert) && uniqueArtistImages.length) {
+        return uniqueArtistImages[hashString(getConcertImageKey(concert)) % uniqueArtistImages.length];
       }
-      return concert?.image || getUniqueConcertImage(concert, concert?.genre || 'concert');
+      return getConcertFallbackImage(concert);
     }
 
     function applyRelevantConcertArtwork(concert) {
@@ -2863,6 +2879,57 @@
         .trim();
     }
 
+    function addPreviewTrack(target, seen, track, maxPreviewTracks) {
+      const key = normalizeArtistName(track?.trackName);
+      if (!key || seen.has(key) || target.length >= maxPreviewTracks) return false;
+      if (!track.previewUrl && !track.streamUrl) return false;
+      seen.add(key);
+      target.push(track);
+      return true;
+    }
+
+    function getPrimaryArtistName(concert) {
+      return String(concert?.artist || '')
+        .replace(/\s+&\s+friends.*$/i, '')
+        .replace(/\s+and\s+friends.*$/i, '')
+        .trim();
+    }
+
+    function isTrackByConcertArtist(concert, artistName) {
+      const requestedArtist = normalizeArtistName(getPrimaryArtistName(concert));
+      const resultArtist = normalizeArtistName(artistName);
+      if (!requestedArtist || !resultArtist) return false;
+      return resultArtist === requestedArtist || resultArtist.startsWith(`${requestedArtist} `) || resultArtist.includes(` ${requestedArtist} `);
+    }
+
+    async function backfillItunesPreviewTracks(concert, target, seen, artistImageUrl, maxPreviewTracks) {
+      const artistQuery = getPrimaryArtistName(concert);
+      const searches = [
+        () => searchItunesPreviewSongs(artistQuery, 'artistTerm'),
+        () => searchItunesPreviewSongs(`${artistQuery} ${concert.tour}`)
+      ];
+
+      for (const runSearch of searches) {
+        if (target.length >= maxPreviewTracks) break;
+        const payload = await runSearch();
+        (payload.results || []).forEach(result => {
+          if (target.length >= maxPreviewTracks) return;
+          if (!isTrackByConcertArtist(concert, result.artistName) || result.trackExplicitness === 'explicit') return;
+          addPreviewTrack(target, seen, {
+            trackName: result.trackName,
+            artistName: result.artistName || concert.artist,
+            collectionName: result.collectionName || '',
+            previewUrl: result.previewUrl || '',
+            streamUrl: result.previewUrl || '',
+            trackViewUrl: result.trackViewUrl || result.artistViewUrl || '',
+            artworkUrl: upgradeArtworkUrl(artistImageUrl),
+            artistImageUrl: upgradeArtworkUrl(artistImageUrl),
+            duration: Math.max(30, Math.round(Number(result.trackTimeMillis || 30000) / 1000))
+          }, maxPreviewTracks);
+        });
+      }
+    }
+
     async function fetchArtistPreviewTracks(concert) {
       if (!concert || concert.rotating) return [];
       if (concert.previewTracks?.length >= 3) return concert.previewTracks;
@@ -2876,32 +2943,36 @@
 
       const request = (async () => {
         try {
-          const requestedArtist = normalizeArtistName(concert.artist);
-          const maxPreviewTracks = 12;
-          const artistSearch = await requestDeezerJsonp(`https://api.deezer.com/search/artist?q=${encodeURIComponent(concert.artist)}&limit=8`);
+          const artistQuery = getPrimaryArtistName(concert);
+          const requestedArtist = normalizeArtistName(artistQuery);
+          const maxPreviewTracks = 24;
+          const artistSearch = await requestDeezerJsonp(`https://api.deezer.com/search/artist?q=${encodeURIComponent(artistQuery)}&limit=8`);
           const artistMatches = artistSearch.data || [];
           const matchedArtist = artistMatches.find(result => normalizeArtistName(result.name) === requestedArtist) || artistMatches[0];
-          if (!matchedArtist?.id) return [];
-          const artistImageUrl = matchedArtist.picture_xl || matchedArtist.picture_big || matchedArtist.picture_medium || matchedArtist.picture_small || '';
-          const trackSearch = await requestDeezerJsonp(`https://api.deezer.com/artist/${matchedArtist.id}/top?limit=${maxPreviewTracks}`);
+          const artistImageUrl = matchedArtist ? matchedArtist.picture_xl || matchedArtist.picture_big || matchedArtist.picture_medium || matchedArtist.picture_small || '' : '';
           const uniqueTracks = [];
           const seen = new Set();
-          (trackSearch.data || []).forEach(result => {
-            const key = normalizeArtistName(result.title);
-            if (!key || seen.has(key) || uniqueTracks.length >= maxPreviewTracks) return;
-            seen.add(key);
-            uniqueTracks.push({
-              trackName: result.title,
-              artistName: result.artist?.name || matchedArtist.name || concert.artist,
-              collectionName: result.album?.title || '',
-              previewUrl: result.preview || '',
-              streamUrl: result.preview || '',
-              trackViewUrl: result.link || matchedArtist.link || '',
-              artworkUrl: upgradeArtworkUrl(result.album?.cover_xl || result.album?.cover_big || result.album?.cover_medium || result.album?.cover_small || artistImageUrl),
-              artistImageUrl: upgradeArtworkUrl(artistImageUrl),
-              duration: Number(result.duration) || 30
+          if (matchedArtist?.id) {
+            const trackSearch = await requestDeezerJsonp(`https://api.deezer.com/artist/${matchedArtist.id}/top?limit=${maxPreviewTracks}`);
+            (trackSearch.data || []).forEach(result => {
+              if (result.explicit_lyrics) return;
+              if (!isTrackByConcertArtist(concert, result.artist?.name || matchedArtist.name || concert.artist)) return;
+              addPreviewTrack(uniqueTracks, seen, {
+                trackName: result.title,
+                artistName: result.artist?.name || matchedArtist.name || concert.artist,
+                collectionName: result.album?.title || '',
+                previewUrl: result.preview || '',
+                streamUrl: result.preview || '',
+                trackViewUrl: result.link || matchedArtist.link || '',
+                artworkUrl: upgradeArtworkUrl(artistImageUrl),
+                artistImageUrl: upgradeArtworkUrl(artistImageUrl),
+                duration: Number(result.duration) || 30
+              }, maxPreviewTracks);
             });
-          });
+          }
+          if (uniqueTracks.length < maxPreviewTracks) {
+            await backfillItunesPreviewTracks(concert, uniqueTracks, seen, artistImageUrl, maxPreviewTracks);
+          }
           concert.previewAvailable = uniqueTracks.length >= 3;
           concert.previewTracks = uniqueTracks;
           concert.artistImageUrl = upgradeArtworkUrl(artistImageUrl);
@@ -3008,7 +3079,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             ${previewTracks.map((track, idx) => `
               <button onclick="previewTicketTrack(${idx})" data-preview-button data-preview-index="${idx}" class="min-w-0 flex items-center gap-2 bg-zinc-50 border border-zinc-200 hover:border-indigo-400 rounded-lg p-2 text-left">
-                <img src="${escapeHtml(track.artworkUrl)}" alt="" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
+                <img src="${escapeHtml(track.artistImageUrl || track.artworkUrl || concert.image)}" alt="" class="w-9 h-9 rounded-md object-cover bg-zinc-200 shrink-0">
                 <span class="min-w-0 flex-1">
                   <span class="block text-xs font-bold text-zinc-800 truncate">${escapeHtml(track.trackName)}</span>
                   <span class="block text-[10px] text-zinc-500 truncate"><i data-preview-icon="${idx}" class="fa-solid fa-play mr-1"></i>30-sec preview</span>
