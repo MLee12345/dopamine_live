@@ -556,10 +556,10 @@
         <div class="relative z-10 max-w-5xl space-y-3">
           <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 px-3 py-1 rounded-md text-indigo-50 text-xs font-semibold">
             <span class="w-2 h-2 rounded-full bg-teal-300"></span>
-            <span>500 events • seat views • saved wallet</span>
+            <span>18,000 fans browsing right now</span>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Find Tickets <span class="text-teal-200">That Fit Your Night.</span>
+            Find Tickets That Fit Your Night.
           </h1>
           <p class="text-indigo-100 text-[clamp(0.72rem,1.35vw,1rem)] whitespace-nowrap font-normal">
             Search by city, date, and price, then preview seats and songs before checkout.
@@ -1490,6 +1490,7 @@
     }
 
     function getConcertFallbackImage(concertOrKey) {
+      if (typeof concertOrKey === 'object' && concertOrKey) return getConcertStageIllustration(concertOrKey);
       const key = getConcertImageKey(concertOrKey);
       return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
@@ -1520,25 +1521,42 @@
     }
 
     function getConcertTextPlaceholder(concert) {
+      return getConcertStageIllustration(concert);
+    }
+
+    function getConcertStageIllustration(concert) {
       const seed = hashString(getConcertImageKey(concert));
       const hue = seed % 360;
       const accentHue = (hue + 135) % 360;
+      const lightHue = (hue + 58) % 360;
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700">
         <defs>
           <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop stop-color="hsl(${hue}, 70%, 16%)"/><stop offset=".52" stop-color="hsl(${accentHue}, 74%, 42%)"/><stop offset="1" stop-color="#16c784"/>
+            <stop stop-color="hsl(${hue}, 70%, 12%)"/><stop offset=".55" stop-color="hsl(${accentHue}, 72%, 28%)"/><stop offset="1" stop-color="#051014"/>
           </linearGradient>
-          <radialGradient id="spot" cx=".5" cy=".2" r=".7"><stop stop-color="rgba(255,255,255,.28)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <radialGradient id="spot" cx=".5" cy=".12" r=".8"><stop stop-color="rgba(255,255,255,.28)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient>
+          <linearGradient id="beamA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="hsla(${lightHue}, 95%, 72%, .62)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></linearGradient>
+          <linearGradient id="beamB" x1="1" y1="0" x2="0" y2="1"><stop stop-color="rgba(255,255,255,.5)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></linearGradient>
         </defs>
         <rect width="1000" height="700" fill="url(#bg)"/>
         <rect width="1000" height="700" fill="url(#spot)"/>
-        <path d="M115 540c155-125 615-125 770 0" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="32" stroke-linecap="round"/>
-        <path d="M170 582c135-65 525-65 660 0" fill="none" stroke="rgba(15,16,33,.38)" stroke-width="24" stroke-linecap="round"/>
-        <circle cx="230" cy="205" r="58" fill="rgba(255,255,255,.18)"/><circle cx="770" cy="205" r="58" fill="rgba(255,255,255,.18)"/>
-        <rect x="105" y="88" width="790" height="84" rx="42" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.28)"/>
-        <circle cx="500" cy="355" r="95" fill="rgba(255,255,255,.16)"/>
-        <path d="M450 420h100l38 88H412z" fill="rgba(255,255,255,.2)"/>
-        <path d="M315 495c75-55 295-55 370 0" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="18" stroke-linecap="round"/>
+        <path d="M95 90 455 470 350 700 0 700 0 0z" fill="url(#beamA)"/>
+        <path d="M905 90 545 470 650 700 1000 700 1000 0z" fill="url(#beamB)"/>
+        <ellipse cx="500" cy="536" rx="360" ry="86" fill="rgba(0,0,0,.4)"/>
+        <rect x="115" y="515" width="770" height="52" rx="26" fill="rgba(255,255,255,.14)"/>
+        <circle cx="500" cy="278" r="48" fill="rgba(255,255,255,.84)"/>
+        <path d="M456 340c24-20 64-20 88 0l33 115H423z" fill="rgba(255,255,255,.82)"/>
+        <path d="M455 368 340 300" stroke="rgba(255,255,255,.76)" stroke-width="24" stroke-linecap="round"/>
+        <path d="M545 370 645 292" stroke="rgba(255,255,255,.76)" stroke-width="24" stroke-linecap="round"/>
+        <path d="M610 256h86" stroke="rgba(255,255,255,.8)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="708" cy="256" r="18" fill="rgba(255,255,255,.78)"/>
+        <path d="M170 608c70-64 590-64 660 0" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="24" stroke-linecap="round"/>
+        <path d="M120 655c95-80 665-80 760 0" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="32" stroke-linecap="round"/>
+        ${Array.from({ length: 18 }, (_, idx) => {
+          const x = 90 + idx * 48 + (idx % 2) * 12;
+          const y = 604 + (idx % 3) * 24;
+          return `<circle cx="${x}" cy="${y}" r="${14 + (idx % 2) * 4}" fill="rgba(8,10,18,.72)"/>`;
+        }).join('')}
       </svg>`;
       return `data:image/svg+xml,${encodeURIComponent(svg)}`;
     }
