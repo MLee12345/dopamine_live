@@ -477,63 +477,83 @@
     </section>
 
     <!-- PAGE 0B: ABOUT / PRIVACY -->
-    <section id="page-about" class="hidden h-[calc(100vh-176px)] min-h-0 overflow-hidden">
-      <div class="h-full bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden grid grid-rows-[auto_1fr]">
-        <div class="p-5 border-b border-zinc-200 flex items-center justify-between gap-4">
-          <div>
-            <button onclick="navigateTo('discover')" class="text-zinc-500 hover:text-indigo-700 text-xs flex items-center gap-1 mb-2">
-              <i class="fa-solid fa-arrow-left"></i> Back
-            </button>
-            <h1 class="text-2xl font-black text-zinc-950">About DopamineLive</h1>
-            <p class="text-sm text-zinc-500">A simulated ticket, wallet, and merch marketplace for high-demand live events.</p>
-          </div>
-          <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-            <i class="fa-solid fa-circle-info"></i> Demo only. No real money is spent.
-          </div>
+    <section id="page-about" class="hidden">
+      <article class="bg-white border border-zinc-300 rounded-none shadow-none text-zinc-950">
+        <header class="p-6 sm:p-8 border-b border-zinc-300">
+          <button onclick="navigateTo('discover')" class="text-zinc-950 hover:underline text-xs font-bold mb-6">
+            Back
+          </button>
+          <p class="text-xs font-bold uppercase tracking-[0.24em] mb-3">DopamineLive Information Statement</p>
+          <h1 class="text-3xl sm:text-4xl font-black tracking-tight">About DopamineLive</h1>
+          <p class="mt-4 text-base leading-7 max-w-5xl">DopamineLive is a browser-based simulation of a ticket discovery, checkout, virtual wallet, rewards, stage, and merchandise experience. It is intended for demonstration, playtesting, and interface review. It is not a ticket broker, payment processor, concert promoter, venue operator, merchandise seller, financial product, or resale marketplace.</p>
+        </header>
+
+        <div class="p-6 sm:p-8 space-y-8 text-sm leading-7">
+          <section class="border-b border-zinc-300 pb-6">
+            <h2 class="text-xl font-black mb-3">TL;DR</h2>
+            <p>DopamineLive is a local simulation. No real money is spent. No real tickets are purchased. No real venue inventory is reserved. Demo accounts, wallet amounts, virtual tickets, virtual merch, checkout timers, daily wheel outcomes, queue progress, stage access, and profile history exist only for this prototype experience and may be stored on this device so the app can remember what happened between reloads.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">1. Nature of the Service</h2>
+            <p>The site presents an entertainment-focused prototype that imitates parts of a live-event shopping flow. The interface may display concerts, venue names, seating sections, ticket quantities, price-like values, tax-like values, urgency messages, wallet balances, discount wheels, merchandise selections, queue status, stage playback screens, and profile history. Those elements are provided to make the experience feel realistic, but they do not create a commercial transaction.</p>
+            <p>All checkout flows in this prototype are simulated. Holding to buy, confirming tickets, selecting merchandise, spinning a wheel, joining a line, reaching the front of a line, changing a wallet balance, receiving a discount, or seeing a low-inventory message does not result in a charge, shipment, reservation, admission right, membership right, or transfer of goods.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">2. No Real Purchases or Payments</h2>
+            <p>No payment processor is contacted by the local prototype. No credit card, bank account, payment wallet, or real account balance is used. Any displayed dollar amount, cents amount, subtotal, tax, fee, discount, credit, cart total, wallet reduction, or insufficient-funds warning is a simulated value used inside the app interface.</p>
+            <p>References to buying, checkout, charges, savings, discounts, free tickets, free merch, wallet drops, and daily deals are part of the demo language. They should be read as interaction labels rather than real purchase terms. No real money is spent anywhere in the DopamineLive prototype.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">3. Local Storage and Persistence</h2>
+            <p>The app may use browser local storage to remember demo state on this device. Stored state may include account names, demo passwords, guest-session markers, display names, city text, virtual wallet balances, selected concerts, virtual passes, attended-show history, merchandise collected, cart contents, queue progress, daily wheel usage, daily deal values, stage-session timing, and reset status.</p>
+            <p>This local persistence is used so reloading the page does not immediately erase the demo experience. Clearing browser storage, using a different browser, using a different device, resetting account data from the footer, or changing local storage manually may remove some or all saved prototype data.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">4. Account and Guest Separation</h2>
+            <p>Guest mode and member mode are intended to remain separate. A guest session is not meant to share its ticket wallet, saved cart, daily deal, virtual merch, or profile history with a named member account. Each member username is intended to maintain its own saved demo state on the device.</p>
+            <p>Because this is a local prototype, account credentials are not a secure authentication system. The username and password flow exists to test onboarding, error states, unique-name behavior, persistence, and profile editing. It should not be used with a real password or any secret that matters outside this app.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">5. Concert Listings, Images, Music, and Venue Data</h2>
+            <p>Concert listings are used for demo browsing and may combine seeded catalog data, rotating dates, simulated inventory, venue-like seating sections, third-party image URLs, and music preview metadata. Images and preview availability can depend on browser loading behavior, network availability, source permissions, and third-party service responses.</p>
+            <p>Venue layouts, capacities, section labels, seat views, music previews, artist names, dates, and prices are presented as prototype content. They should not be relied on as official event information. Real event availability, price, seating, artist schedule, venue access, and merchandise availability must be verified through official ticketing, venue, artist, or marketplace sources.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">6. Simulated Scarcity and Timing</h2>
+            <p>The app may show queue movement, low-ticket notices, inventory changes, checkout timers, hold-to-confirm controls, declining quantities, sold-out-adjacent warnings, and stage expiration. These are interaction mechanics for testing urgency and flow. They are not signals of real-world supply, demand, or purchase pressure.</p>
+            <p>Timers may continue across navigation or reloads when the app stores session timing locally. A virtual ticket may move out of the ticket wallet after a simulated stage session has elapsed. This behavior is part of the product concept and does not represent an actual event attendance record.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">7. Profile, History, and Reset Controls</h2>
+            <p>The profile area may display concerts attended, ticket history, and merchandise collected. These records are virtual and are based on actions taken inside the app. A concert appearing in the profile does not mean the user attended a real show. A merch item appearing in the profile does not mean the item was purchased, shipped, owned, licensed, or transferred.</p>
+            <p>The Reset Account control is intended to delete the active guest or member demo data while keeping the current account session open. Resetting may remove virtual tickets, virtual merch, wallet changes, carts, wheel deals, and profile records associated with the active storage scope. Logging out returns the user to the starting page.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">8. Data Control and Browser Responsibility</h2>
+            <p>Users can edit certain profile fields in the profile area when signed in. Users can also clear app data using the built-in reset control or browser storage tools. Browser-level controls may remove all local prototype data, including both guest and member states, depending on what storage is cleared.</p>
+            <p>Because storage is local to the browser environment, DopamineLive cannot guarantee that data will persist after cache clearing, private-browsing sessions, storage quotas, browser resets, device changes, file moves, development changes, or manual edits to storage. The app is built for prototype continuity, not permanent recordkeeping.</p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-black">9. Limitations and Disclaimers</h2>
+            <p>The prototype may include bugs, incomplete content, delayed images, unavailable previews, inconsistent third-party media, browser-specific behavior, and local-state edge cases. It should be tested as an interactive demo, not treated as a production service. Nothing on the page should be interpreted as a guarantee of event availability, ticket validity, artist participation, venue access, merchandise quality, legal terms, or consumer rights.</p>
+            <p>DopamineLive is provided for demonstration and evaluation only. The safest interpretation of every ticket, queue, wallet, reward, merch, and stage feature is that it is simulated unless clearly connected to a real, external service by a separate official provider.</p>
+          </section>
+
+          <section class="space-y-3 border-t border-zinc-300 pt-6">
+            <h2 class="text-xl font-black">10. Plain-English Summary</h2>
+            <p>This app is a realistic-looking demo. It tries to feel like browsing shows, choosing seats, checking out, collecting merch, and entering a concert stage. The money is not real. The tickets are not real. The merch is not real. The urgency is not real. The saved history is local demo history. Use it to test the experience, not to buy anything.</p>
+          </section>
         </div>
-        <div class="min-h-0 grid grid-rows-[auto_1fr]">
-          <div class="bg-indigo-700 p-5 text-white border-b border-indigo-500">
-            <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-              <div class="lg:w-[42%]">
-                <div class="text-xs font-black uppercase tracking-wider text-emerald-200 mb-2">TL;DR</div>
-                <p class="text-sm leading-relaxed text-indigo-50">DopamineLive is a local simulation. It stores demo account names, virtual tickets, virtual merch, wallet balance, and profile history on this device so the experience can persist between reloads.</p>
-              </div>
-              <div class="grid grid-cols-3 gap-2 flex-1 text-center">
-                <div class="rounded-xl bg-white/10 border border-white/15 p-3"><i class="fa-solid fa-ticket text-emerald-200"></i><div class="text-[10px] font-bold mt-1">Fake tickets</div></div>
-                <div class="rounded-xl bg-white/10 border border-white/15 p-3"><i class="fa-solid fa-wallet text-emerald-200"></i><div class="text-[10px] font-bold mt-1">Fake wallet</div></div>
-                <div class="rounded-xl bg-white/10 border border-white/15 p-3"><i class="fa-solid fa-lock text-emerald-200"></i><div class="text-[10px] font-bold mt-1">Local data</div></div>
-              </div>
-              <div class="lg:w-[26%] rounded-2xl bg-emerald-300 text-zinc-950 p-4 text-sm font-black">Purchases, discounts, queues, wallet charges, and checkout timers are all simulated. No external checkout occurs.</div>
-            </div>
-          </div>
-          <div class="min-h-0 overflow-y-auto p-5 space-y-4 text-sm text-zinc-600">
-            <section class="space-y-2">
-              <h2 class="text-lg font-black text-zinc-950">Privacy Details</h2>
-              <p>DopamineLive keeps this prototype self-contained. The app uses your browser's local storage to remember the current account, guest session, saved virtual passes, merch cart state, profile history, wallet balance, and daily wheel status.</p>
-            </section>
-            <section class="space-y-2">
-              <h3 class="font-black text-zinc-950">Account and Guest Separation</h3>
-              <p>Guest mode and member mode use separate storage areas. A guest wallet, pass list, merch history, and deal state are not shared with a signed-in member account, and each username gets its own saved demo data.</p>
-            </section>
-            <section class="space-y-2">
-              <h3 class="font-black text-zinc-950">What Is Stored</h3>
-              <p>The app may store your demo username, demo password, editable display city, simulated ticket wallet, concerts attended, merch collected, saved cart data, virtual wallet amount, and active daily deal. This information stays on this device.</p>
-            </section>
-            <section class="space-y-2">
-              <h3 class="font-black text-zinc-950">What Is Not Happening</h3>
-              <p>No payment processor is contacted, no real tickets are issued, no venue inventory is reserved, and no real money is transferred. Checkout screens, scarcity warnings, queue progress, rewards, and taxes are interface simulations.</p>
-            </section>
-            <section class="space-y-2">
-              <h3 class="font-black text-zinc-950">Reset and Logout</h3>
-              <p>Logout returns you to the starting screen while keeping that account's local demo data. Reset Account deletes the current guest or member account's saved demo tickets, merch history, cart, wallet, and daily deal while keeping the account session open.</p>
-            </section>
-            <section class="space-y-2">
-              <h3 class="font-black text-zinc-950">Control</h3>
-              <p>You can change your profile name and city from the profile area when signed in. You can also reset the active session's data from the footer. Browser storage controls can clear all local prototype data from the device.</p>
-            </section>
-          </div>
-        </div>
-      </div>
+      </article>
     </section>
 
     <!-- PAGE 1: DISCOVER / CONCERT CATALOGUE -->
