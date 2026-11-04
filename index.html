@@ -975,20 +975,24 @@
         </button>
       </div>
       <div class="p-6 space-y-5">
+        <div id="walletModalNotice" class="hidden rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-3 text-sm font-bold text-emerald-100"></div>
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
           <div class="text-xs text-zinc-500 uppercase font-bold">Balance</div>
           <div id="walletModalBalance" class="text-4xl font-extrabold text-white">$0</div>
           <div class="text-xs text-zinc-500 mt-1"><span id="siteTimeText">0:00</span> on site. Wallet gets $5.00 every 45 seconds.</div>
         </div>
         <div class="grid grid-cols-4 gap-2">
-          <button onclick="addWalletMoney(10)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$10.00</button>
-          <button onclick="addWalletMoney(25)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$25.00</button>
-          <button onclick="addWalletMoney(50)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$50.00</button>
-          <button onclick="addWalletMoney(100)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">$100.00</button>
+          <button onclick="addWalletMoney(10)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">+$10.00</button>
+          <button onclick="addWalletMoney(25)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">+$25.00</button>
+          <button onclick="addWalletMoney(50)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">+$50.00</button>
+          <button onclick="addWalletMoney(100)" class="min-h-11 py-2 bg-zinc-100 text-zinc-950 rounded-md text-xs font-bold">+$100.00</button>
         </div>
         <div class="flex gap-2">
           <input id="customWalletAmount" type="number" min="0.01" step="0.01" placeholder="Custom amount" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500">
-          <button onclick="addCustomWalletMoney()" class="min-h-11 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg text-sm font-bold">Add custom</button>
+          <button onclick="addCustomWalletMoney()" class="min-h-11 px-4 py-2 bg-white hover:bg-zinc-100 text-zinc-950 rounded-lg text-sm font-bold">+ Custom</button>
+        </div>
+        <div class="flex justify-end">
+          <button onclick="closeWalletModal()" class="min-h-11 px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg text-sm font-black">Save</button>
         </div>
       </div>
     </div>
@@ -3511,6 +3515,15 @@
         priceEach: state.selectedSection.price
       };
 
+      const payment = calculateTicketPayment();
+      if (!ensureWalletCanCover(payment.finalTotal, {
+        context: 'tickets',
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and press Confirm Tickets again.`
+      })) {
+        state.pendingCheckout = null;
+        return;
+      }
+
       startReservationTimer();
       navigateTo('checkout');
     }
@@ -3702,11 +3715,11 @@
       updateWalletUI();
     }
 
-    function ensureWalletCanCover(total) {
+    function ensureWalletCanCover(total, options = {}) {
       if (state.walletBalance >= total) return true;
       const shortfall = Math.max(0, total - state.walletBalance);
       showToast(`Add ${formatMoney(shortfall)} more to your wallet to complete this purchase.`, 'info');
-      openWalletModal();
+      openWalletModal(options.message || `Add ${formatMoney(shortfall)} more to your wallet to complete this purchase.`);
       return false;
     }
 
@@ -5086,12 +5099,19 @@
       if (!quiet) showToast(`${formatMoney(amount)} added to wallet.`, 'success');
     }
 
-    function openWalletModal() {
+    function openWalletModal(message = '') {
       updateWalletUI();
+      const notice = document.getElementById('walletModalNotice');
+      if (notice) {
+        notice.innerText = message;
+        notice.classList.toggle('hidden', !message);
+      }
       document.getElementById('walletModal').classList.remove('hidden');
     }
 
     function closeWalletModal() {
+      const notice = document.getElementById('walletModalNotice');
+      if (notice) notice.classList.add('hidden');
       document.getElementById('walletModal').classList.add('hidden');
     }
 
