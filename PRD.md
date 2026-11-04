@@ -1,130 +1,83 @@
-# Product Requirements Document (PRD)
+# Product Requirements Document
 
-**Project Name:** Live Music Dopamine Simulator  
+**Project Name:** DopamineLive  
 **Version:** 1.0  
 **Status:** Approved  
-**Target Platform:** Desktop-First Web Application  
+**Target Platform:** Responsive, desktop-first single-page web app  
 
 ---
 
-## 1. User Persona & Strategic Intent
+## Who It's For
 
-* **Target User:** Live music fans seeking the thrill of discovering real artists, securing ticket drops, and purchasing tour merchandise.
-* **Core Intent:** Deliver a desktop-first, zero-risk, high-satisfaction "dopamine simulator" that recreates the emotional highs of concert drops, ticket purchases, and merch queues with virtual money, simulated fees, and no real-world financial transaction.
+DopamineLive is for live music fans who enjoy the rush of finding a good show, choosing seats, claiming a ticket, entering a virtual stage, and grabbing artist merch without spending real money or risking a real checkout.
 
----
+The primary user is a fan who wants a fast, low-stakes version of high-demand ticketing: search artists and venues, filter by city/date/price, preview seats and tracks, use a virtual wallet, and keep a personal history of virtual tickets, concerts attended, and merch collected.
 
-## 2. Problem Statement & Solutions
-
-| Real-World Pain Point | Dopamine Simulator Solution |
-| :--- | :--- |
-| **Ticketing Anxiety & Scalper Bots:** Dynamic surge pricing, instant sell-outs, and checkout errors. | **Simulated Checkout & Guaranteed Access:** Simulated ticket prices, visible virtual fees and tax, timed seat holds, and ticket claiming through the virtual wallet. |
-| **Merch Queue Friction:** Long physical lines at venue merch booths where desired sizes and limited items sell out quickly. | **Gamified Tap Queue:** Low-friction crowd-navigation tap game engineered with high win rates so users consistently reach the table. |
-| **Financial Stress:** High financial barrier to entry for tickets, fees, and apparel. | **Simulated Economy:** Seeded virtual wallet, preset top-ups, custom top-ups, site-time rewards, and daily deal spins with no real payment processing. |
+The experience supports both guest users and lightweight demo accounts. Guest and member sessions stay separate, and their saved passes, wallet balance, merch carts, profile history, and daily deal state persist locally in the browser.
 
 ---
 
-## 3. Feature Architecture & Capabilities
+## Design Claim
 
-### 3.1 Ticket Intelligence Engine
-* **Dynamic Price Drop Alerts:** Simulates real-time price fluctuations across secondary and venue ticket markets, triggering visual price-drop badges.
-* **Presale & Drop Tracker:** Interactive calendar counters and notifications alerting users to upcoming fictional tour presales and venue drops.
-* **Seat Selection Support:** Venue diagrams, section availability, preview images, and clear per-section pricing help users choose seats before checkout.
+DopamineLive turns the stressful parts of ticketing and merch drops into a satisfying simulation: the interface should feel like a real live-event marketplace, but every high-pressure moment is softened into a clear, reversible, local-only interaction.
 
-### 3.2 Concert & Merch Experience Hub
-* **Event-Day Activation Mode:** Dedicated top-level interface mode that activates on show day or when triggered manually by the user.
-* **Integrated Artist Audio Experience:** Automatic playback of authentic audio tracks, top hits, and live previews from the selected real-world artist.
-* **Interactive Merch Catalog:** Previews of tour-exclusive apparel, accessories, posters, and limited variants with full size selections.
-* **Gamified Queue Gateway:** Light crowd-navigation tap mini-game allowing users to move through the venue crowd and access the merch booth.
+The product should balance two moods:
+
+- A clean marketplace for discovery, filters, seat maps, ticket review, and wallet visibility.
+- A darker, high-energy concert layer for stage entry, playlist playback, visualizer controls, merch queue progress, and hold-to-confirm checkout moments.
+
+The user should always understand that this is a demo. The site can use convincing patterns such as seat holds, checkout timers, verified-fan labels, limited stock, daily deals, and crowd activity, but it must clearly remain a virtual ticket, wallet, merch, and concert simulator.
 
 ---
 
-## 4. Data Model & Input Requirements
+## Three Must-Haves
 
-* **Embedded Artist & Audio Database:** An extensive, self-contained local database containing authentic artist metadata, track titles, album artwork, and audio clips—eliminating external API dependencies.
-* **Procedural Concert Generator:** System engine that pre-populates fictional tour dates, virtual venue seat maps, simulated pricing models, and virtual merch catalogs.
-* **User Preference Mapping:** Guest and member profiles store local ticket, merch, wallet, and profile history separately.
-* **Simulated Wallet Engine:** Tracks virtual funds, starts with a small seeded balance, and supports preset top-ups, custom top-ups, site-time rewards, and deal-wheel bonuses.
+### 1. Discover and Claim Virtual Tickets
 
----
+Users must be able to browse a large simulated live-event catalog, search by artist/venue/city, filter by location/date/price, sort results, and open a show detail flow.
 
-## 5. End-to-End User Workflows
+The ticket flow must include:
 
-### Flow 1: Setup & Customization
-1. User opens the desktop app and browses the pre-loaded artist database.
-2. User selects favorite artists to populate their custom tour schedule.
-3. User can add virtual wallet funds through preset amounts, custom amounts, site-time rewards, or the daily deal wheel.
+- Artist, venue, city, date, price, and event imagery.
+- A seat map with selectable venue sections and per-section pricing.
+- Ticket quantity controls and a clear calculated total.
+- A checkout review with a visible 20-second seat hold.
+- A "press and hold to buy" action that adds the ticket to the user's virtual ticket wallet.
 
-### Flow 2: Ticket Procurement
-1. User monitors upcoming show drops and evaluates real-time price-drop indicators.
-2. User selects seats using the venue map, section availability, preview images, and prices.
-3. User completes a simulated paid checkout with virtual wallet funds and receives a digital ticket stub.
+### 2. Keep a Persistent Local Simulation
 
-### Flow 3: Concert & Merch Experience (The Dopamine Loop)
-1. User observes the locked door state or activates the **Speed Up Time** button to fast-forward to showtime immediately.
-2. At showtime, the ticket switches to a ready state until the user clicks **"Enter Concert"**.
-3. Upon entering Concert Mode, audio playback begins automatically with real artist tracks.
-4. User plays a low-friction crowd-navigation tap game with guaranteed high success rates to reach the merch booth.
-5. User selects apparel, chooses sizes, completes instant checkout, and adds items to their persistent digital collection.
+Users must be able to use DopamineLive without a backend or real payment flow. All prototype state should be saved on the device with browser storage.
 
----
+The local simulation must persist:
 
-## 6. System Constraints & Operational Policy
+- Current guest or demo-account session.
+- Virtual wallet balance, custom top-ups, timed wallet rewards, and daily wheel deal state.
+- Saved tickets and ticket badge counts.
+- Saved merch carts, merch purchases, and concert attendance history.
+- Editable member profile name and city.
 
-* **Platform Target:** Desktop-first web application optimized for widescreen desktop viewports and browser layouts.
-* **Non-Transactional Boundary:** Zero real currency processing, payment gateways, or live e-commerce integrations.
-* **Zero API Dependencies:** Fully offline-capable local dataset for media, artist metadata, and store inventory.
-* **Positive Game Mechanics:** Queue logic engineered specifically to prevent punishing failure states and maximize user satisfaction.
+Resetting an account must clear only the current guest or member session's saved demo data while keeping the prototype usable.
 
----
+### 3. Enter the Stage and Buy Virtual Merch
 
-## 7. Interface Requirements & Visual Theme
+After claiming a ticket, users must be able to manage passes from the ticket wallet and enter a virtual stage when the show is ready.
 
-* **Clean Ticket Marketplace Theme:** Light marketplace pages for browsing and checkout, with darker high-energy surfaces for account entry, concert mode, wallet, deals, and merch moments.
-* **Muted Music Accents:** Indigo, emerald, and violet highlights with subtle audio visualizer animations, avoiding harsh neon flashing.
-* **Top Header Navigation:** Global header displaying artist search on larger screens, deal wheel access, wallet balance, digital ticket wallet, and profile access.
-* **Dashboard & Concert Hub:** Grid-based event layouts, dedicated audio playback controls, **Speed Up Time** trigger, **Enter Concert** action cards, and merch access from saved tickets or the stage.
+The stage and merch loop must include:
+
+- A live-stage view with artist and venue context.
+- Playlist controls, play/pause behavior, viewer-count ambience, fullscreen stage mode, and visualizer color controls.
+- A merch queue interaction that moves the user to the front through a low-friction tap/progress mechanic.
+- A merch shop with item imagery, size/color options where applicable, quantity controls, scarcity messaging, cart totals, and a 20-second booth checkout.
+- A "press and hold to confirm" merch purchase that deducts from the virtual wallet and records the merch in profile history.
 
 ---
 
-## 8. Technical Constraints & State Persistence
+## What We're Not Doing
 
-### 8.1 Auto-Save & Full Persistence Across Reloads
-All user state—including remaining wallet balance, guest/member account data, secured tickets, purchased merch collection, daily deal state, and active concert door state—is continuously persisted in browser storage (`localStorage` / `IndexedDB`). Page reloads or session restarts restore exact user progress seamlessly.
+DopamineLive is not issuing real tickets, reserving venue inventory, processing real payments, or contacting payment processors. Any card labels, fees, taxes, verified checkout language, stock warnings, queue movement, and ticket holds are interface simulations.
 
-### 8.2 Technical Architecture
-* **Single Page Application (SPA):** Built as a client-side web application operating without backend dependencies.
-* **HTML5 Audio API:** Handles local audio clip streaming, track playback controls, and volume synchronization.
-* **Clock State Engine:** Centralized simulation clock that tracks event timers, fast-forward multipliers, and transition states.
+DopamineLive is not building a backend account system. Demo usernames, passwords, wallet balances, passes, profile history, and carts stay in local browser storage only.
 
-### 8.3 State Persistence Schema Example
-```json
-{
-  "userWallet": {
-    "isUnlimited": false,
-    "balance": 25.00,
-    "lastSiteTimeRewardAt": "2026-11-03T12:00:00.000Z"
-  },
-  "followedArtists": ["Artist_101", "Artist_204"],
-  "acquiredTickets": [
-    {
-      "eventId": "EVT_5501",
-      "artistName": "Real Artist",
-      "section": "Pit 1",
-      "pricePaid": 0
-    }
-  ],
-  "purchasedMerch": [
-    {
-      "itemId": "ITEM_801",
-      "title": "Tour Hoodie",
-      "size": "L"
-    }
-  ],
-  "activeEvents": {
-    "EVT_5501": {
-      "countdownMs": 0,
-      "status": "WAITING_FOR_USER"
-    }
-  }
-}
+DopamineLive is not integrating with live ticketing, artist, venue, inventory, or commerce APIs. The event catalog, seat maps, merch items, deals, stage behavior, and profile history are generated or stored locally in the app.
+
+DopamineLive is not optimizing for production security, fraud prevention, fulfillment, accessibility certification, or commercial scale. This PRD covers the self-contained prototype experience currently represented by the website.
