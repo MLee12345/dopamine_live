@@ -1505,6 +1505,28 @@
       return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
     }
 
+    function getConcertImageSearchTerms(concertOrKey, genre = 'concert') {
+      const concert = typeof concertOrKey === 'object' && concertOrKey ? concertOrKey : null;
+      const concertGenre = normalizeArtistName(concert?.genre || genre);
+      const venueName = normalizeArtistName(VENUES[concert?.venueId]?.name || '');
+      const terms = ['live concert', 'concert stage', 'crowd', 'stage lights'];
+      if (concertGenre.includes('electronic')) terms.push('dj', 'festival');
+      if (concertGenre.includes('hip hop')) terms.push('rapper', 'arena');
+      if (concertGenre.includes('rock')) terms.push('band', 'guitar');
+      if (concertGenre.includes('r b')) terms.push('singer', 'spotlight');
+      if (concertGenre.includes('pop')) terms.push('pop concert', 'arena show');
+      if (venueName.includes('bowl') || venueName.includes('amphitheatre')) terms.push('outdoor concert');
+      if (venueName.includes('sphere') || venueName.includes('garden') || venueName.includes('arena')) terms.push('indoor arena concert');
+      return [...new Set(terms)].slice(0, 7);
+    }
+
+    function getUniqueConcertCardImage(concertOrKey, genre = 'concert') {
+      const key = getConcertImageKey(concertOrKey, genre);
+      const terms = getConcertImageSearchTerms(concertOrKey, genre).map(encodeURIComponent).join(',');
+      const sig = hashString(`${key}|concert-card`);
+      return `https://source.unsplash.com/1000x700/?${terms}&sig=${sig}`;
+    }
+
     function shouldUseArtistCardImage(concert) {
       const artist = normalizeArtistName(concert?.artist);
       return Boolean(artist);
@@ -1567,7 +1589,7 @@
     }
 
     function getRelevantConcertImage(concert) {
-      return getConcertFallbackImage(concert);
+      return getUniqueConcertCardImage(concert);
     }
 
     function getConcertArtistImages(concert) {
@@ -1678,7 +1700,7 @@
     function getUniqueConcertImage(idx, genre = 'concert') {
       const key = getConcertImageKey(idx, genre);
       if (typeof idx === 'object' && idx) return getRelevantConcertImage(idx);
-      return EVENT_IMAGE_POOL[hashString(key) % EVENT_IMAGE_POOL.length] || INLINE_CONCERT_PLACEHOLDER;
+      return getUniqueConcertCardImage(key, genre);
     }
 
     function getUniqueMerchImage(idx, type = 'tour-merch') {
