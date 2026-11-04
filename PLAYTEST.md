@@ -1,3 +1,4 @@
+INSTRUCTIONS:
 Open the site.
 Create an account or skip.
 Browse concerts.
@@ -12,3 +13,9 @@ Buy merch.
 Check your profile.
 Try reset account.
 Open About.
+
+
+NOTES:
+Struggled to figure out the wallet function
+- Kept pressing the green add instead of the x at the top right corner to exit the page
+For some reason, the format was a little different on her computer
