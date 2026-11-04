@@ -17,5 +17,6 @@ Open About.
 
 NOTES:
 Struggled to figure out the wallet function
-- Kept pressing the green add instead of the x at the top right corner to exit the page
+Kept pressing the green add instead of the x at the top right corner to exit the page
 For some reason, the format was a little different on her computer
+Unintuitive merch clicking, user was a little confused as to what to do at first
