@@ -3516,7 +3516,7 @@
       const payment = calculateTicketPayment();
       if (!ensureWalletCanCover(payment.finalTotal, {
         context: 'tickets',
-        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and press Confirm Tickets again.`
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, press Save, close wallet, and then press Confirm Tickets again.`
       })) {
         state.pendingCheckout = null;
         return;
@@ -3730,7 +3730,7 @@
       if (state.pendingCheckout) {
         const payment = calculateTicketPayment();
         if (!ensureWalletCanCover(payment.finalTotal, {
-          message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and hold to buy.`
+          message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, press Save, close wallet, and then hold to buy again.`
         })) return;
       }
       state.holdTimer = setInterval(() => {
@@ -4776,7 +4776,7 @@
       }
       const payment = calculateMerchPayment();
       if (!ensureWalletCanCover(payment.finalTotal, {
-        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and press checkout again.`
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, press Save, close wallet, and then press Checkout again.`
       })) {
         return;
       }
@@ -4819,7 +4819,7 @@
       document.getElementById('merchHoldFill').style.width = '0%';
       const payment = calculateMerchPayment();
       if (!ensureWalletCanCover(payment.finalTotal, {
-        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and hold to confirm.`
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, press Save, close wallet, and then hold to confirm again.`
       })) return;
       state.merchHoldTimer = setInterval(() => {
         state.merchHoldProgress += 4;
@@ -4854,7 +4854,7 @@
       }).filter(Boolean);
       const payment = calculateMerchPayment();
       if (!ensureWalletCanCover(payment.finalTotal, {
-        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and hold to confirm.`
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, press Save, close wallet, and then hold to confirm again.`
       })) return;
       state.walletBalance = roundMoney(Math.max(0, state.walletBalance - payment.finalTotal));
       recordMerchHistory(purchasedItems, state.activeMerchConcert);
