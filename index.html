@@ -3727,7 +3727,12 @@
       if (state.holdTimer) clearInterval(state.holdTimer);
       state.holdProgress = 0;
       document.getElementById('holdBuyFill').style.width = '0%';
-      if (state.pendingCheckout && !ensureWalletCanCover(calculateTicketPayment().finalTotal)) return;
+      if (state.pendingCheckout) {
+        const payment = calculateTicketPayment();
+        if (!ensureWalletCanCover(payment.finalTotal, {
+          message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and hold to buy.`
+        })) return;
+      }
       state.holdTimer = setInterval(() => {
         state.holdProgress += 4;
         document.getElementById('holdBuyFill').style.width = `${Math.min(100, state.holdProgress)}%`;
@@ -4769,6 +4774,12 @@
         showToast('Please select at least one merch item.', 'info');
         return;
       }
+      const payment = calculateMerchPayment();
+      if (!ensureWalletCanCover(payment.finalTotal, {
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and press checkout again.`
+      })) {
+        return;
+      }
       document.getElementById('merchShopView').classList.add('hidden');
       document.getElementById('merchCheckoutView').classList.remove('hidden');
       document.getElementById('merchModalSubtitle').innerText = 'Merch checkout';
@@ -4806,7 +4817,10 @@
       if (state.merchHoldTimer) clearInterval(state.merchHoldTimer);
       state.merchHoldProgress = 0;
       document.getElementById('merchHoldFill').style.width = '0%';
-      if (!ensureWalletCanCover(calculateMerchPayment().finalTotal)) return;
+      const payment = calculateMerchPayment();
+      if (!ensureWalletCanCover(payment.finalTotal, {
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and hold to confirm.`
+      })) return;
       state.merchHoldTimer = setInterval(() => {
         state.merchHoldProgress += 4;
         document.getElementById('merchHoldFill').style.width = `${Math.min(100, state.merchHoldProgress)}%`;
@@ -4839,7 +4853,9 @@
         return item ? { ...item, qty: entry.qty, size: entry.size, color: entry.color } : null;
       }).filter(Boolean);
       const payment = calculateMerchPayment();
-      if (!ensureWalletCanCover(payment.finalTotal)) return;
+      if (!ensureWalletCanCover(payment.finalTotal, {
+        message: `Add ${formatMoney(Math.max(0, payment.finalTotal - state.walletBalance))} more, then close this wallet and hold to confirm.`
+      })) return;
       state.walletBalance = roundMoney(Math.max(0, state.walletBalance - payment.finalTotal));
       recordMerchHistory(purchasedItems, state.activeMerchConcert);
       purchasedItems.forEach(item => {
